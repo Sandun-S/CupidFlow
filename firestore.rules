@@ -19,6 +19,11 @@ service cloud.firestore {
       allow write: if request.auth.uid == userId || isAdmin();
     }
 
+    // User Preferences
+    match /preferences/{userId} {
+      allow read, write: if request.auth.uid == userId;
+    }
+
     // Verification: Admin read only, User write (create only)
     match /verification_requests/{userId} {
       allow read: if request.auth.uid == userId || isAdmin();

@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
-import { collection, getDocs, query, limit, where, orderBy, doc, updateDoc, Timestamp } from 'firebase/firestore';
+import { collection, getDocs, getDoc, query, limit, where, orderBy, doc, updateDoc, Timestamp } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { useAuthStore } from '../../store/authStore';
 import ProfileCard from './ProfileCard';
 import { useMatching } from '../../hooks/useMatching';
-import { Loader, Rocket, HelpCircle, Mail, Filter, X } from 'lucide-react';
+import { Loader, Rocket, HelpCircle, Mail, Filter } from 'lucide-react';
 import BottomNav from './BottomNav';
-import { DISTRICTS } from '../../lib/constants';
 
 export default function ExploreFeed() {
     const { user, userData } = useAuthStore();
@@ -16,22 +15,25 @@ export default function ExploreFeed() {
     const [boostActive, setBoostActive] = useState(false);
 
     // Filters & Search State
-    const [showFilters, setShowFilters] = useState(false);
-    const [filters, setFilters] = useState({
-        minAge: 18,
-        maxAge: 50,
-        district: '',
-        expandSearch: true
-    });
+    const [preferences, setPreferences] = useState<any>(null);
 
     useEffect(() => {
-        fetchProfiles();
-        // Check if currently boosted
-        if (userData?.boostedUntil) {
-            const end = userData.boostedUntil.seconds * 1000;
-            if (end > Date.now()) setBoostActive(true);
-        }
-    }, [user, userData]);
+        const loadPrefs = async () => {
+            if (user) {
+                try {
+                    const docSnap = await getDoc(doc(db, "preferences", user.uid));
+                    if (docSnap.exists()) {
+                        setPreferences(docSnap.data());
+                    }
+                } catch (e) { console.error("Error loading prefs", e); }
+            }
+        };
+        loadPrefs();
+    }, [user]);
+
+    useEffect(() => {
+        if (user) fetchProfiles();
+    }, [user]);
 
     const fetchProfiles = async () => {
         if (!user) return;
@@ -82,17 +84,37 @@ export default function ExploreFeed() {
 
     // Client-side Filtering
     const filteredProfiles = profiles.filter(p => {
-        const matchesAge = (p.age || 18) >= filters.minAge && (p.age || 18) <= filters.maxAge;
-        const matchesDistrict = filters.district ? (p.location?.district === filters.district) : true;
-        return matchesAge && matchesDistrict;
+        // 1. Gender Filter
+        const prefGender = preferences?.gender || 'any';
+        const matchesGender = prefGender === 'any' || p.gender === prefGender;
+
+        // 2. Age Filter
+        const minAge = preferences?.ageRange?.min || 18;
+        const maxAge = preferences?.ageRange?.max || 60;
+        // Handle missing age safely
+        const pAge = p.age || 18; // Default to 18 if undefined so we don't crash, but ideally should be filtered by query
+        const matchesAge = pAge >= minAge && pAge <= maxAge;
+
+        // 3. District Filter (Multi-select)
+        let matchesDistrict = true;
+        const prefDistrict = preferences?.district || 'any';
+        if (prefDistrict !== 'any') {
+            const allowedDistricts = Array.isArray(prefDistrict) ? prefDistrict : [prefDistrict];
+            // If profile has no location, we might hide it? Or show it? Let's hide if location is preferred.
+            matchesDistrict = allowedDistricts.includes(p.location?.district);
+        }
+
+        return matchesGender && matchesAge && matchesDistrict;
     });
 
     // Elastic Logic
-    const displayProfiles = (filters.expandSearch && filteredProfiles.length < 5)
-        ? profiles // Show all if too few matches and elastic is ON
-        : filteredProfiles;
+    // If strict match fails, we can fallback to standard query or ask user to broaden.
+    // For now, let's just use filteredProfiles.
+    const displayProfiles = filteredProfiles;
+    const isElasticActive = false; // Disable elastic for now to ensure correctness
 
-    const isElasticActive = filters.expandSearch && filteredProfiles.length < 5 && profiles.length >= 5;
+
+    // const isElasticActive = filters.expandSearch && filteredProfiles.length < 5 && profiles.length >= 5;
 
     const handleSwipe = async (direction: 'left' | 'right') => {
         if (displayProfiles.length === 0) return;
@@ -178,10 +200,11 @@ export default function ExploreFeed() {
                 <h1 className="text-2xl font-bold text-pink-600">CupidFlow</h1>
 
                 <div className="flex gap-3">
-                    {/* Filter Button */}
+                    {/* Filter Button -> Preferences */}
                     <button
-                        onClick={() => setShowFilters(!showFilters)}
-                        className={`p-2 rounded-full shadow-sm transition-all ${showFilters ? 'bg-pink-100 text-pink-600' : 'bg-white text-gray-500'}`}
+                        onClick={() => window.location.href = '/app/preferences'}
+                        className="p-2 rounded-full shadow-sm bg-white text-gray-500 hover:text-pink-600 transition-colors"
+                        title="Preferences"
                     >
                         <Filter size={20} />
                     </button>
@@ -208,65 +231,6 @@ export default function ExploreFeed() {
                     </button>
                 </div>
             </div>
-
-            {/* Filter Panel */}
-            {showFilters && (
-                <div className="w-full max-w-sm bg-white p-4 rounded-2xl shadow-xl mb-4 border border-pink-100 animate-in slide-in-from-top-2 relative z-20">
-                    <div className="flex justify-between items-center mb-4">
-                        <h3 className="font-bold text-gray-800">Filters</h3>
-                        <button onClick={() => setShowFilters(false)} className="text-gray-400 hover:text-gray-600">
-                            <X size={16} />
-                        </button>
-                    </div>
-
-                    <div className="space-y-4">
-                        <div>
-                            <label className="text-xs font-bold text-gray-500 uppercase">Age Range</label>
-                            <div className="flex items-center gap-2 mt-1">
-                                <input
-                                    type="number"
-                                    value={filters.minAge}
-                                    onChange={e => setFilters({ ...filters, minAge: parseInt(e.target.value) || 18 })}
-                                    className="w-full p-2 border rounded-lg bg-gray-50 text-center"
-                                />
-                                <span className="text-gray-400">-</span>
-                                <input
-                                    type="number"
-                                    value={filters.maxAge}
-                                    onChange={e => setFilters({ ...filters, maxAge: parseInt(e.target.value) || 60 })}
-                                    className="w-full p-2 border rounded-lg bg-gray-50 text-center"
-                                />
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="text-xs font-bold text-gray-500 uppercase">District</label>
-                            <select
-                                value={filters.district}
-                                onChange={e => setFilters({ ...filters, district: e.target.value })}
-                                className="w-full p-2 border rounded-lg bg-gray-50 mt-1"
-                            >
-                                <option value="">Anywhere</option>
-                                {DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
-                            </select>
-                        </div>
-
-                        <div className="flex items-center gap-3 pt-2 border-t mt-2">
-                            <input
-                                type="checkbox"
-                                id="expand"
-                                checked={filters.expandSearch}
-                                onChange={e => setFilters({ ...filters, expandSearch: e.target.checked })}
-                                className="w-5 h-5 text-pink-600 rounded border-gray-300 focus:ring-pink-500"
-                            />
-                            <label htmlFor="expand" className="text-sm text-gray-700 leading-snug">
-                                <strong>Elastic Search</strong><br />
-                                <span className="text-xs text-gray-500">Show people outside filters if matches run out</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            )}
 
             {/* Elastic Indicator */}
             {isElasticActive && (
@@ -305,13 +269,13 @@ export default function ExploreFeed() {
                         </div>
                         <h3 className="text-xl font-bold text-gray-700">No matches found</h3>
                         <p className="text-gray-500 mb-6 mt-2">
-                            We couldn't find anyone matching your current filters.
+                            Check your preferences or try again later.
                         </p>
                         <button
-                            onClick={() => setFilters({ minAge: 18, maxAge: 60, district: '', expandSearch: true })}
+                            onClick={() => window.location.href = '/app/preferences'}
                             className="bg-white border border-pink-200 text-pink-600 px-6 py-2 rounded-full font-bold shadow-sm hover:bg-pink-50 transition-colors"
                         >
-                            Reset Filters
+                            Update Preferences
                         </button>
                     </div>
                 )}

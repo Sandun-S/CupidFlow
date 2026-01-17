@@ -5,7 +5,13 @@ import { db } from '../../lib/firebase';
 import { ArrowLeft, SlidersHorizontal, MapPin, Users, BookHeart, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const defaultPreferences = {
+const defaultPreferences: {
+    ageRange: { min: number; max: number };
+    gender: string;
+    district: string | string[];
+    ethnicity: string;
+    religion: string;
+} = {
     ageRange: { min: 20, max: 40 },
     gender: 'any',
     district: 'any',
@@ -137,18 +143,39 @@ export default function Preferences() {
                 <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
                     <div className="flex items-center gap-3 mb-4">
                         <div className="p-2 bg-gray-100 rounded-lg text-gray-600"><MapPin size={20} /></div>
-                        <h3 className="font-bold text-gray-900">Location</h3>
+                        <h3 className="font-bold text-gray-900">Location (Select Multiple)</h3>
                     </div>
-                    <select
-                        value={prefs.district || 'any'}
-                        onChange={(e) => setPrefs({ ...prefs, district: e.target.value })}
-                        className="w-full p-3 bg-gray-50 border-none rounded-xl font-medium text-gray-700 focus:ring-2 focus:ring-pink-100"
-                    >
-                        <option value="any">Anywhere in Sri Lanka</option>
-                        {['Colombo', 'Gampaha', 'Kandy', 'Galle', 'Kurunegala', 'Kalutara', 'Matara', 'Ratnapura', 'Kegalle', 'Jaffna', 'Batticaloa', 'Anuradhapura', 'Nuwara Eliya'].map(d => (
-                            <option key={d} value={d}>{d}</option>
+
+                    <div className="flex flex-wrap gap-2">
+                        <button
+                            onClick={() => setPrefs({ ...prefs, district: 'any' })}
+                            className={`px-3 py-1.5 rounded-full text-sm font-bold border transition-colors ${prefs.district === 'any' ? 'bg-pink-600 text-white border-pink-600' : 'bg-white border-gray-200 text-gray-600'}`}
+                        >
+                            Anywhere
+                        </button>
+                        {['Colombo', 'Gampaha', 'Kandy', 'Galle', 'Kurunegala', 'Kalutara', 'Matara', 'Ratnapura', 'Kegalle', 'Jaffna', 'Batticaloa', 'Anuradhapura', 'Nuwara Eliya', 'Puttalam', 'Badulla', 'Monaragala', 'Hambantota', 'Ampara', 'Trincomalee', 'Mannar', 'Vavuniya', 'Mullaitivu', 'Kilinochchi', 'Polonnaruwa'].map(d => (
+                            <button
+                                key={d}
+                                onClick={() => {
+                                    let current = Array.isArray(prefs.district) ? [...prefs.district] : (prefs.district === 'any' ? [] : [prefs.district]);
+                                    if (current.includes(d)) {
+                                        current = current.filter(c => c !== d);
+                                        if (current.length === 0) current = ['any']; // Default to any if empty
+                                    } else {
+                                        current = current.filter(c => c !== 'any'); // Remove 'any' if selecting specific
+                                        current.push(d);
+                                    }
+                                    setPrefs({ ...prefs, district: current });
+                                }}
+                                className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-colors ${(Array.isArray(prefs.district) && prefs.district.includes(d)) || prefs.district === d
+                                    ? 'bg-pink-50 border-pink-500 text-pink-700'
+                                    : 'bg-white border-gray-200 text-gray-600'
+                                    }`}
+                            >
+                                {d}
+                            </button>
                         ))}
-                    </select>
+                    </div>
                 </div>
 
                 {/* Advanced */}

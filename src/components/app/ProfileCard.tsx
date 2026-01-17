@@ -1,17 +1,15 @@
 import { Profile } from '../../store/userStore';
-import { Heart, X, MapPin, Briefcase, Lock, Zap, Crown, User, Book, Ruler, Users, Wine, ArrowDown } from 'lucide-react';
+import { Heart, X, MapPin, Briefcase, Zap, Crown, User, Book, Ruler, Users, Wine, ArrowDown } from 'lucide-react';
 import { useState } from 'react';
 import { differenceInYears } from 'date-fns';
-import { useAuthStore } from '../../store/authStore';
-
 interface ProfileCardProps {
     profile: Profile;
     onSwipe: (direction: 'left' | 'right') => void;
 }
 
 export default function ProfileCard({ profile, onSwipe }: ProfileCardProps) {
-    const { userData } = useAuthStore();
-    const isPremium = userData?.isPremium === true;
+    // const { userData } = useAuthStore();
+    // const isPremium = userData?.isPremium === true;
     const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
     const [showInfo, setShowInfo] = useState(false);
 
@@ -52,11 +50,11 @@ export default function ProfileCard({ profile, onSwipe }: ProfileCardProps) {
                     <img
                         src={photos[currentPhotoIndex]}
                         alt={profile.displayName}
-                        className={`w-full h-full object-cover transition-all duration-300 ${!isPremium && currentPhotoIndex > 0 ? 'blur-xl' : ''}`}
+                        className="w-full h-full object-cover transition-all duration-300"
                     />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center bg-pink-100 text-pink-300 font-bold text-4xl">
-                        {profile.displayName[0]}
+                        {profile.displayName ? profile.displayName[0] : '?'}
                     </div>
                 )}
 
@@ -74,14 +72,6 @@ export default function ProfileCard({ profile, onSwipe }: ProfileCardProps) {
 
                 {/* Gradient Overlay */}
                 <div className="absolute bottom-0 left-0 right-0 h-2/3 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
-
-                {/* Premium Lock Overlay for 2nd+ photos if not premium */}
-                {!isPremium && currentPhotoIndex > 0 && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-md z-10">
-                        <Lock className="w-12 h-12 text-white mb-2" />
-                        <p className="text-white font-bold opacity-80">Upgrade to view Gallery</p>
-                    </div>
-                )}
             </div>
 
             {/* Content Layer - Shown when NOT in Detail View */}

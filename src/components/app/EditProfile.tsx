@@ -600,19 +600,21 @@ export default function EditProfile() {
             `}</style>
 
             {/* Nav */}
-            <nav className="bg-white shadow-sm p-4 sticky top-0 z-20 flex items-center justify-between">
-                <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-full">
-                    <ArrowLeft className="text-gray-600" />
-                </button>
-                <h1 className="text-lg font-bold">Edit Profile</h1>
-                <button
-                    onClick={handleSave}
-                    disabled={saving}
-                    className="px-4 py-1.5 bg-pink-600 text-white rounded-full font-bold text-sm shadow-sm hover:bg-pink-700 disabled:opacity-50 transition-all"
-                >
-                    {saving ? '...' : 'Save'}
-                </button>
-            </nav>
+            <div className="bg-white sticky top-0 z-20 shadow-sm">
+                <nav className="max-w-md mx-auto p-4 flex items-center justify-between">
+                    <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-full">
+                        <ArrowLeft className="text-gray-600" />
+                    </button>
+                    <h1 className="text-lg font-bold">Edit Profile</h1>
+                    <button
+                        onClick={handleSave}
+                        disabled={saving}
+                        className="px-4 py-1.5 bg-pink-600 text-white rounded-full font-bold text-sm shadow-sm hover:bg-pink-700 disabled:opacity-50 transition-all"
+                    >
+                        {saving ? '...' : 'Save'}
+                    </button>
+                </nav>
+            </div>
 
             <div className="max-w-md mx-auto p-4">
                 {/* Photos Section */}

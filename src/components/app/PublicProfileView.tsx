@@ -11,6 +11,7 @@ export default function PublicProfileView() {
     const navigate = useNavigate();
     const [profile, setProfile] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [carouselIndex, setCarouselIndex] = useState(0);
 
     // Check if we are viewing *another* user (passed via location state or query?)
     // Or if this is for the current user.
@@ -60,24 +61,55 @@ export default function PublicProfileView() {
 
 
             <div className="max-w-md mx-auto bg-white min-h-screen shadow-lg overflow-hidden relative">
-                {/* Main Photo */}
-                <div className="relative h-96 w-full">
+                {/* Main Photo (Carousel) */}
+                <div
+                    className="relative h-96 w-full cursor-pointer"
+                    onClick={(e) => {
+                        // Simple Tap Logic for Carousel
+                        const width = e.currentTarget.offsetWidth;
+                        const x = e.nativeEvent.offsetX;
+                        const photos = profile.photos || [];
+                        if (photos.length <= 1) return;
+
+                        // Tap Left (< 35%)
+                        if (x < width * 0.35) {
+                            setCarouselIndex(prev => prev === 0 ? prev : prev - 1);
+                        }
+                        // Tap Right (> 65%)
+                        else if (x > width * 0.65) {
+                            setCarouselIndex(prev => prev === photos.length - 1 ? prev : prev + 1);
+                        }
+                    }}
+                >
                     <img
-                        src={profile.avatar || "https://via.placeholder.com/400"}
+                        src={profile.photos?.[carouselIndex] || profile.avatar || "https://via.placeholder.com/400"}
                         alt={profile.displayName}
                         className="w-full h-full object-cover"
                     />
+
+                    {/* Indicators */}
+                    {profile.photos && profile.photos.length > 1 && (
+                        <div className="absolute top-2 left-0 right-0 flex gap-1 px-4 z-10">
+                            {profile.photos.map((_: any, idx: number) => (
+                                <div key={idx} className={`h-1 flex-1 rounded-full ${idx === carouselIndex ? 'bg-white' : 'bg-white/40'}`} />
+                            ))}
+                        </div>
+                    )}
+
                     {/* Settings Button (Owner Only) */}
                     {isOwner && (
                         <button
-                            onClick={() => navigate('/app/settings')}
-                            className="absolute top-4 right-4 p-2 bg-black/40 text-white rounded-full hover:bg-black/60 transition backdrop-blur-sm"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                navigate('/app/settings');
+                            }}
+                            className="absolute top-4 right-4 p-2 bg-black/40 text-white rounded-full hover:bg-black/60 transition backdrop-blur-sm z-20"
                             title="Settings"
                         >
                             <SettingsIcon size={24} />
                         </button>
                     )}
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 text-white pb-10">
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 text-white pb-10 pointer-events-none">
                         <h2 className="text-3xl font-bold flex items-center gap-2">
                             {profile.displayName || "User"}, {profile.age || "??"}
                         </h2>
@@ -85,6 +117,20 @@ export default function PublicProfileView() {
                             <MapPin size={16} /> {profile.location?.city || "Unknown City"}, {profile.location?.district || ""}
                         </div>
                     </div>
+
+                    {/* Tap Zones overlay for clarity */}
+                    {profile.photos && profile.photos.length > 1 && (
+                        <>
+                            <div className="absolute inset-y-0 left-0 w-1/3 z-0" onClick={(e) => {
+                                e.stopPropagation();
+                                setCarouselIndex(prev => prev === 0 ? prev : prev - 1);
+                            }} />
+                            <div className="absolute inset-y-0 right-0 w-1/3 z-0" onClick={(e) => {
+                                e.stopPropagation();
+                                setCarouselIndex(prev => prev === profile.photos.length - 1 ? prev : prev + 1);
+                            }} />
+                        </>
+                    )}
                 </div>
 
                 <div className="p-6 space-y-6">
