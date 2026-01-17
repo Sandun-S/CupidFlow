@@ -3,7 +3,7 @@ import { useUserStore } from '../../../store/userStore';
 import { DISTRICTS } from '../../../lib/constants'; // Import shared constants
 import { RecaptchaVerifier, linkWithPhoneNumber } from 'firebase/auth';
 import { auth, db } from '../../../lib/firebase';
-import { Phone, CheckCircle, Loader } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 
 const ethnicities = ["Sinhalese", "Tamil", "Muslim", "Burgher", "Other"];
@@ -287,6 +287,23 @@ export default function BasicInfo() {
                     className="mt-1 w-full p-2 border rounded-md"
                     placeholder="Software Engineer"
                 />
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-gray-700">Education</label>
+                <select
+                    value={draft.education}
+                    onChange={(e) => updateDraft({ education: e.target.value })}
+                    className="mt-1 w-full p-2 border rounded-md"
+                >
+                    <option value="">Select Education</option>
+                    <option value="High School">High School</option>
+                    <option value="Diploma">Diploma</option>
+                    <option value="Bachelors">Bachelor's Degree</option>
+                    <option value="Masters">Master's Degree</option>
+                    <option value="Doctorate">Doctorate</option>
+                    <option value="Other">Other</option>
+                </select>
             </div>
         </div>
     );

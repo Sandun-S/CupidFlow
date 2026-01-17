@@ -24,6 +24,7 @@ export interface UserProfileDraft {
     civilStatus: string;
     profession: string;
     education: string;
+    university?: string;
 
     family: {
         fatherProfession: string;

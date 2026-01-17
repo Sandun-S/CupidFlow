@@ -26,6 +26,7 @@ import AboutUs from './components/marketing/AboutUs';
 import SafetyTips from './components/marketing/SafetyTips';
 import EditProfile from './components/app/EditProfile';
 import PublicProfileView from './components/app/PublicProfileView';
+import Preferences from './components/app/Preferences';
 
 function App() {
     const { setUser, setUserData, setLoading, loading } = useAuthStore();
@@ -90,6 +91,7 @@ function App() {
                 <Route path="/app/chat/:matchId" element={<ChatWindow />} />
                 <Route path="/app/upgrade" element={<UpgradePlan />} />
                 <Route path="/app/profile/edit" element={<EditProfile />} />
+                <Route path="/app/preferences" element={<Preferences />} />
                 <Route path="/app/profile/view" element={<PublicProfileView />} />
 
                 {/* Admin Routes */}

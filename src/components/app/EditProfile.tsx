@@ -18,6 +18,7 @@ export default function EditProfile() {
         displayName: '',
         about: '',
         profession: '',
+        university: '',
         photos: [] as string[]
     });
 
@@ -32,6 +33,7 @@ export default function EditProfile() {
                         displayName: data.displayName || '',
                         about: data.bio || '',
                         profession: data.profession || '',
+                        university: data.university || '',
                         photos: data.photos || []
                     });
                 }
@@ -59,6 +61,7 @@ export default function EditProfile() {
                 displayName: formData.displayName,
                 bio: formData.about,
                 profession: formData.profession,
+                university: formData.university || '',
                 photos: formData.photos,
                 avatar: formData.photos[0] || '' // Sync avatar with 1st photo
             });
@@ -158,6 +161,17 @@ export default function EditProfile() {
                             onChange={(e) => setFormData({ ...formData, profession: e.target.value })}
                             className="w-full p-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-900 font-medium focus:ring-2 focus:ring-pink-100 outline-none transition-all"
                             placeholder="e.g. Engineer"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">University / College</label>
+                        <input
+                            type="text"
+                            value={formData.university || ''}
+                            onChange={(e) => setFormData({ ...formData, university: e.target.value })}
+                            className="w-full p-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-900 font-medium focus:ring-2 focus:ring-pink-100 outline-none transition-all"
+                            placeholder="e.g. University of Colombo"
                         />
                     </div>
 

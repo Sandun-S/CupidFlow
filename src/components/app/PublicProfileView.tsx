@@ -102,6 +102,7 @@ export default function PublicProfileView() {
                             <div>
                                 <p className="text-xs text-gray-500">Education</p>
                                 <p className="font-medium text-sm line-clamp-2">{profile.education}</p>
+                                {profile.university && <p className="text-xs text-gray-500 mt-1">{profile.university}</p>}
                             </div>
                         </div>
                         <div className="flex items-start gap-3 text-gray-700 bg-gray-50 p-3 rounded-lg col-span-2">
