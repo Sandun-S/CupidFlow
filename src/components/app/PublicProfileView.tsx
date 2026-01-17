@@ -58,12 +58,7 @@ export default function PublicProfileView() {
                     >
                         <SettingsIcon size={20} />
                     </button>
-                    <button
-                        onClick={() => navigate('/app/profile/edit')}
-                        className="bg-pink-600 text-white px-4 py-1.5 rounded-full text-sm font-bold flex items-center gap-1 hover:bg-pink-700 transition"
-                    >
-                        <Edit2 size={16} /> Edit
-                    </button>
+                    {/* Edit moved to Settings */}
                 </div>
             </nav>
 
