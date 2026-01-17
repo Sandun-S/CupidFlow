@@ -139,7 +139,11 @@ export default function ExploreFeed() {
                         </button>
                     </div>
                 </div>
-            </div>
+                <div className="mt-auto w-full">
+                    {/* Spacing for bottom nav */}
+                </div>
+                <BottomNav />
+            </div >
         );
     }
 
