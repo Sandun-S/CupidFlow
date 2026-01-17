@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
-import { ArrowLeft, User, Briefcase, MapPin, Ruler, Book, Users, Wine, Settings as SettingsIcon, BookOpen } from 'lucide-react';
+import { User, Briefcase, MapPin, Ruler, Book, Users, Wine, BookOpen } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import BottomNav from './BottomNav';
 
@@ -57,22 +57,7 @@ export default function PublicProfileView() {
     return (
         <div className="min-h-screen bg-gray-50 pb-20">
             {/* Header Nav */}
-            <nav className="bg-white shadow-sm p-4 sticky top-0 z-20 flex items-center justify-between">
-                <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-full">
-                    <ArrowLeft className="text-gray-600" />
-                </button>
-                <h1 className="text-lg font-bold">My Profile</h1>
-                <div className="flex gap-2">
-                    <button
-                        onClick={() => navigate('/app/settings')}
-                        className="p-2 hover:bg-gray-100 rounded-full text-gray-600"
-                        title="Settings"
-                    >
-                        <SettingsIcon size={20} />
-                    </button>
-                    {/* Edit moved to Settings */}
-                </div>
-            </nav>
+
 
             <div className="max-w-md mx-auto bg-white min-h-screen shadow-lg overflow-hidden relative">
                 {/* Main Photo */}

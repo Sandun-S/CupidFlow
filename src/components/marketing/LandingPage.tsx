@@ -1,8 +1,10 @@
 import { useNavigate, Link } from 'react-router-dom';
 import { Heart, Shield, CheckCircle, ArrowRight, Smartphone, Globe } from 'lucide-react';
+import { useAuthStore } from '../../store/authStore';
 
 export default function LandingPage() {
     const navigate = useNavigate();
+    const { user } = useAuthStore();
 
     return (
         <div className="font-sans text-gray-800 bg-white">
@@ -15,18 +17,29 @@ export default function LandingPage() {
                     </span>
                 </div>
                 <div className="flex gap-4">
-                    <button
-                        onClick={() => navigate('/login')}
-                        className="px-4 py-2 text-pink-600 font-bold hover:bg-pink-50 rounded-full transition-colors"
-                    >
-                        Log In
-                    </button>
-                    <button
-                        onClick={() => navigate('/onboarding')}
-                        className="px-6 py-2 bg-pink-600 text-white font-bold rounded-full hover:bg-pink-700 hover:shadow-lg transition-all"
-                    >
-                        Get Started
-                    </button>
+                    {user ? (
+                        <button
+                            onClick={() => navigate('/app/explore')}
+                            className="px-6 py-2 bg-pink-600 text-white font-bold rounded-full hover:bg-pink-700 hover:shadow-lg transition-all"
+                        >
+                            Dashboard
+                        </button>
+                    ) : (
+                        <>
+                            <button
+                                onClick={() => navigate('/login')}
+                                className="px-4 py-2 text-pink-600 font-bold hover:bg-pink-50 rounded-full transition-colors"
+                            >
+                                Log In
+                            </button>
+                            <button
+                                onClick={() => navigate('/onboarding')}
+                                className="px-6 py-2 bg-pink-600 text-white font-bold rounded-full hover:bg-pink-700 hover:shadow-lg transition-all"
+                            >
+                                Get Started
+                            </button>
+                        </>
+                    )}
                 </div>
             </nav>
 
