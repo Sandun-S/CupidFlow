@@ -9,7 +9,7 @@ export const handleUserAuthSuccess = async (user: any, navigate: any, method: st
     if (userSnap.exists()) {
         const data = userSnap.data();
         if (data.role === 'admin') {
-            navigate('/admin/dashboard');
+            navigate('/admin');
         } else if (!data.isVerified && data.nicStatus === 'pending') {
             navigate('/verify-status');
         } else if (!data.isVerified && data.nicStatus === 'rejected') {
