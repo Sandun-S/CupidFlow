@@ -22,7 +22,7 @@ export default function LikesYou() {
     // Adjust based on your package logic. Let's assume 'gold' and 'platinum' give this feature.
     // Or just check a flag if we had one. For now, let's assume 'gold' | 'platinum'.
     // Better: Helper function or just check ID.
-    const isPremium = userData?.packageId === 'gold' || userData?.packageId === 'platinum';
+    const isPremium = ['silver', 'gold', 'platinum'].includes(userData?.packageId || '');
 
     useEffect(() => {
         if (!user) return;

@@ -15,10 +15,7 @@ interface Transaction {
     userName?: string;
 }
 
-const PACKAGES = {
-    gold: { name: 'Gold Package', durationDays: 30 },
-    platinum: { name: 'Platinum Package', durationDays: 90 }
-};
+
 
 export default function TransactionManager() {
     const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -76,32 +73,51 @@ export default function TransactionManager() {
             const userRef = doc(db, "users", selectedTxn.uid);
 
             if (action === 'approve') {
-                // 1. Calculate new expiry
-                const pkg = PACKAGES[selectedTxn.packageId as keyof typeof PACKAGES] || PACKAGES.gold;
+                // 1. Fetch Dynamic Package Details to get latest Limit & Duration
+                let daysToAdd = 30; // Fallback
+                let newSwipeLimit = 10; // Fallback
+
+                try {
+                    const pkgSnap = await getDoc(doc(db, "packages", selectedTxn.packageId));
+                    if (pkgSnap.exists()) {
+                        const pkgData = pkgSnap.data();
+                        // Parse duration string "1 Month" -> 30 days (Simple logic)
+                        if (pkgData.duration?.includes('12 Month')) daysToAdd = 365;
+                        else if (pkgData.duration?.includes('3 Month')) daysToAdd = 90;
+                        else if (pkgData.duration?.includes('1 Month')) daysToAdd = 30;
+
+                        newSwipeLimit = pkgData.dailySwipeLimit || 10;
+                    }
+                } catch (e) {
+                    console.error("Could not fetch package details, using defaults", e);
+                }
+
+                // 2. Calculate New Expiry
                 const now = new Date();
                 const expiryDate = new Date();
-                expiryDate.setDate(now.getDate() + pkg.durationDays);
+                expiryDate.setDate(now.getDate() + daysToAdd);
 
-                // 2. Update User (Private)
+                // 3. Update User (Private) with NEW LIMIT
                 batch.update(userRef, {
                     packageId: selectedTxn.packageId,
                     subscriptionExpiry: Timestamp.fromDate(expiryDate),
-                    isPremium: true
+                    isPremium: true,
+                    dailySwipeLimit: newSwipeLimit // <--- CRITICAL FIX: Update limit based on package
                 });
 
-                // 2b. Update Profile (Public)
-                // Ensure field exists in Profile interface if sticking to strict types, but Firestore is flexible.
+                // 4. Update Profile (Public)
                 const profileRef = doc(db, "profiles", selectedTxn.uid);
                 batch.update(profileRef, {
                     packageId: selectedTxn.packageId,
                     isPremium: true
+                    // We don't need to expose swipe limit publicly
                 });
 
-                // 3. Update Transaction
+                // 5. Update Transaction
                 batch.update(txnRef, {
                     status: 'approved',
                     approvedAt: Timestamp.now(),
-                    adminNotes: 'Approved manually'
+                    adminNotes: `Approved. Limit set to ${newSwipeLimit}`
                 });
             } else {
                 // Reject

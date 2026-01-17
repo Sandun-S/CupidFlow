@@ -1,20 +1,26 @@
 import { useEffect, useState } from 'react';
-import { collection, getDocs, query, limit, where } from 'firebase/firestore';
+import { collection, getDocs, query, limit, where, orderBy, doc, updateDoc, Timestamp } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { useAuthStore } from '../../store/authStore';
 import ProfileCard from './ProfileCard';
 import { useMatching } from '../../hooks/useMatching';
-import { Loader } from 'lucide-react';
+import { Loader, Rocket, HelpCircle, Mail } from 'lucide-react';
 
 export default function ExploreFeed() {
-    const { user } = useAuthStore();
+    const { user, userData } = useAuthStore();
     const [profiles, setProfiles] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const { swipe, matchDetails, setMatchDetails } = useMatching();
+    const [boostActive, setBoostActive] = useState(false);
 
     useEffect(() => {
         fetchProfiles();
-    }, [user]);
+        // Check if currently boosted
+        if (userData?.boostedUntil) {
+            const end = userData.boostedUntil.seconds * 1000;
+            if (end > Date.now()) setBoostActive(true);
+        }
+    }, [user, userData]); // Re-run if userData updates (e.g. after boost)
 
     const fetchProfiles = async () => {
         if (!user) return;
@@ -22,29 +28,42 @@ export default function ExploreFeed() {
 
         try {
             // 1. Get IDs of users I've already swiped on
-            // Ideally this list is cached or paginated. For now we fetch "my swipes".
             const mySwipesSnapshot = await getDocs(query(collection(db, "swipes"), where("fromUid", "==", user.uid)));
             const swipedUserIds = new Set(mySwipesSnapshot.docs.map(d => d.data().toUid));
-            swipedUserIds.add(user.uid); // Don't show myself
+            swipedUserIds.add(user.uid);
 
-            // 2. Fetch Profiles
-            const q = query(collection(db, "profiles"), limit(50));
+            // 2. Fetch Profiles - Prioritize Boosted Users
+            // Note: Composite index needed for 'boostedUntil' desc + 'isActive' etc usually.
+            // For now, simpler approach: orderBy boostedUntil desc
+            const q = query(
+                collection(db, "profiles"),
+                orderBy("boostedUntil", "desc"), // Boosted users first
+                limit(50)
+            );
+
             const querySnapshot = await getDocs(q);
 
             const validProfiles = [];
             for (const d of querySnapshot.docs) {
                 if (!swipedUserIds.has(d.id)) {
-                    // Double check if data is valid
                     if (d.data().displayName) {
                         validProfiles.push({ id: d.id, ...d.data() });
                     }
                 }
             }
-
             setProfiles(validProfiles);
 
         } catch (error) {
             console.error("Error fetching profiles:", error);
+            if ((error as any).code === 'failed-precondition') {
+                // Fallback: Simple query, filter purely in memory against 'user.uid'
+                const q = query(collection(db, "profiles"), limit(50));
+                const snap = await getDocs(q);
+                const validProfiles = snap.docs
+                    .filter(d => d.id !== user.uid)
+                    .map(d => ({ id: d.id, ...d.data() }));
+                setProfiles(validProfiles);
+            }
         } finally {
             setLoading(false);
         }
@@ -52,18 +71,48 @@ export default function ExploreFeed() {
 
     const handleSwipe = async (direction: 'left' | 'right') => {
         if (profiles.length === 0) return;
-
         const currentProfile = profiles[0];
-
-        // Optimistic UI update: Remove card immediately
         setProfiles(prev => prev.slice(1));
-
-        // Perform Logic in Background
         const isMatch = await swipe(currentProfile.id, direction);
+        if (isMatch) { /* Handled via UI state */ }
+    };
 
-        if (isMatch) {
-            // alert("Match!"); // Handled by UI below
+    const handleBoost = async () => {
+        if (userData?.packageId !== 'platinum') {
+            alert("Boosting is a Platinum feature! Upgrade to get seen by 10x more people.");
+            return;
         }
+        if (boostActive) {
+            alert("You are already boosted!");
+            return;
+        }
+        if (!window.confirm("Activate your 1-hour Profile Boost?")) return;
+
+        try {
+            // Set boostedUntil to 1 hour from now
+            const boostEnd = new Date();
+            boostEnd.setHours(boostEnd.getHours() + 1);
+
+            await updateDoc(doc(db, "users", user!.uid), {
+                boostedUntil: Timestamp.fromDate(boostEnd)
+            });
+            // Update public profile too for sorting
+            await updateDoc(doc(db, "profiles", user!.uid), {
+                boostedUntil: Timestamp.fromDate(boostEnd)
+            });
+
+            setBoostActive(true);
+            alert("🚀 Boost Activated! You are now top of the stack.");
+        } catch (e) {
+            console.error("Boost failed", e);
+        }
+    };
+
+    const handleSupport = () => {
+        const subject = userData?.packageId === 'gold' || userData?.packageId === 'platinum'
+            ? "PRIORITY Support Request - CupidFlow"
+            : "Support Request - CupidFlow";
+        window.open(`mailto:syntaxsandun@googlegroups.com?subject=${encodeURIComponent(subject)}`);
     };
 
     if (loading) {
@@ -83,17 +132,43 @@ export default function ExploreFeed() {
                     <button onClick={fetchProfiles} className="text-pink-600 font-bold hover:underline">
                         Refresh
                     </button>
+                    <div className="mt-8 pt-6 border-t w-full">
+                        <button onClick={handleSupport} className="flex items-center justify-center gap-2 text-gray-400 hover:text-pink-600">
+                            <Mail size={16} /> Contact Support
+                        </button>
+                    </div>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-pink-50 flex flex-col items-center py-8 px-4 relative">
+        <div className="min-h-screen bg-pink-50 flex flex-col items-center py-6 px-4 relative">
+            {/* Header / Actions */}
             <div className="w-full max-w-sm flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold text-pink-600">CupidFlow</h1>
-                <div className="w-8 h-8 bg-gray-200 rounded-full overflow-hidden">
-                    {/* My Avatar */}
+
+                <div className="flex gap-3">
+                    {/* Support Button */}
+                    <button
+                        onClick={handleSupport}
+                        className="p-2 bg-white rounded-full text-gray-400 hover:text-gray-600 shadow-sm"
+                        title="Contact Support"
+                    >
+                        <HelpCircle size={20} />
+                    </button>
+
+                    {/* Boost Button */}
+                    <button
+                        onClick={handleBoost}
+                        className={`p-2 rounded-full shadow-sm transition-all ${boostActive
+                            ? 'bg-purple-600 text-white shadow-purple-200 ring-2 ring-purple-300'
+                            : 'bg-white text-purple-600 hover:bg-purple-50'
+                            }`}
+                        title="Boost Profile"
+                    >
+                        <Rocket size={20} className={boostActive ? 'animate-pulse' : ''} />
+                    </button>
                 </div>
             </div>
 
@@ -124,11 +199,11 @@ export default function ExploreFeed() {
                     <div className="flex gap-4 mb-8">
                         {/* Me */}
                         <div className="w-24 h-24 rounded-full bg-gray-200 overflow-hidden border-4 border-white">
-                            {/* <img src={myPhoto} /> */}
+                            {/* Placeholder */}
                         </div>
                         {/* Them */}
                         <div className="w-24 h-24 rounded-full bg-gray-200 overflow-hidden border-4 border-white">
-                            {/* <img src={profiles.find(p => p.id === matchDetails.targetUserId)?.photos[0]} /> */}
+                            {/* Placeholder */}
                         </div>
                     </div>
                     <button
@@ -136,9 +211,6 @@ export default function ExploreFeed() {
                         className="bg-white text-pink-600 px-8 py-3 rounded-full font-bold text-lg hover:scale-105 transition-transform"
                     >
                         Keep Swiping
-                    </button>
-                    <button className="mt-4 text-white opacity-80 decoration-slice">
-                        Send a Message
                     </button>
                 </div>
             )}
