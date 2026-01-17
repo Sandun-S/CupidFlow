@@ -147,6 +147,37 @@ export default function UserManagement() {
                                         </td>
                                         <td className="p-4 text-right">
                                             <div className="flex justify-end gap-2">
+                                                <select
+                                                    className={`text-xs font-bold uppercase border rounded px-2 py-1 outline-none ${user.nicStatus === 'verified' ? 'text-green-600 border-green-200 bg-green-50' :
+                                                        user.nicStatus === 'rejected' ? 'text-red-600 border-red-200 bg-red-50' :
+                                                            'text-yellow-600 border-yellow-200 bg-yellow-50'
+                                                        }`}
+                                                    value={user.nicStatus || 'unverified'}
+                                                    onChange={async (e) => {
+                                                        const newStatus = e.target.value;
+                                                        if (confirm(`Change status to ${newStatus}?`)) {
+                                                            try {
+                                                                await updateDoc(doc(db, "users", user.id), { nicStatus: newStatus });
+                                                                // Also update isVerified if verified
+                                                                if (newStatus === 'verified') {
+                                                                    await updateDoc(doc(db, "users", user.id), { isVerified: true });
+                                                                } else {
+                                                                    await updateDoc(doc(db, "users", user.id), { isVerified: false });
+                                                                }
+                                                                setUsers(users.map(u => u.id === user.id ? { ...u, nicStatus: newStatus } : u));
+                                                            } catch (err) {
+                                                                console.error(err);
+                                                                alert("Failed to update status");
+                                                            }
+                                                        }
+                                                    }}
+                                                >
+                                                    <option value="unverified">Unverified</option>
+                                                    <option value="pending">Pending</option>
+                                                    <option value="verified">Verified</option>
+                                                    <option value="rejected">Rejected</option>
+                                                </select>
+
                                                 <button
                                                     title="View Public Profile"
                                                     className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100"

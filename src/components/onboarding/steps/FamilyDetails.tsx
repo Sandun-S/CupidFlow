@@ -58,23 +58,28 @@ export default function FamilyDetails() {
                 <div className="bg-white border rounded-xl p-4 shadow-sm hover:border-pink-200 transition-colors">
                     <label className="block text-sm font-bold text-gray-700 mb-2">Father's Profession</label>
                     <select
-                        value={professions.includes(draft.family.fatherProfession) ? draft.family.fatherProfession : (draft.family.fatherProfession ? "Other" : "")}
+                        value={professions.includes(draft.family.fatherProfession) && draft.family.fatherProfession !== "Other" ? draft.family.fatherProfession : "Other"}
                         onChange={(e) => {
                             const val = e.target.value;
-                            handleProfessionChange('fatherProfession', val === "Other" ? "Other" : val);
+                            // If they select "Other", we set it to "Other" which triggers input
+                            // If they select a real profession, we set it.
+                            handleProfessionChange('fatherProfession', val);
                         }}
                         className="w-full p-2.5 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-pink-100 outline-none"
                     >
                         <option value="">Select Profession</option>
-                        {professions.map(p => <option key={p} value={p}>{p}</option>)}
+                        {professions.filter(p => p !== "Other").map(p => <option key={p} value={p}>{p}</option>)}
+                        <option value="Other">Other</option>
                     </select>
 
-                    {(!professions.includes(draft.family.fatherProfession) && draft.family.fatherProfession !== "") && (
+                    {/* Show input if "Other" is selected OR if the current value is not in the standard list */}
+                    {(draft.family.fatherProfession === "Other" || (!professions.includes(draft.family.fatherProfession) && draft.family.fatherProfession !== "")) && (
                         <input
                             type="text"
+                            // If it's literally "Other", show empty to type. Otherwise show the custom value.
                             value={draft.family.fatherProfession === "Other" ? "" : draft.family.fatherProfession}
                             onChange={(e) => handleProfessionChange('fatherProfession', e.target.value)}
-                            className="mt-3 w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-pink-100 outline-none"
+                            className="mt-3 w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-pink-100 outline-none animate-in fade-in slide-in-from-top-1"
                             placeholder="Please specify profession..."
                             autoFocus
                         />
@@ -85,23 +90,24 @@ export default function FamilyDetails() {
                 <div className="bg-white border rounded-xl p-4 shadow-sm hover:border-pink-200 transition-colors">
                     <label className="block text-sm font-bold text-gray-700 mb-2">Mother's Profession</label>
                     <select
-                        value={professions.includes(draft.family.motherProfession) ? draft.family.motherProfession : (draft.family.motherProfession ? "Other" : "")}
+                        value={professions.includes(draft.family.motherProfession) && draft.family.motherProfession !== "Other" ? draft.family.motherProfession : "Other"}
                         onChange={(e) => {
                             const val = e.target.value;
-                            handleProfessionChange('motherProfession', val === "Other" ? "Other" : val);
+                            handleProfessionChange('motherProfession', val);
                         }}
                         className="w-full p-2.5 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-pink-100 outline-none"
                     >
                         <option value="">Select Profession</option>
-                        {professions.map(p => <option key={p} value={p}>{p}</option>)}
+                        {professions.filter(p => p !== "Other").map(p => <option key={p} value={p}>{p}</option>)}
+                        <option value="Other">Other</option>
                     </select>
 
-                    {(!professions.includes(draft.family.motherProfession) && draft.family.motherProfession !== "") && (
+                    {(draft.family.motherProfession === "Other" || (!professions.includes(draft.family.motherProfession) && draft.family.motherProfession !== "")) && (
                         <input
                             type="text"
                             value={draft.family.motherProfession === "Other" ? "" : draft.family.motherProfession}
                             onChange={(e) => handleProfessionChange('motherProfession', e.target.value)}
-                            className="mt-3 w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-pink-100 outline-none"
+                            className="mt-3 w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-pink-100 outline-none animate-in fade-in slide-in-from-top-1"
                             placeholder="Please specify profession..."
                         />
                     )}

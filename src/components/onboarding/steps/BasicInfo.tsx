@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useUserStore } from '../../../store/userStore';
 import { DISTRICTS } from '../../../lib/constants'; // Import shared constants
-import { RecaptchaVerifier, linkWithPhoneNumber } from 'firebase/auth';
 import { auth, db } from '../../../lib/firebase';
 import { CheckCircle } from 'lucide-react';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
@@ -12,10 +11,6 @@ const religions = ["Buddhist", "Christian", "Hindu", "Islam", "Other"];
 export default function BasicInfo() {
     const { draft, updateDraft } = useUserStore();
     const [phoneNumber, setPhoneNumber] = useState('');
-    const [otp, setOtp] = useState('');
-    const [verificationId, setVerificationId] = useState<any>(null); // confirmationResult object
-    const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState('');
     const [isPhoneVerified, setIsPhoneVerified] = useState(false);
 
     useEffect(() => {
@@ -25,73 +20,42 @@ export default function BasicInfo() {
                 const docSnap = await getDoc(doc(db, "users", auth.currentUser.uid));
                 if (docSnap.exists() && docSnap.data().phone) {
                     setPhoneNumber(docSnap.data().phone);
-                    setIsPhoneVerified(true); // Assume saved = verified for simplicity/legacy, or check explicit flag
+                    setIsPhoneVerified(true);
                 }
             }
         };
         checkPhone();
     }, []);
 
-    const sendOtp = async () => {
-        if (!phoneNumber) return;
-        setLoading(true);
-        setMessage('');
+    // Simple save phone handler - just updates state/firestore on blur or change if needed
+    // For now, we'll just let the user type it and it saves when they click Next (which saves draft)
+    // But wait, the draft doesn't have phone, it's a separate user field.
+    // Let's verify: The original code saved to 'users' collection on verify.
+    // We should probably save it to draft or update the user doc when they type.
+    // To keep it simple and consistent with "Basic Info" step, let's update the UserStore draft if it had phone,
+    // but looking at store, it might not.
+    // Actually, let's just update the Firestore 'users' doc when they change it or on blur.
 
-        try {
-            // Cleanup existing verifier if happens to exist
-            if (window.recaptchaVerifier) {
-                window.recaptchaVerifier.clear();
-            }
-
-            window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container-onboard', {
-                'size': 'invisible',
-            });
-
-            const appVerifier = window.recaptchaVerifier;
-            const confirmationResult = await linkWithPhoneNumber(auth.currentUser!, phoneNumber, appVerifier);
-            setVerificationId(confirmationResult);
-            setMessage("OTP Sent! Check your phone.");
-        } catch (err: any) {
-            console.error("Link Phone Error", err);
-            if (err.code === 'auth/credential-already-in-use') {
-                setMessage("Error: Number already linked to another account.");
-            } else if (err.code === 'auth/invalid-phone-number') {
-                setMessage("Invalid Phone Number");
-            } else {
-                setMessage("Failed to send OTP: " + err.message);
-            }
-        } finally {
-            setLoading(false);
-        }
+    const handlePhoneChange = async (val: string) => {
+        setPhoneNumber(val);
+        // Debounce or save on blur would be better, but for simplicity:
+        // We will just set local state. 
+        // We need to ensure this gets saved to the backend eventually.
+        // The previous code updated it immediately upon verification.
+        // Let's add a "Save" button or just save on Blur.
     };
 
-    const verifyOtp = async () => {
-        if (!verificationId || !otp) return;
-        setLoading(true);
-        try {
-            await verificationId.confirm(otp);
-            setMessage("Phone Verified Successfully!");
-            setIsPhoneVerified(true);
-            setVerificationId(null);
-
-            // Save to Firestore Immediate
-            if (auth.currentUser) {
-                await updateDoc(doc(db, "users", auth.currentUser.uid), {
-                    phone: phoneNumber
-                });
-            }
-        } catch (err) {
-            console.error(err);
-            setMessage("Invalid OTP. Try again.");
-        } finally {
-            setLoading(false);
+    const savePhone = async () => {
+        if (auth.currentUser && phoneNumber) {
+            await updateDoc(doc(db, "users", auth.currentUser.uid), {
+                phone: phoneNumber
+            });
+            setIsPhoneVerified(true); // Treat as "saved"
         }
     };
 
     return (
         <div className="space-y-6">
-            <div id="recaptcha-container-onboard"></div>
-
             <div className="grid grid-cols-2 gap-4">
                 <div>
                     <label className="block text-sm font-medium text-gray-700">First Name <span className="text-xs text-gray-500">(Private)</span></label>
@@ -126,69 +90,21 @@ export default function BasicInfo() {
                 />
             </div>
 
-            {/* Phone Verification Section */}
-            <div className={`p-4 rounded-xl border ${isPhoneVerified ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-200'}`}>
-                <label className="block text-sm font-medium text-gray-800 mb-2">Mobile Number (For Notifications & Login)</label>
-
-                {isPhoneVerified ? (
-                    <div className="flex items-center gap-2 text-green-700 font-medium">
-                        <CheckCircle size={20} />
-                        <span>{phoneNumber} (Verified)</span>
-                    </div>
-                ) : (
-                    <div className="space-y-3">
-                        <div className="flex gap-2">
-                            <input
-                                type="tel"
-                                value={phoneNumber}
-                                onChange={(e) => setPhoneNumber(e.target.value)}
-                                className="flex-1 p-2 border rounded-md"
-                                placeholder="+94 7X XXX XXXX"
-                                disabled={!!verificationId}
-                            />
-                            {!verificationId && (
-                                <button
-                                    onClick={sendOtp}
-                                    disabled={loading || !phoneNumber}
-                                    className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium disabled:opacity-50"
-                                >
-                                    {loading ? 'Sending...' : 'Verify'}
-                                </button>
-                            )}
-                        </div>
-
-                        {verificationId && (
-                            <div className="flex gap-2 animate-in fade-in slide-in-from-top-2">
-                                <input
-                                    type="text"
-                                    value={otp}
-                                    onChange={(e) => setOtp(e.target.value)}
-                                    className="flex-1 p-2 border rounded-md"
-                                    placeholder="Enter OTP Code"
-                                />
-                                <button
-                                    onClick={verifyOtp}
-                                    disabled={loading}
-                                    className="px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium disabled:opacity-50"
-                                >
-                                    {loading ? 'Verifying...' : 'Confirm'}
-                                </button>
-                                <button
-                                    onClick={() => { setVerificationId(null); setMessage(''); }}
-                                    className="text-xs text-gray-500 underline"
-                                >
-                                    Cancel
-                                </button>
-                            </div>
-                        )}
-
-                        {message && (
-                            <p className={`text-xs ${message.includes('Error') || message.includes('Failed') || message.includes('Invalid') ? 'text-red-500' : 'text-blue-600'}`}>
-                                {message}
-                            </p>
-                        )}
-                    </div>
-                )}
+            {/* Phone Section - Simplified */}
+            <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                <label className="block text-sm font-medium text-gray-800 mb-2">Mobile Number (For Notifications)</label>
+                <div className="flex gap-2">
+                    <input
+                        type="tel"
+                        value={phoneNumber}
+                        onChange={(e) => handlePhoneChange(e.target.value)}
+                        onBlur={savePhone}
+                        className="flex-1 p-2 border rounded-md"
+                        placeholder="+94 7X XXX XXXX"
+                    />
+                    {isPhoneVerified && <CheckCircle className="text-green-500 mt-2" size={20} />}
+                </div>
+                <p className="text-xs text-gray-500 mt-1">We'll save this automatically.</p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -324,13 +240,28 @@ export default function BasicInfo() {
                     className="mt-1 w-full p-2 border rounded-md"
                 >
                     <option value="">Select Education</option>
-                    <option value="High School">High School</option>
+                    <option value="G.C.E O/L">G.C.E O/L</option>
+                    <option value="G.C.E A/L">G.C.E A/L</option>
                     <option value="Diploma">Diploma</option>
                     <option value="Bachelors">Bachelor's Degree</option>
                     <option value="Masters">Master's Degree</option>
                     <option value="Doctorate">Doctorate</option>
                     <option value="Other">Other</option>
                 </select>
+
+                {/* Conditional University Field */}
+                {['Diploma', 'Bachelors', 'Masters', 'Doctorate'].includes(draft.education) && (
+                    <div className="mt-3 animate-in fade-in slide-in-from-top-1">
+                        <label className="block text-sm font-medium text-gray-700">University / Institute</label>
+                        <input
+                            type="text"
+                            value={draft.university || ''}
+                            onChange={(e) => updateDraft({ university: e.target.value })}
+                            className="mt-1 w-full p-2 border rounded-md"
+                            placeholder="e.g. University of Colombo"
+                        />
+                    </div>
+                )}
             </div>
         </div>
     );
