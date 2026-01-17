@@ -2,7 +2,7 @@ import { useState } from 'react';
 import NICUploader from '../../verification/NICUploader';
 import { useUserStore } from '../../../store/userStore';
 import { useAuthStore } from '../../../store/authStore';
-import { doc, setDoc, serverTimestamp, collection, getDocs, query, where } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
 import SHA256 from 'crypto-js/sha256';
 import { useNavigate } from 'react-router-dom';
@@ -35,13 +35,23 @@ export default function PhotoUpload() {
         try {
             // 1. Check for Duplicate NIC
             const nicHash = SHA256(nicNumber).toString();
-            const q = query(collection(db, "users"), where("nicHash", "==", nicHash));
-            const querySnapshot = await getDocs(q);
 
-            if (!querySnapshot.empty) {
+            // Check usage in 'nic_hashes' collection (Publicly readable)
+            const hashDocRef = doc(db, "nic_hashes", nicHash);
+            const hashDoc = await getDoc(hashDocRef);
+
+            if (hashDoc.exists() && hashDoc.data().uid !== user.uid) {
+                // Duplicate found (and not own)
                 setError("An account with this NIC number already exists.");
                 setIsSubmitting(false);
                 return;
+            }
+
+            // If checking own re-submission, we allow it.
+            if (!hashDoc.exists()) {
+                // Reserve the hash immediately or in batch? 
+                // We'll do it in parallel or batch.
+                // Let's add it to the list of writes.
             }
 
             // 2. Create User Profile (Private Data)
@@ -106,6 +116,12 @@ export default function PhotoUpload() {
                 submittedAt: serverTimestamp(),
                 status: "pending",
                 adminNotes: ""
+            });
+
+            // 5. Save NIC Hash
+            await setDoc(doc(db, "nic_hashes", nicHash), {
+                uid: user.uid,
+                createdAt: serverTimestamp()
             });
 
             // Success!

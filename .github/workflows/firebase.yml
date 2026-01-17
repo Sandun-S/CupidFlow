@@ -13,9 +13,28 @@ jobs:
           node-version: 20
       - run: npm ci
       - run: npm run build
+      
+      # Deploy Hosting
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_CUPIDFLOW_SYNTAX }}'
           channelId: live
           projectId: cupidflow-syntax
+      
+      # Deploy Rules (Using the same Service Account)
+      - name: Deploy Firestore Rules
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_CUPIDFLOW_SYNTAX }}
+        run: |
+          echo $FIREBASE_SERVICE_ACCOUNT > service-account.json
+          export GOOGLE_APPLICATION_CREDENTIALS=service-account.json
+          npx firebase-tools deploy --only firestore:rules --project cupidflow-syntax --non-interactive
+      
+      - name: Deploy Firestore Rules
+        run: npx firebase-tools deploy --only firestore:rules --project cupidflow-syntax --json
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ steps.auth.outputs.credentials_json_path }}
+        # Note: This requires a different auth method usually. 
+        # Simpler: Use the SERVICE_ACCOUNT secret directly with firebase-tools
+

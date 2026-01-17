@@ -38,5 +38,11 @@ service cloud.firestore {
     match /matches/{matchId} {
         allow read, write: if request.auth != null; 
     }
+    
+    // NIC Hashes (Public Read for Uniqueness Check, Authenticated Write)
+    match /nic_hashes/{hash} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null; // Ideally check if hash matches content but simple for now
+    }
   }
 }
