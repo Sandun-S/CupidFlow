@@ -130,17 +130,26 @@ export default function VerificationQueue() {
             {requests.length === 0 ? (
                 <p className="text-gray-500">No pending verification requests.</p>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="space-y-4">
                     {requests.map(req => (
-                        <div key={req.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                            <div className="flex justify-between items-start mb-4">
+                        <div key={req.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center transition hover:shadow-md">
+                            <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 font-bold">
+                                    {req.displayName ? req.displayName[0] : 'U'}
+                                </div>
                                 <div>
-                                    <h3 className="font-bold text-gray-900">{req.nicNumber}</h3>
-                                    <p className="text-sm text-gray-500">{new Date(req.submittedAt?.seconds * 1000).toLocaleDateString()}</p>
+                                    <h3 className="font-bold text-gray-900">{req.displayName || "Unknown User"}</h3>
+                                    <p className="text-sm text-gray-500 font-mono">{req.nicNumber}</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                                <div className="text-right text-xs text-gray-400">
+                                    <p>{new Date(req.submittedAt?.seconds * 1000).toLocaleDateString()}</p>
+                                    <p>{req.status}</p>
                                 </div>
                                 <button
                                     onClick={() => setSelectedReq(req)}
-                                    className="bg-pink-100 text-pink-700 px-3 py-1 text-sm rounded-full hover:bg-pink-200"
+                                    className="bg-pink-600 text-white px-4 py-2 text-sm font-bold rounded-lg hover:bg-pink-700 transition"
                                 >
                                     Review
                                 </button>
@@ -152,75 +161,78 @@ export default function VerificationQueue() {
 
             {/* Review Modal */}
             {selectedReq && (
-                <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white w-full max-w-6xl h-[90vh] rounded-2xl overflow-hidden flex flex-col">
+                <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+                    <div className="bg-white w-full max-w-7xl h-[90vh] rounded-2xl overflow-hidden flex flex-col shadow-2xl animate-in fade-in zoom-in duration-300">
                         {/* Header */}
-                        <div className="p-4 border-b flex justify-between items-center bg-gray-50">
+                        <div className="p-6 border-b flex justify-between items-center bg-gray-50">
                             <div>
-                                <h2 className="text-xl font-bold">Reviewing: {selectedReq.displayName} ({selectedReq.age})</h2>
-                                <p className="text-sm text-gray-500 flex flex-col gap-1 mt-1">
-                                    <span className="flex items-center gap-2 font-medium text-gray-900"><User size={14} /> {selectedReq.fullName}</span>
-                                    <span className="flex items-center gap-2"><Phone size={14} /> {selectedReq.userPhone}</span>
-                                    <span className="flex items-center gap-2">📍 {selectedReq.address} ({selectedReq.location})</span>
-                                    <span className="text-xs text-gray-400">NIC: {selectedReq.nicNumber}</span>
-                                </p>
+                                <h2 className="text-2xl font-bold text-gray-800">Reviewing: {selectedReq.displayName}</h2>
+                                <div className="flex flex-wrap gap-4 mt-2 text-sm text-gray-600">
+                                    <span className="flex items-center gap-1 bg-white px-2 py-1 rounded border"><User size={14} /> {selectedReq.fullName}</span>
+                                    <span className="flex items-center gap-1 bg-white px-2 py-1 rounded border"><Phone size={14} /> {selectedReq.userPhone}</span>
+                                    <span className="flex items-center gap-1 bg-white px-2 py-1 rounded border">📍 {selectedReq.location}</span>
+                                    <span className="flex items-center gap-1 bg-yellow-50 text-yellow-700 px-2 py-1 rounded border border-yellow-200 font-mono font-bold">NIC: {selectedReq.nicNumber}</span>
+                                </div>
                             </div>
-                            <button onClick={() => setSelectedReq(null)} className="text-gray-500 hover:text-gray-800">Close</button>
+                            <button onClick={() => setSelectedReq(null)} className="p-2 hover:bg-gray-200 rounded-full transition">
+                                <XCircle size={24} className="text-gray-500" />
+                            </button>
                         </div>
 
-                        {/* Split View */}
-                        <div className="flex-1 overflow-y-auto p-4 bg-gray-900 grid grid-cols-3 gap-4">
-                            <div className="space-y-2">
-                                <p className="text-white text-center font-bold">Selfie</p>
-                                <img src={selectedReq.selfieUrl} className="w-full rounded-lg border border-gray-700" />
+                        {/* Content Grid */}
+                        <div className="flex-1 overflow-y-auto p-6 bg-gray-100 grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {/* Selfie */}
+                            <div className="flex flex-col gap-2">
+                                <div className="bg-white p-3 rounded-xl shadow-sm border text-center font-bold text-gray-700">Selfie</div>
+                                <div className="flex-1 bg-black rounded-xl overflow-hidden border-2 border-gray-200 relative group">
+                                    <img src={selectedReq.selfieUrl} className="w-full h-full object-contain" />
+                                </div>
                             </div>
-                            <div className="space-y-2">
-                                <p className="text-white text-center font-bold">NIC Front</p>
-                                <img src={selectedReq.nicFrontUrl} className="w-full rounded-lg border border-gray-700" />
+
+                            {/* NIC Front */}
+                            <div className="flex flex-col gap-2">
+                                <div className="bg-white p-3 rounded-xl shadow-sm border text-center font-bold text-gray-700">NIC Front</div>
+                                <div className="flex-1 bg-black rounded-xl overflow-hidden border-2 border-gray-200 relative group">
+                                    <img src={selectedReq.nicFrontUrl} className="w-full h-full object-contain" />
+                                </div>
                             </div>
-                            <div className="space-y-2">
-                                <p className="text-white text-center font-bold">NIC Back</p>
-                                <img src={selectedReq.nicBackUrl} className="w-full rounded-lg border border-gray-700" />
+
+                            {/* NIC Back */}
+                            <div className="flex flex-col gap-2">
+                                <div className="bg-white p-3 rounded-xl shadow-sm border text-center font-bold text-gray-700">NIC Back</div>
+                                <div className="flex-1 bg-black rounded-xl overflow-hidden border-2 border-gray-200 relative group">
+                                    <img src={selectedReq.nicBackUrl} className="w-full h-full object-contain" />
+                                </div>
                             </div>
                         </div>
 
                         {/* Footer Actions */}
-                        <div className="p-6 border-t bg-white">
-                            {/* Rejection Note Input - Only relevant if we are considering rejection, 
-                                but to keep UI simple, let's just show it or toggle it. 
-                                Actually, prompt or show input always? Let's show a small input. */}
-                            <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Admin Notes (Required for Rejection)</label>
-                                <textarea
-                                    id="admin-note"
-                                    className="w-full border rounded-md p-2 text-sm"
-                                    placeholder="Reason for rejection or approval notes..."
-                                    rows={2}
-                                />
-                            </div>
-
-                            <div className="flex justify-end gap-4">
+                        <div className="p-6 border-t bg-white flex flex-col gap-4">
+                            <textarea
+                                id="admin-note"
+                                className="w-full border border-gray-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-pink-500 outline-none"
+                                placeholder="Admin Notes (Required for Rejection)..."
+                                rows={2}
+                            />
+                            <div className="flex justify-end gap-3">
                                 <button
                                     onClick={() => {
                                         const note = (document.getElementById('admin-note') as HTMLTextAreaElement).value;
-                                        if (!note) {
-                                            alert("Please provide a reason for rejection.");
-                                            return;
-                                        }
+                                        if (!note) return alert("Please provide a rejection reason.");
                                         handleAction('reject', note);
                                     }}
-                                    className="flex items-center gap-2 px-6 py-3 border border-red-200 text-red-700 rounded-lg hover:bg-red-50 font-bold"
+                                    className="px-6 py-3 border border-red-200 text-red-600 bg-red-50 rounded-xl font-bold hover:bg-red-100 transition flex items-center gap-2"
                                 >
-                                    <XCircle /> Reject
+                                    <XCircle size={18} /> Reject
                                 </button>
                                 <button
                                     onClick={() => {
                                         const note = (document.getElementById('admin-note') as HTMLTextAreaElement).value;
-                                        handleAction('approve', note || 'Approved by Admin');
+                                        handleAction('approve', note || 'Verified by Admin');
                                     }}
-                                    className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-bold"
+                                    className="px-6 py-3 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition flex items-center gap-2 shadow-lg shadow-green-200"
                                 >
-                                    <CheckCircle /> Approve & Verify
+                                    <CheckCircle size={18} /> Approve & Verify
                                 </button>
                             </div>
                         </div>

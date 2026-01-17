@@ -11,6 +11,9 @@ export interface UserData {
     boostedUntil?: any;
     accountExpiry?: any;
     accessStatus?: 'active' | 'pending_payment' | 'expired';
+    role?: 'user' | 'admin';
+    nicStatus?: 'pending' | 'verified' | 'rejected' | 'unverified';
+    emailVerified?: boolean;
 }
 
 interface AuthState {

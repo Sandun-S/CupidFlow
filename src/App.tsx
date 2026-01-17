@@ -1,16 +1,15 @@
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
-import AdminRoute from './components/admin/AdminRoute';
-import AdminLayout from './components/admin/AdminLayout';
-import VerificationQueue from './components/admin/VerificationQueue';
-import TransactionManager from './components/admin/TransactionManager';
-import Login from './components/auth/Login';
-import Register from './components/auth/Register';
-import ForgotPassword from './components/auth/ForgotPassword';
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { auth, db } from './lib/firebase';
 import { useAuthStore } from './store/authStore';
+
+// Components
+import Login from './components/auth/Login';
+import Register from './components/auth/Register';
+import ForgotPassword from './components/auth/ForgotPassword';
+import EmailVerificationPending from './components/auth/EmailVerificationPending';
 import ProfileWizard from './components/onboarding/ProfileWizard';
 import ExploreFeed from './components/app/ExploreFeed';
 import ChatList from './components/chat/ChatList';
@@ -29,17 +28,33 @@ import EditProfile from './components/app/EditProfile';
 import PublicProfileView from './components/app/PublicProfileView';
 import Preferences from './components/app/Preferences';
 import Settings from './components/app/Settings';
+import VerificationQueue from './components/admin/VerificationQueue';
+import TransactionManager from './components/admin/TransactionManager';
+
+// Layouts
+import AdminLayout from './components/admin/AdminLayout';
+
+function AdminRoute({ children }: { children: React.ReactNode }) {
+    const { userData, loading } = useAuthStore();
+    if (loading) return <div>Loading...</div>;
+    if (userData?.role !== 'admin') return <Navigate to="/app/explore" />;
+    return <>{children}</>;
+}
+
 
 function AppContent() {
     const { setUser, setUserData, setLoading, loading } = useAuthStore();
     const navigate = useNavigate();
+    const location = useLocation();
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-            setUser(currentUser);
+            setLoading(true);
             if (currentUser) {
+                setUser(currentUser);
+
+                // Fetch User & Profile Data
                 try {
-                    // Fetch both user and profile docs in parallel
                     const [userSnap, profileSnap] = await Promise.all([
                         getDoc(doc(db, "users", currentUser.uid)),
                         getDoc(doc(db, "profiles", currentUser.uid))
@@ -53,95 +68,101 @@ function AppContent() {
                             await updateDoc(doc(db, "users", currentUser.uid), {
                                 emailVerified: true
                             });
-                            data.emailVerified = true; // Update local state copy
+                            data.emailVerified = true;
                         }
 
                         setUserData(data);
 
-                        // Routing Logic
-                        const path = window.location.pathname;
-                        const status = data.nicStatus || 'unverified'; // Default to unverified if missing
                         const profileExists = profileSnap.exists();
+                        const status = data.nicStatus || 'pending';
+                        const path = location.pathname;
 
-                        // 0. Public Pages (Always allow)
+                        // Allow basic access to public/auth pages
                         if (['/login', '/signup', '/forgot-password', '/', '/terms', '/privacy', '/about', '/safety'].includes(path)) {
-                            // Do nothing, allow access
+                            // Do nothing
                         }
                         // 1. Admin Bypass
                         else if (data.role === 'admin') {
-                            // Allow admin access
+                            // Admins can go anywhere
                         }
-                        // 2. Force Onboarding if Profile Missing (CRITICAL FIX)
+                        // 2. Email Verification Guard
+                        else if (!currentUser.emailVerified && !data.emailVerified) {
+                            if (path !== '/verify-email') {
+                                navigate('/verify-email');
+                            }
+                        }
+                        // 3. Force Onboarding if Profile Missing
                         else if (!profileExists) {
                             if (!path.startsWith('/onboarding')) {
                                 navigate('/onboarding');
                             }
                         }
-                        // 3. Pending Verification -> Status Page
+                        // 4. Verification Status Check (Pending)
                         else if (status === 'pending') {
                             if (path !== '/verify-status') navigate('/verify-status');
                         }
-                        // 4. Unverified/Rejected -> Onboarding (Double check, though profileExists should catch most)
+                        // 5. Unverified/Rejected -> Onboarding (Fallback)
                         else if (['unverified', 'rejected'].includes(status)) {
                             if (!path.startsWith('/onboarding')) {
                                 navigate('/onboarding');
                             }
                         }
-                        // 5. Verified -> App
+                        // 6. Verified -> App (Redirect from login/onboarding if verified)
                         else if (status === 'verified') {
-                            if (path === '/' || path.startsWith('/onboarding') || path === '/login' || path === '/signup' || path === '/verify-status') {
-                                navigate('/app/profile/view'); // Or explore
+                            if (['/', '/login', '/signup', '/verify-status'].includes(path) || path.startsWith('/onboarding')) {
+                                navigate('/app/profile/view');
                             }
                         }
+
                     } else {
-                        setUserData(null);
+                        // User exists in Auth but not Firestore
                     }
-                } catch (e) {
-                    console.error("Error fetching user data", e);
+                } catch (error) {
+                    console.error("Error fetching user data", error);
                 }
             } else {
+                setUser(null);
                 setUserData(null);
+                const path = location.pathname;
+                if (!['/login', '/signup', '/forgot-password', '/', '/terms', '/privacy', '/about', '/safety'].includes(path)) {
+                    navigate('/login');
+                }
             }
             setLoading(false);
         });
-        return () => unsubscribe();
-    }, [setUser, setUserData, setLoading, navigate]);
 
-    if (loading) {
-        return <div className="h-screen flex items-center justify-center text-pink-600">Loading...</div>;
-    }
+        return () => unsubscribe();
+    }, [setUser, setUserData, setLoading, navigate, location.pathname]);
+
+    if (loading) return <div className="h-screen flex items-center justify-center text-pink-600">Loading...</div>;
 
     return (
         <Routes>
+            {/* Marketing & Auth */}
+            <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/" element={<LandingPage />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/about" element={<AboutUs />} />
             <Route path="/safety" element={<SafetyTips />} />
 
-            {/* Onboarding */}
-            <Route path="/onboarding" element={<div className="min-h-screen bg-pink-50 pt-10"><ProfileWizard /></div>} />
-            <Route path="/onboarding/*" element={<div className="min-h-screen bg-pink-50 pt-10"><ProfileWizard /></div>} />
-
+            {/* Verification Staging */}
+            <Route path="/verify-email" element={<EmailVerificationPending />} />
             <Route path="/verify-status" element={
-                <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-                    <div className="bg-white p-8 rounded-xl shadow-lg text-center max-w-md">
-                        <h2 className="text-2xl font-bold text-gray-800 mb-4">Verification Pending</h2>
-                        <p className="text-gray-600 mb-6">
-                            Your profile is currently under review. Our team is verifying your NIC details.
-                            This usually takes 24-48 hours.
-                        </p>
-                        <div className="animate-pulse bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full inline-block text-sm font-medium">
-                            Status: Pending Review
-                        </div>
+                <div className="flex items-center justify-center min-h-screen bg-pink-50 p-4">
+                    <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md text-center">
+                        <h2 className="text-2xl font-bold mb-4 text-gray-800">Verification Pending</h2>
+                        <p className="text-gray-600 mb-6">Your profile is currently under review by our team. This usually takes 24-48 hours. You will be notified once complete.</p>
+                        <div className="animate-pulse bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full inline-block text-sm font-medium">Status: Pending Review</div>
+                        <button onClick={() => auth.signOut()} className="text-pink-600 font-bold hover:underline mt-4 block mx-auto">Sign Out</button>
                     </div>
                 </div>
             } />
 
             {/* App Routes */}
+            <Route path="/onboarding/*" element={<div className="min-h-screen bg-pink-50 pt-10"><ProfileWizard /></div>} />
             <Route path="/app/explore" element={<ExploreFeed />} />
             <Route path="/app/chat" element={<ChatList />} />
             <Route path="/app/likes" element={<LikesYou />} />
@@ -153,15 +174,13 @@ function AppContent() {
             <Route path="/app/profile/view" element={<PublicProfileView />} />
 
             {/* Admin Routes */}
-            <Route path="/admin" element={<AdminRoute />}>
-                <Route element={<AdminLayout />}>
-                    <Route index element={<div className="text-center p-10">Welcome to Admin Dashboard. Select an item from the sidebar.</div>} />
-                    <Route path="verifications" element={<VerificationQueue />} />
-                    <Route path="transactions" element={<TransactionManager />} />
-                    <Route path="packages" element={<PackageManager />} />
-                    <Route path="users" element={<UserManagement />} />
-                    <Route path="config" element={<SystemConfig />} />
-                </Route>
+            <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
+                <Route index element={<div className="text-center p-10">Welcome to Admin Dashboard. Select an item from the sidebar.</div>} />
+                <Route path="verifications" element={<VerificationQueue />} />
+                <Route path="transactions" element={<TransactionManager />} />
+                <Route path="packages" element={<PackageManager />} />
+                <Route path="users" element={<UserManagement />} />
+                <Route path="config" element={<SystemConfig />} />
             </Route>
         </Routes>
     );
