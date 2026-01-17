@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import AdminRoute from './components/admin/AdminRoute';
 import AdminLayout from './components/admin/AdminLayout';
 import VerificationQueue from './components/admin/VerificationQueue';
@@ -16,6 +16,9 @@ import ChatWindow from './components/chat/ChatWindow';
 import UpgradePlan from './components/subscription/UpgradePlan';
 import PackageManager from './components/admin/PackageManager';
 import LikesYou from './components/app/LikesYou';
+import LandingPage from './components/marketing/LandingPage';
+import Terms from './components/legal/Terms';
+import Privacy from './components/legal/Privacy';
 
 function App() {
     const { setUser, setUserData, setLoading, loading } = useAuthStore();
@@ -51,7 +54,9 @@ function App() {
         <Router>
             <Routes>
                 <Route path="/login" element={<Login />} />
-                <Route path="/" element={<Navigate to="/login" />} />
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/privacy" element={<Privacy />} />
                 {/* Placeholders for future routes */}
                 <Route path="/onboarding" element={<div className="min-h-screen bg-pink-50 pt-10"><ProfileWizard /></div>} />
                 <Route path="/verify-status" element={
