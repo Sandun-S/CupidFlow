@@ -10,6 +10,8 @@ import { auth } from './lib/firebase';
 import { useAuthStore } from './store/authStore';
 import ProfileWizard from './components/onboarding/ProfileWizard';
 import ExploreFeed from './components/app/ExploreFeed';
+import ChatList from './components/chat/ChatList';
+import ChatWindow from './components/chat/ChatWindow';
 
 function App() {
     const { setUser, setLoading, loading } = useAuthStore();
@@ -48,6 +50,8 @@ function App() {
                     </div>
                 } />
                 <Route path="/app/explore" element={<ExploreFeed />} />
+                <Route path="/app/chat" element={<ChatList />} />
+                <Route path="/app/chat/:matchId" element={<ChatWindow />} />
 
                 {/* Admin Routes */}
                 <Route path="/admin" element={<AdminRoute />}>

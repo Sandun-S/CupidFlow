@@ -35,8 +35,16 @@ service cloud.firestore {
     match /swipes/{swipId} {
         allow read, write: if request.auth != null;
     }
+    // Matches: Only participants can read/write
     match /matches/{matchId} {
-        allow read, write: if request.auth != null; 
+        allow read: if request.auth != null && (resource == null || request.auth.uid in resource.data.users);
+        allow create: if request.auth != null; // Created by client-side logic
+        allow update: if request.auth != null && request.auth.uid in resource.data.users;
+
+        // Messages Subcollection
+        match /messages/{messageId} {
+            allow read, write: if request.auth != null && request.auth.uid in get(/databases/$(database)/documents/matches/$(matchId)).data.users;
+        }
     }
     
     // NIC Hashes (Public Read for Uniqueness Check, Authenticated Write)
