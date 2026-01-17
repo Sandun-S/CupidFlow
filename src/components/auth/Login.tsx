@@ -2,10 +2,18 @@ import { useState, useEffect } from 'react';
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
 import { auth, db } from '../../lib/firebase';
 import { useNavigate, Link } from 'react-router-dom';
-import { doc, getDoc, setDoc, serverTimestamp, runTransaction } from 'firebase/firestore';
+import { doc, getDoc, serverTimestamp, runTransaction } from 'firebase/firestore';
 import { useAuthStore } from '../../store/authStore';
-import { logAction } from '../../lib/audit'; // Import audit logging
+import { logAction } from '../../lib/audit';
 import { Mail, Lock, Chrome, Phone } from 'lucide-react';
+
+// Add global window declarations for Firebase Auth
+declare global {
+    interface Window {
+        recaptchaVerifier: any;
+        confirmationResult: any;
+    }
+}
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -16,7 +24,6 @@ export default function Login() {
     // Phone Auth State
     const [isPhoneLogin, setIsPhoneLogin] = useState(false);
     const [phoneNumber, setPhoneNumber] = useState('+94');
-    const [verificationId, setVerificationId] = useState('');
     const [otp, setOtp] = useState('');
     const [showOtpInput, setShowOtpInput] = useState(false);
 
@@ -144,8 +151,8 @@ export default function Login() {
         try {
             const appVerifier = window.recaptchaVerifier;
             const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
-            setVerificationId(confirmationResult.verificationId);
-            (window as any).confirmationResult = confirmationResult;
+            // We store confirmationResult in window to access it in the next step
+            window.confirmationResult = confirmationResult;
 
             setShowOtpInput(true);
             setLoading(false);
