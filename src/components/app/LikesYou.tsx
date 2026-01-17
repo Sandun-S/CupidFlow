@@ -4,6 +4,7 @@ import { db } from '../../lib/firebase';
 import { useAuthStore } from '../../store/authStore';
 import { Heart, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import BottomNav from './BottomNav';
 
 interface LikerProfile {
     uid: string;
@@ -148,6 +149,7 @@ export default function LikesYou() {
                     </div>
                 )}
             </div>
+            <BottomNav />
         </div>
     );
 }

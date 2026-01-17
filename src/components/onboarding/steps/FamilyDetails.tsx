@@ -40,8 +40,8 @@ export default function FamilyDetails() {
         }
 
         // Count logic
-        const brothers = list.filter(i => i.gender === 'Brother').length;
-        const sisters = list.filter(i => i.gender === 'Sister').length;
+        // const brothers = list.filter(i => i.gender === 'Brother').length;
+        // const sisters = list.filter(i => i.gender === 'Sister').length;
 
         // Detailed string: "1 Brother (Married), 1 Sister (Student)"
         // Or simplified if many.
