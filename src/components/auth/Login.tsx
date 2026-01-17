@@ -1,0 +1,129 @@
+import React, { useState } from 'react';
+import { auth, db } from '../../lib/firebase';
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, User } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
+import { Lock, Mail, Chrome } from 'lucide-react';
+import { useAuthStore } from '../../store/authStore';
+
+export default function Login() {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const navigate = useNavigate();
+    const setUser = useAuthStore((state) => state.setUser);
+
+    const checkUserStatus = async (user: User) => {
+        // 1. Check if user doc exists
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+
+        if (!userDoc.exists()) {
+            // New user -> Go to Wizard
+            navigate('/onboarding');
+        } else {
+            const userData = userDoc.data();
+            if (!userData.isVerified) {
+                navigate('/verify-status');
+            } else {
+                navigate('/app/explore');
+            }
+        }
+    };
+
+    const handleEmailLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            setUser(userCredential.user);
+            await checkUserStatus(userCredential.user);
+        } catch (err: any) {
+            setError(err.message);
+        }
+    };
+
+    const handleGoogleLogin = async () => {
+        const provider = new GoogleAuthProvider();
+        try {
+            const result = await signInWithPopup(auth, provider);
+            setUser(result.user);
+            await checkUserStatus(result.user);
+        } catch (err: any) {
+            setError(err.message);
+        }
+    };
+
+    return (
+        <div className="min-h-screen bg-pink-50 flex items-center justify-center p-4">
+            <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
+                <div className="text-center mb-8">
+                    <h1 className="text-3xl font-bold text-pink-600 mb-2">CupidFlow</h1>
+                    <p className="text-gray-500">Find your verified soulmate</p>
+                </div>
+
+                {error && (
+                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm">
+                        {error}
+                    </div>
+                )}
+
+                <form onSubmit={handleEmailLogin} className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <div className="relative">
+                            <Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                            <input
+                                type="email"
+                                required
+                                className="pl-10 w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none"
+                                placeholder="you@example.com"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <div className="relative">
+                            <Lock className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                            <input
+                                type="password"
+                                required
+                                className="pl-10 w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent outline-none"
+                                placeholder="••••••••"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                            />
+                        </div>
+                    </div>
+
+                    <button
+                        type="submit"
+                        className="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-2.5 rounded-lg transition-colors"
+                    >
+                        Sign In
+                    </button>
+                </form>
+
+                <div className="mt-6">
+                    <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-gray-300"></div>
+                        </div>
+                        <div className="relative flex justify-center text-sm">
+                            <span className="px-2 bg-white text-gray-500">Or continue with</span>
+                        </div>
+                    </div>
+
+                    <button
+                        onClick={handleGoogleLogin}
+                        className="mt-6 w-full flex items-center justify-center gap-2 border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 font-medium py-2.5 rounded-lg transition-colors"
+                    >
+                        <Chrome className="h-5 w-5 text-blue-500" />
+                        Google
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
