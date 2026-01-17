@@ -1,6 +1,6 @@
 import { useAuthStore } from '../../store/authStore';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, ArrowLeft, Bell, Shield, HelpCircle, ChevronRight } from 'lucide-react';
+import { LogOut, ArrowLeft, Bell, Shield, HelpCircle, ChevronRight, User, Sliders } from 'lucide-react';
 import { auth } from '../../lib/firebase';
 import { signOut } from 'firebase/auth';
 
@@ -19,6 +19,8 @@ export default function Settings() {
     };
 
     const settingItems = [
+        { icon: User, label: 'Edit Profile', action: () => navigate('/app/profile/edit') },
+        { icon: Sliders, label: 'Preferences', action: () => navigate('/app/preferences') },
         { icon: Bell, label: 'Notifications', action: () => alert('Notifications coming soon') },
         { icon: Shield, label: 'Privacy & Security', action: () => navigate('/privacy') },
         { icon: HelpCircle, label: 'Help & Support', action: () => navigate('/about') },

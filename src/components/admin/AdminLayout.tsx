@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { ShieldCheck, CreditCard, LogOut, LayoutDashboard, Settings } from 'lucide-react';
+import { ShieldCheck, CreditCard, LogOut, LayoutDashboard, Settings, Users, Package } from 'lucide-react';
 import { auth } from '../../lib/firebase';
 import { signOut } from 'firebase/auth';
 
@@ -14,9 +14,10 @@ export default function AdminLayout() {
 
     const menuItems = [
         { label: "Dashboard", path: "/admin", icon: <LayoutDashboard size={20} /> },
+        { label: "User Management", path: "/admin/users", icon: <Users size={20} /> },
         { label: "Verifications", path: "/admin/verifications", icon: <ShieldCheck size={20} /> },
         { label: "Transactions", path: "/admin/transactions", icon: <CreditCard size={20} /> },
-        { label: "Packages", path: "/admin/packages", icon: <CreditCard size={20} /> },
+        { label: "Packages", path: "/admin/packages", icon: <Package size={20} /> },
         { label: "Config", path: "/admin/config", icon: <Settings size={20} /> },
     ];
 
