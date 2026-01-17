@@ -6,10 +6,11 @@ interface NICUploaderProps {
     label: string;
     onUpload: (url: string) => void;
     type: "verification" | "public"; // "verification" for NIC, "public" for profile pics
+    initialUrl?: string;
 }
 
-export default function NICUploader({ label, onUpload, type }: NICUploaderProps) {
-    const [image, setImage] = useState<string | null>(null);
+export default function NICUploader({ label, onUpload, type, initialUrl }: NICUploaderProps) {
+    const [image, setImage] = useState<string | null>(initialUrl || null);
     const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 

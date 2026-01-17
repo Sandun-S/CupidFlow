@@ -16,6 +16,7 @@ export default function AdminLayout() {
         { label: "Dashboard", path: "/admin", icon: <LayoutDashboard size={20} /> },
         { label: "Verifications", path: "/admin/verifications", icon: <ShieldCheck size={20} /> },
         { label: "Transactions", path: "/admin/transactions", icon: <CreditCard size={20} /> },
+        { label: "Packages", path: "/admin/packages", icon: <CreditCard size={20} /> },
     ];
 
     return (
@@ -33,8 +34,8 @@ export default function AdminLayout() {
                             key={item.path}
                             to={item.path}
                             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${location.pathname === item.path
-                                    ? 'bg-pink-600 text-white'
-                                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                                ? 'bg-pink-600 text-white'
+                                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
                                 }`}
                         >
                             {item.icon}

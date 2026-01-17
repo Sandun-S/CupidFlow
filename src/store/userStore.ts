@@ -36,6 +36,12 @@ export interface UserProfileDraft {
 
     bio: string;
     lookingFor: string;
+
+    // Verification Draft Data
+    nicFront?: string;
+    nicBack?: string;
+    selfie?: string;
+    nicNumber?: string;
 }
 
 interface UserStore {
@@ -58,7 +64,11 @@ const initialDraft: UserProfileDraft = {
     family: { fatherProfession: "", motherProfession: "", siblings: "" },
     habits: { drinking: "", smoking: "", food: "" },
     bio: "",
-    lookingFor: ""
+    lookingFor: "",
+    nicFront: "",
+    nicBack: "",
+    selfie: "",
+    nicNumber: ""
 };
 
 export const useUserStore = create<UserStore>()(

@@ -8,18 +8,24 @@ import SHA256 from 'crypto-js/sha256';
 import { useNavigate } from 'react-router-dom';
 
 export default function PhotoUpload() {
-    const { draft } = useUserStore();
+    const { draft, updateDraft } = useUserStore();
     const { user } = useAuthStore();
     const navigate = useNavigate();
 
-    const [nicFront, setNicFront] = useState('');
-    const [nicBack, setNicBack] = useState('');
-    const [selfie, setSelfie] = useState('');
-    const [nicNumber, setNicNumber] = useState('');
-    const [avatar, setAvatar] = useState('');
+    const [nicFront, setNicFront] = useState(draft.nicFront || '');
+    const [nicBack, setNicBack] = useState(draft.nicBack || '');
+    const [selfie, setSelfie] = useState(draft.selfie || '');
+    const [nicNumber, setNicNumber] = useState(draft.nicNumber || '');
+    const [avatar, setAvatar] = useState(''); // Avatar is also typically part of profile but we upload it directly to profile. Let's persist it too if we want, but for now focus on NIC.
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState('');
+
+    // Persist as we type/upload
+    const handleNicFront = (url: string) => { setNicFront(url); updateDraft({ nicFront: url }); };
+    const handleNicBack = (url: string) => { setNicBack(url); updateDraft({ nicBack: url }); };
+    const handleSelfie = (url: string) => { setSelfie(url); updateDraft({ selfie: url }); };
+    const handleNicNumber = (val: string) => { setNicNumber(val); updateDraft({ nicNumber: val }); };
 
     const handleSubmit = async () => {
         if (!nicFront || !nicBack || !selfie || !nicNumber || !avatar) {
@@ -150,16 +156,16 @@ export default function PhotoUpload() {
                 <input
                     type="text"
                     value={nicNumber}
-                    onChange={(e) => setNicNumber(e.target.value)}
+                    onChange={(e) => handleNicNumber(e.target.value)}
                     className="mt-1 w-full p-2 border rounded-md uppercase"
                     placeholder="e.g. 199512345678"
                 />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <NICUploader label="NIC Front Side" type="verification" onUpload={setNicFront} />
-                <NICUploader label="NIC Back Side" type="verification" onUpload={setNicBack} />
-                <NICUploader label="Selfie with NIC" type="verification" onUpload={setSelfie} />
+                <NICUploader label="NIC Front Side" type="verification" onUpload={handleNicFront} initialUrl={nicFront} />
+                <NICUploader label="NIC Back Side" type="verification" onUpload={handleNicBack} initialUrl={nicBack} />
+                <NICUploader label="Selfie with NIC" type="verification" onUpload={handleSelfie} initialUrl={selfie} />
                 <NICUploader label="Profile Photo (Public)" type="public" onUpload={setAvatar} />
             </div>
 
