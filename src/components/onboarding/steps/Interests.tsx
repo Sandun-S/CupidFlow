@@ -1,74 +1,50 @@
 import { useUserStore } from '../../../store/userStore';
 
+const INTERESTS_LIST = [
+    "Music", "Travel", "Foodie", "Movies", "Reading", "Gym / Fitness",
+    "Sports", "Photography", "Gaming", "Cooking", "Dancing", "Art",
+    "Tech", "Nature", "Pets", "Fashion", "Writing", "Politics",
+    "Volunteering", "Swimming", "Hiking", "Yoga", "Meditation"
+];
+
 export default function Interests() {
     const { draft, updateDraft } = useUserStore();
 
+    const toggleInterest = (interest: string) => {
+        const current = draft.interests || [];
+        if (current.includes(interest)) {
+            updateDraft({ interests: current.filter(i => i !== interest) });
+        } else {
+            if (current.length >= 10) return; // Limit to 10
+            updateDraft({ interests: [...current, interest] });
+        }
+    };
+
     return (
         <div className="space-y-6">
-            <h3 className="text-lg font-medium text-gray-900">Lifestyle & Habits</h3>
+            <h3 className="text-lg font-medium text-gray-900">Your Interests</h3>
+            <p className="text-sm text-gray-500">Select up to 10 interests that describe you.</p>
 
-            <div className="grid grid-cols-1 gap-4">
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">Drinking</label>
-                    <div className="flex gap-4 mt-2">
-                        {["No", "Socially", "Regularly"].map((opt) => (
-                            <label key={opt} className="flex items-center space-x-2">
-                                <input
-                                    type="radio"
-                                    checked={draft.habits.drinking === opt}
-                                    onChange={() => updateDraft({ habits: { ...draft.habits, drinking: opt as any } })}
-                                    className="accent-pink-600"
-                                />
-                                <span>{opt}</span>
-                            </label>
-                        ))}
-                    </div>
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">Smoking</label>
-                    <div className="flex gap-4 mt-2">
-                        {["No", "Socially", "Regularly"].map((opt) => (
-                            <label key={opt} className="flex items-center space-x-2">
-                                <input
-                                    type="radio"
-                                    checked={draft.habits.smoking === opt}
-                                    onChange={() => updateDraft({ habits: { ...draft.habits, smoking: opt as any } })}
-                                    className="accent-pink-600"
-                                />
-                                <span>{opt}</span>
-                            </label>
-                        ))}
-                    </div>
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">Food Preference</label>
-                    <div className="flex gap-4 mt-2">
-                        {["Veg", "Non-Veg", "Vegan"].map((opt) => (
-                            <label key={opt} className="flex items-center space-x-2">
-                                <input
-                                    type="radio"
-                                    checked={draft.habits.food === opt}
-                                    onChange={() => updateDraft({ habits: { ...draft.habits, food: opt as any } })}
-                                    className="accent-pink-600"
-                                />
-                                <span>{opt}</span>
-                            </label>
-                        ))}
-                    </div>
-                </div>
+            <div className="flex flex-wrap gap-2">
+                {INTERESTS_LIST.map((interest) => {
+                    const isSelected = draft.interests?.includes(interest);
+                    return (
+                        <button
+                            key={interest}
+                            onClick={() => toggleInterest(interest)}
+                            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${isSelected
+                                    ? "bg-pink-600 text-white shadow-md"
+                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                }`}
+                        >
+                            {interest}
+                        </button>
+                    );
+                })}
             </div>
 
-            <div>
-                <label className="block text-sm font-medium text-gray-700">Bio</label>
-                <textarea
-                    value={draft.bio}
-                    onChange={(e) => updateDraft({ bio: e.target.value })}
-                    className="mt-1 w-full p-2 border rounded-md"
-                    rows={4}
-                    placeholder="Tell us about yourself..."
-                />
+            <div className="text-sm text-gray-500 mt-2">
+                Selected: {draft.interests?.length || 0}/10
             </div>
         </div>
     );

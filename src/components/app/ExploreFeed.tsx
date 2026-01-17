@@ -5,6 +5,7 @@ import { useAuthStore } from '../../store/authStore';
 import ProfileCard from './ProfileCard';
 import { useMatching } from '../../hooks/useMatching';
 import { Loader, Rocket, HelpCircle, Mail } from 'lucide-react';
+import BottomNav from './BottomNav';
 
 export default function ExploreFeed() {
     const { user, userData } = useAuthStore();
@@ -214,6 +215,8 @@ export default function ExploreFeed() {
                     </button>
                 </div>
             )}
+
+            <BottomNav />
         </div>
     );
 }

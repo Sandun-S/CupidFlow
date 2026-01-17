@@ -5,7 +5,9 @@ import Interests from './steps/Interests';
 import PhotoUpload from './steps/PhotoUpload';
 
 
-const steps = ["Basic Info", "Family", "Lifestyle", "Verification"];
+import Lifestyle from './steps/Lifestyle';
+
+const steps = ["Basic Info", "Family", "Lifestyle", "Interests", "Photos/Verification"];
 
 export default function ProfileWizard() {
     const [currentStep, setCurrentStep] = useState(0);
@@ -22,8 +24,9 @@ export default function ProfileWizard() {
         switch (currentStep) {
             case 0: return <BasicInfo />;
             case 1: return <FamilyDetails />;
-            case 2: return <Interests />;
-            case 3: return <PhotoUpload />;
+            case 2: return <Lifestyle />;
+            case 3: return <Interests />;
+            case 4: return <PhotoUpload />;
             default: return null;
         }
     };

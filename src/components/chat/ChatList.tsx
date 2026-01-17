@@ -4,6 +4,7 @@ import { db } from '../../lib/firebase';
 import { useAuthStore } from '../../store/authStore';
 import { useNavigate } from 'react-router-dom';
 import { MessageCircle } from 'lucide-react';
+import BottomNav from '../app/BottomNav';
 
 interface ChatMatch {
     id: string; // matchId
@@ -134,6 +135,7 @@ export default function ChatList() {
                     ))}
                 </div>
             )}
+            <BottomNav />
         </div>
     );
 }

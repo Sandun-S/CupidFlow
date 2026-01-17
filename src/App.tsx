@@ -19,6 +19,10 @@ import LikesYou from './components/app/LikesYou';
 import LandingPage from './components/marketing/LandingPage';
 import Terms from './components/legal/Terms';
 import Privacy from './components/legal/Privacy';
+import AboutUs from './components/marketing/AboutUs';
+import SafetyTips from './components/marketing/SafetyTips';
+import EditProfile from './components/app/EditProfile';
+import PublicProfileView from './components/app/PublicProfileView';
 
 function App() {
     const { setUser, setUserData, setLoading, loading } = useAuthStore();
@@ -57,6 +61,8 @@ function App() {
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/privacy" element={<Privacy />} />
+                <Route path="/about" element={<AboutUs />} />
+                <Route path="/safety" element={<SafetyTips />} />
                 {/* Placeholders for future routes */}
                 <Route path="/onboarding" element={<div className="min-h-screen bg-pink-50 pt-10"><ProfileWizard /></div>} />
                 <Route path="/verify-status" element={
@@ -78,6 +84,8 @@ function App() {
                 <Route path="/app/likes" element={<LikesYou />} />
                 <Route path="/app/chat/:matchId" element={<ChatWindow />} />
                 <Route path="/app/upgrade" element={<UpgradePlan />} />
+                <Route path="/app/profile/edit" element={<EditProfile />} />
+                <Route path="/app/profile/view" element={<PublicProfileView />} />
 
                 {/* Admin Routes */}
                 <Route path="/admin" element={<AdminRoute />}>

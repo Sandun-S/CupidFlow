@@ -7,6 +7,8 @@ export interface Profile extends UserProfileDraft {
 }
 
 export interface UserProfileDraft {
+    firstName: string;
+    lastName: string;
     displayName: string;
     gender: "man" | "woman" | "non-binary" | "";
     birthDate: string;
@@ -14,6 +16,7 @@ export interface UserProfileDraft {
         district: string;
         city: string;
         province: string;
+        address?: string; // Private address
     };
     ethnicity: string;
     religion: string;
@@ -36,6 +39,8 @@ export interface UserProfileDraft {
 
     bio: string;
     lookingFor: string;
+    interests: string[];
+    photos?: string[]; // Up to 6 URLs
 
     // Verification Draft Data
     nicFront?: string;
@@ -51,10 +56,12 @@ interface UserStore {
 }
 
 const initialDraft: UserProfileDraft = {
+    firstName: "",
+    lastName: "",
     displayName: "",
     gender: "",
     birthDate: "",
-    location: { district: "", city: "", province: "" },
+    location: { district: "", city: "", province: "", address: "" },
     ethnicity: "",
     religion: "",
     height: "",
@@ -65,6 +72,8 @@ const initialDraft: UserProfileDraft = {
     habits: { drinking: "", smoking: "", food: "" },
     bio: "",
     lookingFor: "",
+    interests: [],
+    photos: [],
     nicFront: "",
     nicBack: "",
     selfie: "",

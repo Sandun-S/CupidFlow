@@ -50,7 +50,7 @@ export default function VerificationQueue() {
         fetchRequests();
     }, []);
 
-    const handleAction = async (action: 'approve' | 'reject') => {
+    const handleAction = async (action: 'approve' | 'reject', note: string) => {
         if (!selectedReq) return;
 
         try {
@@ -66,13 +66,10 @@ export default function VerificationQueue() {
                     isVerified: true,
                     nicStatus: 'verified'
                 });
-                // Delete request for privacy? Or keep as archive? 
-                // Guide said "Delete images from verification_requests (Privacy cleanup)"
-                // But we need record. Let's update status to 'reviewed' and maybe remove image links if we are strict.
-                // For now, allow keeping record.
+
                 batch.update(reqRef, {
                     status: 'reviewed',
-                    adminNotes: 'Approved by Admin'
+                    adminNotes: note
                 });
             } else {
                 // Reject
@@ -81,8 +78,8 @@ export default function VerificationQueue() {
                     nicStatus: 'rejected'
                 }); // Keep isVerified false
                 batch.update(reqRef, {
-                    status: 'reviewed',
-                    adminNotes: 'Rejected: Mismatch or Unclear'
+                    status: 'rejected', // Changed from 'reviewed' to 'rejected' so user knows
+                    adminNotes: note
                 });
             }
 
@@ -159,19 +156,44 @@ export default function VerificationQueue() {
                         </div>
 
                         {/* Footer Actions */}
-                        <div className="p-6 border-t bg-white flex justify-end gap-4">
-                            <button
-                                onClick={() => handleAction('reject')}
-                                className="flex items-center gap-2 px-6 py-3 border border-red-200 text-red-700 rounded-lg hover:bg-red-50 font-bold"
-                            >
-                                <XCircle /> Reject
-                            </button>
-                            <button
-                                onClick={() => handleAction('approve')}
-                                className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-bold"
-                            >
-                                <CheckCircle /> Approve & Verify
-                            </button>
+                        <div className="p-6 border-t bg-white">
+                            {/* Rejection Note Input - Only relevant if we are considering rejection, 
+                                but to keep UI simple, let's just show it or toggle it. 
+                                Actually, prompt or show input always? Let's show a small input. */}
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Admin Notes (Required for Rejection)</label>
+                                <textarea
+                                    id="admin-note"
+                                    className="w-full border rounded-md p-2 text-sm"
+                                    placeholder="Reason for rejection or approval notes..."
+                                    rows={2}
+                                />
+                            </div>
+
+                            <div className="flex justify-end gap-4">
+                                <button
+                                    onClick={() => {
+                                        const note = (document.getElementById('admin-note') as HTMLTextAreaElement).value;
+                                        if (!note) {
+                                            alert("Please provide a reason for rejection.");
+                                            return;
+                                        }
+                                        handleAction('reject', note);
+                                    }}
+                                    className="flex items-center gap-2 px-6 py-3 border border-red-200 text-red-700 rounded-lg hover:bg-red-50 font-bold"
+                                >
+                                    <XCircle /> Reject
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        const note = (document.getElementById('admin-note') as HTMLTextAreaElement).value;
+                                        handleAction('approve', note || 'Approved by Admin');
+                                    }}
+                                    className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-bold"
+                                >
+                                    <CheckCircle /> Approve & Verify
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

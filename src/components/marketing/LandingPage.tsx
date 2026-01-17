@@ -224,8 +224,8 @@ export default function LandingPage() {
                     </div>
 
                     <div className="flex gap-8 text-sm font-medium text-gray-600">
-                        <a href="#" className="hover:text-pink-600 transition-colors">About Us</a>
-                        <a href="#" className="hover:text-pink-600 transition-colors">Safety Tips</a>
+                        <a href="#" onClick={() => navigate('/about')} className="hover:text-pink-600 transition-colors">About Us</a>
+                        <a href="#" onClick={() => navigate('/safety')} className="hover:text-pink-600 transition-colors">Safety Tips</a>
                         <a href="#" onClick={() => navigate('/terms')} className="hover:text-pink-600 transition-colors">Terms</a>
                         <a href="#" onClick={() => navigate('/privacy')} className="hover:text-pink-600 transition-colors">Privacy</a>
                     </div>
