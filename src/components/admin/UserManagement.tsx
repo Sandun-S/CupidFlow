@@ -5,20 +5,46 @@ import { Search, Shield, UserX, Eye } from 'lucide-react';
 
 export default function UserManagement() {
     const [users, setUsers] = useState<any[]>([]);
+    const [packages, setPackages] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
-        fetchUsers();
+        fetchData();
     }, []);
 
-    const fetchUsers = async () => {
+    const fetchData = async () => {
         try {
+            // 1. Fetch Packages
+            const packagesSnap = await getDocs(collection(db, "packages"));
+            const packagesList = packagesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+            setPackages(packagesList);
+
+            // 2. Fetch Users
             const q = query(collection(db, "users"), orderBy("createdAt", "desc"), limit(50));
             const snapshot = await getDocs(q);
-            setUsers(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
+            const userDocs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+
+            // 3. Fetch Profiles for these users (to get names)
+            // We'll do individual fetches or batches. For 50, Promise.all is acceptable.
+            const usersWithProfiles = await Promise.all(userDocs.map(async (user: any) => {
+                const profileRef = doc(db, "profiles", user.id);
+                // We don't want to fail if one profile fails, so we catch
+                try {
+                    const profileSnap = await import('firebase/firestore').then(mod => mod.getDoc(profileRef));
+                    if (profileSnap.exists()) {
+                        return { ...user, ...profileSnap.data(), email: user.email, role: user.role }; // Merge, preferring profile data for display but keeping user auth data
+                    }
+                } catch (e) {
+                    console.warn("Failed to fetch profile for", user.id);
+                }
+                return user;
+            }));
+
+            setUsers(usersWithProfiles);
+
         } catch (error) {
-            console.error("Error fetching users", error);
+            console.error("Error fetching admin data", error);
         } finally {
             setLoading(false);
         }
@@ -35,13 +61,13 @@ export default function UserManagement() {
         }
     };
 
-    const handleSubscription = async (userId: string, tier: string) => {
+    const handleSubscription = async (userId: string, packageId: string) => {
         try {
             await updateDoc(doc(db, "users", userId), {
-                subscriptionTier: tier,
-                isPremium: tier !== 'free'
+                packageId: packageId,
+                // accessStatus: 'active' // Optional: reactivate if they upgrade?
             });
-            setUsers(users.map(u => u.id === userId ? { ...u, subscriptionTier: tier, isPremium: tier !== 'free' } : u));
+            setUsers(users.map(u => u.id === userId ? { ...u, packageId: packageId } : u));
         } catch (error) {
             console.error(error);
             alert("Failed to update subscription");
@@ -49,9 +75,9 @@ export default function UserManagement() {
     }
 
     const filteredUsers = users.filter(u =>
-        u.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        u.displayName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        u.phone?.includes(searchTerm)
+        (u.email && u.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (u.displayName && u.displayName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (u.phone && u.phone.includes(searchTerm))
     );
 
     return (
@@ -77,7 +103,7 @@ export default function UserManagement() {
                             <tr>
                                 <th className="p-4 font-bold">User</th>
                                 <th className="p-4 font-bold">Contact</th>
-                                <th className="p-4 font-bold">Sub. Tier</th>
+                                <th className="p-4 font-bold">Package</th>
                                 <th className="p-4 font-bold">Role</th>
                                 <th className="p-4 font-bold text-right">Actions</th>
                             </tr>
@@ -91,8 +117,9 @@ export default function UserManagement() {
                                 filteredUsers.map(user => (
                                     <tr key={user.id} className="hover:bg-gray-50 transition">
                                         <td className="p-4">
-                                            <div className="font-bold text-gray-900">{user.displayName || "No Name"}</div>
+                                            <div className="font-bold text-gray-900">{user.displayName || "No Name (Onboarding)"}</div>
                                             <div className="text-xs text-gray-400">{user.gender} • {user.id.slice(0, 6)}</div>
+                                            {user.nicStatus && <div className={`text-[10px] uppercase font-bold ${user.nicStatus === 'verified' ? 'text-green-500' : 'text-yellow-500'}`}>{user.nicStatus}</div>}
                                         </td>
                                         <td className="p-4">
                                             <div className="text-gray-600">{user.email}</div>
@@ -100,16 +127,16 @@ export default function UserManagement() {
                                         </td>
                                         <td className="p-4">
                                             <select
-                                                value={user.subscriptionTier || 'free'}
+                                                value={user.packageId || 'free'}
                                                 onChange={(e) => handleSubscription(user.id, e.target.value)}
-                                                className={`p-1 rounded text-xs font-bold border ${user.subscriptionTier === 'platinum' ? 'bg-purple-100 text-purple-700 border-purple-200' :
-                                                    user.subscriptionTier === 'gold' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' :
-                                                        'bg-gray-100 text-gray-600 border-gray-200'
-                                                    }`}
+                                                className="p-2 rounded-lg border border-gray-200 text-sm focus:border-pink-500 outline-none bg-white"
                                             >
                                                 <option value="free">Free</option>
-                                                <option value="gold">Gold</option>
-                                                <option value="platinum">Platinum</option>
+                                                {packages.map(pkg => (
+                                                    <option key={pkg.id} value={pkg.id}>
+                                                        {pkg.name} (${pkg.price})
+                                                    </option>
+                                                ))}
                                             </select>
                                         </td>
                                         <td className="p-4">
@@ -121,16 +148,16 @@ export default function UserManagement() {
                                         <td className="p-4 text-right">
                                             <div className="flex justify-end gap-2">
                                                 <button
-                                                    title="View Profile (Coming Soon)"
+                                                    title="View Public Profile"
                                                     className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100"
-                                                    onClick={() => alert("Public view link construction")}
+                                                    onClick={() => alert("Navigate to public profile view? (Needs valid profile)")}
                                                 >
                                                     <Eye size={16} />
                                                 </button>
                                                 <button
-                                                    title="Make Admin"
-                                                    onClick={() => handleUpdateRole(user.id, 'admin')}
-                                                    className="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200"
+                                                    title={user.role === 'admin' ? "Remove Admin" : "Make Admin"}
+                                                    onClick={() => handleUpdateRole(user.id, user.role === 'admin' ? 'user' : 'admin')}
+                                                    className={`p-2 rounded-lg ${user.role === 'admin' ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-600'}`}
                                                 >
                                                     <Shield size={16} />
                                                 </button>

@@ -31,7 +31,7 @@ import Preferences from './components/app/Preferences';
 import Settings from './components/app/Settings';
 
 function AppContent() {
-    const { user, setUser, setUserData, userData, setLoading, loading } = useAuthStore();
+    const { setUser, setUserData, setLoading, loading } = useAuthStore();
     const navigate = useNavigate();
 
     useEffect(() => {
