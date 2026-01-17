@@ -56,6 +56,7 @@ export default function EditProfile() {
         gender: '',
         birthDate: '',
         civilStatus: '',
+        phone: '',
 
         // Personal
         height: '',
@@ -86,9 +87,15 @@ export default function EditProfile() {
         const fetchProfile = async () => {
             if (!user) return;
             try {
-                const docSnap = await getDoc(doc(db, "profiles", user.uid));
+                // Fetch Profile AND User Data (for phone)
+                const [docSnap, userSnap] = await Promise.all([
+                    getDoc(doc(db, "profiles", user.uid)),
+                    getDoc(doc(db, "users", user.uid))
+                ]);
+
                 if (docSnap.exists()) {
                     const data = docSnap.data();
+                    const userData = userSnap.exists() ? userSnap.data() : {};
 
                     setFormData({
                         displayName: data.displayName || '',
@@ -100,6 +107,7 @@ export default function EditProfile() {
                         gender: data.gender || '',
                         birthDate: data.birthDate || '',
                         civilStatus: data.civilStatus || '',
+                        phone: userData.phone || '',
 
                         height: data.height || '',
                         education: data.education || '',
@@ -199,6 +207,11 @@ export default function EditProfile() {
                 interests: formData.interests
             });
 
+            // Also update phone in users collection
+            await updateDoc(doc(db, "users", user.uid), {
+                phone: formData.phone
+            });
+
             await logAction('PROFILE_UPDATE', {
                 fields: ['all_fields'],
             });
@@ -278,29 +291,29 @@ export default function EditProfile() {
                             <div>
                                 <label className="label">Education</label>
                                 <select
-                                    value={['O/L', 'A/L', 'Diploma', 'Bachelors', 'Masters', 'Doctorate'].includes(formData.education) ? formData.education : (formData.education ? "Other" : "")}
+                                    value={['G.C.E O/L', 'G.C.E A/L', 'Diploma', 'Bachelors', 'Masters', 'Doctorate'].includes(formData.education) ? formData.education : (formData.education ? "Other" : "")}
                                     onChange={e => setFormData({ ...formData, education: e.target.value === "Other" ? "Other" : e.target.value })}
                                     className="input-field"
                                 >
                                     <option value="">Select</option>
-                                    <option value="O/L">G.C.E O/L</option>
-                                    <option value="A/L">G.C.E A/L</option>
+                                    <option value="G.C.E O/L">G.C.E O/L</option>
+                                    <option value="G.C.E A/L">G.C.E A/L</option>
                                     <option value="Diploma">Diploma</option>
                                     <option value="Bachelors">Bachelor's Degree</option>
                                     <option value="Masters">Master's Degree</option>
                                     <option value="Doctorate">Doctorate</option>
                                     <option value="Other">Other</option>
                                 </select>
-                                {(!['O/L', 'A/L', 'Diploma', 'Bachelors', 'Masters', 'Doctorate', ''].includes(formData.education) || formData.education === "Other") && (
+                                {(!['G.C.E O/L', 'G.C.E A/L', 'Diploma', 'Bachelors', 'Masters', 'Doctorate', ''].includes(formData.education) || formData.education === "Other") && (
                                     <input type="text" value={formData.education === "Other" ? "" : formData.education} onChange={e => setFormData({ ...formData, education: e.target.value })} className="input-field mt-2" placeholder="Specify Education" />
                                 )}
                             </div>
                         </div>
 
                         {/* University - Only if Higher Ed */}
-                        {(['Diploma', 'Bachelors', 'Masters', 'Doctorate'].includes(formData.education) || (!['O/L', 'A/L', ''].includes(formData.education))) && (
+                        {(['Diploma', 'Bachelors', 'Masters', 'Doctorate'].includes(formData.education) || (!['G.C.E O/L', 'G.C.E A/L', ''].includes(formData.education))) && (
                             <div className="animate-in fade-in slide-in-from-top-2">
-                                <label className="label">University / College</label>
+                                <label className="label">University / Institute</label>
                                 <input type="text" value={formData.university} onChange={e => setFormData({ ...formData, university: e.target.value })} className="input-field" placeholder="e.g. University of Colombo" />
                             </div>
                         )}
@@ -494,6 +507,19 @@ export default function EditProfile() {
                         <div>
                             <label className="label">Display Name</label>
                             <input type="text" value={formData.displayName} onChange={e => setFormData({ ...formData, displayName: e.target.value })} className="input-field" />
+                        </div>
+
+                        {/* Phone Number Logic */}
+                        <div>
+                            <label className="label">Mobile Number (Private)</label>
+                            <input
+                                type="tel"
+                                value={formData.phone}
+                                onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                                className="input-field"
+                                placeholder="+94 7X XXX XXXX"
+                            />
+                            <p className="text-xs text-gray-400 mt-1">Shared only with confirmed matches (if enabled) or Admin.</p>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div>

@@ -3,7 +3,10 @@ import { db } from '../../lib/firebase';
 import { collection, query, getDocs, doc, updateDoc, limit, orderBy } from 'firebase/firestore';
 import { Search, Shield, UserX, Eye } from 'lucide-react';
 
+import { useNavigate } from 'react-router-dom';
+
 export default function UserManagement() {
+    const navigate = useNavigate();
     const [users, setUsers] = useState<any[]>([]);
     const [packages, setPackages] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -181,7 +184,7 @@ export default function UserManagement() {
                                                 <button
                                                     title="View Public Profile"
                                                     className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100"
-                                                    onClick={() => alert("Navigate to public profile view? (Needs valid profile)")}
+                                                    onClick={() => navigate('/app/profile/view', { state: { uid: user.id } })}
                                                 >
                                                     <Eye size={16} />
                                                 </button>

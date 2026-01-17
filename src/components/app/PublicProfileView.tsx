@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
-import { ArrowLeft, User, Briefcase, MapPin, Ruler, Book, Users, Wine, Settings as SettingsIcon } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, User, Briefcase, MapPin, Ruler, Book, Users, Wine, Settings as SettingsIcon, BookOpen } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import BottomNav from './BottomNav';
 
 export default function PublicProfileView() {
@@ -12,11 +12,23 @@ export default function PublicProfileView() {
     const [profile, setProfile] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
+    // Check if we are viewing *another* user (passed via location state or query?)
+    // Or if this is for the current user.
+    // Ideally this component should accept a prop or read from URL param `:uid`
+    // But currently routes as `/app/profile/view`.
+    // Let's modify it to default to `user.uid` but accept an ID?
+    // Actually, for Admin view, we need a way to pass the target UID.
+    // I'll update it to check for `location.state.uid` if provided.
+
+    const location = useLocation();
+    const targetUid = location.state?.uid || user?.uid;
+    const isOwner = targetUid === user?.uid;
+
     useEffect(() => {
         const fetchProfile = async () => {
-            if (!user) return;
+            if (!targetUid) return;
             try {
-                const docSnap = await getDoc(doc(db, "profiles", user.uid));
+                const docSnap = await getDoc(doc(db, "profiles", targetUid));
                 if (docSnap.exists()) {
                     setProfile(docSnap.data());
                 }
@@ -117,20 +129,36 @@ export default function PublicProfileView() {
                             <div>
                                 <p className="text-xs text-gray-500">Education</p>
                                 <p className="font-medium text-sm line-clamp-2">{profile.education || "N/A"}</p>
-                                {profile.university && <p className="text-xs text-gray-500 mt-1">{profile.university}</p>}
                             </div>
                         </div>
-                        <div className="flex items-start gap-3 text-gray-700 bg-gray-50 p-3 rounded-lg col-span-2">
-                            <Users size={20} className="text-pink-500 mt-1" />
-                            <div className="w-full">
-                                <p className="text-xs text-gray-500">Family</p>
-                                <p className="text-xs font-medium mt-1">
-                                    <span className="block text-gray-600">Father: {profile.family?.fatherProfession || 'N/A'}</span>
-                                    <span className="block text-gray-600">Mother: {profile.family?.motherProfession || 'N/A'}</span>
-                                    <span className="block text-gray-800 border-t border-gray-200 mt-1 pt-1">{profile.family?.siblings ? profile.family.siblings : 'N/A'}</span>
-                                </p>
+
+                        {/* NEW: University / Education (if available) */}
+                        {profile.university && (
+                            <div className="flex items-center gap-3 text-gray-700 bg-pink-50 p-3 rounded-lg col-span-2">
+                                <BookOpen size={20} className="text-pink-500" />
+                                <div>
+                                    <p className="font-bold text-sm">Studies at</p>
+                                    <p className="text-sm">{profile.university}</p>
+                                </div>
                             </div>
-                        </div>
+                        )}
+
+                        {/* NEW: Family Details (if available) */}
+                        {profile.family && (profile.family.fatherProfession || profile.family.motherProfession) && (
+                            <div className="flex items-center gap-3 text-gray-700 bg-blue-50 p-3 rounded-lg col-span-2">
+                                <Users size={20} className="text-blue-500" />
+                                <div>
+                                    <p className="font-bold text-sm">Family Background</p>
+                                    <p className="text-xs text-gray-600">
+                                        {[
+                                            profile.family.fatherProfession ? `Father: ${profile.family.fatherProfession}` : '',
+                                            profile.family.motherProfession ? `Mother: ${profile.family.motherProfession}` : ''
+                                        ].filter(Boolean).join(' • ')}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
                         <div className="flex items-center gap-3 text-gray-700 bg-gray-50 p-3 rounded-lg col-span-2">
                             <Wine size={20} className="text-pink-500" />
                             <div className="flex flex-wrap gap-2">
@@ -149,7 +177,6 @@ export default function PublicProfileView() {
                             </div>
                         </div>
                     </div>
-
                     {/* Interests */}
                     {profile.interests && profile.interests.length > 0 && (
                         <div>
@@ -178,10 +205,21 @@ export default function PublicProfileView() {
                         </div>
                     )}
 
-                    {/* Report Button Area (Disabled for own profile) */}
-                    <div className="pt-8 border-t text-center text-gray-400 text-sm">
-                        This is how other users will see your profile.
-                    </div>
+                    {/* Report Button Area */}
+                    {isOwner ? (
+                        <div className="pt-8 border-t text-center text-gray-400 text-sm">
+                            This is how other users will see your profile.
+                        </div>
+                    ) : (
+                        <div className="pt-8 border-t text-center">
+                            <button
+                                onClick={() => alert("Report User feature coming soon")}
+                                className="text-red-500 font-bold text-sm hover:underline"
+                            >
+                                Report this user
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
             <BottomNav />

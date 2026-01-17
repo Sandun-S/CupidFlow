@@ -91,20 +91,20 @@ export default function BasicInfo() {
             </div>
 
             {/* Phone Section - Simplified */}
-            <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
-                <label className="block text-sm font-medium text-gray-800 mb-2">Mobile Number (For Notifications)</label>
+            <div className="bg-white border rounded-xl p-4 shadow-sm hover:border-pink-200 transition-colors">
+                <label className="block text-sm font-bold text-gray-700 mb-2">Mobile Number (For Notifications)</label>
                 <div className="flex gap-2">
                     <input
                         type="tel"
                         value={phoneNumber}
                         onChange={(e) => handlePhoneChange(e.target.value)}
                         onBlur={savePhone}
-                        className="flex-1 p-2 border rounded-md"
+                        className="flex-1 p-2.5 border rounded-lg focus:ring-2 focus:ring-pink-100 outline-none"
                         placeholder="+94 7X XXX XXXX"
                     />
-                    {isPhoneVerified && <CheckCircle className="text-green-500 mt-2" size={20} />}
+                    {isPhoneVerified && <CheckCircle className="text-pink-500 mt-2" size={20} />}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">We'll save this automatically.</p>
+                <p className="text-xs text-gray-400 mt-2 ml-1">We'll save this automatically.</p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">

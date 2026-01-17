@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, SlidersHorizontal, MapPin, Users, BookHeart, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const defaultPreferences = {
@@ -42,7 +42,6 @@ export default function Preferences() {
         setSaving(true);
         try {
             await setDoc(doc(db, "preferences", user.uid), prefs, { merge: true });
-            // alert("Preferences Saved!");
             navigate(-1);
         } catch (error) {
             console.error("Error saving preferences", error);
@@ -54,6 +53,15 @@ export default function Preferences() {
 
     if (loading) return <div>Loading...</div>;
 
+    const OptionButton = ({ label, active, onClick }: { label: string, active: boolean, onClick: () => void }) => (
+        <button
+            onClick={onClick}
+            className={`px-4 py-2 rounded-lg text-sm font-bold border transition-colors ${active ? 'bg-pink-50 border-pink-500 text-pink-700' : 'bg-white border-gray-200 text-gray-600'}`}
+        >
+            {label}
+        </button>
+    );
+
     return (
         <div className="min-h-screen bg-gray-50 pb-20">
             <nav className="bg-white shadow-sm p-4 sticky top-0 z-10 flex items-center justify-between">
@@ -64,94 +72,123 @@ export default function Preferences() {
                 <button
                     onClick={handleSave}
                     disabled={saving}
-                    className="text-pink-600 font-bold text-sm flex items-center gap-1 disabled:opacity-50"
+                    className="text-pink-600 font-bold text-sm bg-pink-50 px-3 py-1.5 rounded-full hover:bg-pink-100 disabled:opacity-50 transition-colors"
                 >
-                    <Save size={16} /> {saving ? 'Saving...' : 'Save'}
+                    {saving ? 'Saving...' : 'Save'}
                 </button>
             </nav>
 
-            <div className="p-6 max-w-md mx-auto space-y-6">
+            <div className="p-5 max-w-md mx-auto space-y-6">
+
+                {/* Header Info */}
+                <div className="bg-gradient-to-r from-pink-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
+                    <SlidersHorizontal className="mb-4 opacity-80" size={32} />
+                    <h2 className="text-xl font-bold mb-1">Customize Your Match</h2>
+                    <p className="text-pink-100 text-sm opacity-90">We'll prioritize showing you people who match these preferences.</p>
+
+                    {/* Decorative Circles */}
+                    <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+                </div>
 
                 {/* Age Range */}
-                <div className="bg-white p-4 rounded-xl shadow-sm">
-                    <h3 className="font-medium text-gray-900 mb-4">Age Range</h3>
-                    <div className="flex items-center gap-4">
-                        <input
-                            type="number"
-                            value={prefs.ageRange.min}
-                            onChange={(e) => setPrefs({ ...prefs, ageRange: { ...prefs.ageRange, min: parseInt(e.target.value) } })}
-                            className="w-20 p-2 border rounded center"
-                        />
-                        <span className="text-gray-500">to</span>
-                        <input
-                            type="number"
-                            value={prefs.ageRange.max}
-                            onChange={(e) => setPrefs({ ...prefs, ageRange: { ...prefs.ageRange, max: parseInt(e.target.value) } })}
-                            className="w-20 p-2 border rounded center"
-                        />
+                <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-gray-100 rounded-lg text-gray-600"><User size={20} /></div>
+                        <h3 className="font-bold text-gray-900">Age Preference</h3>
+                    </div>
+
+                    <div className="flex items-center justify-between mb-4 px-2">
+                        <span className="text-2xl font-bold text-gray-800">{prefs.ageRange.min}</span>
+                        <span className="text-gray-300 font-medium">to</span>
+                        <span className="text-2xl font-bold text-gray-800">{prefs.ageRange.max}</span>
+                    </div>
+
+                    <div className="flex gap-4">
+                        <div className="flex-1">
+                            <label className="text-xs font-bold text-gray-400 uppercase mb-1 block">Min Age</label>
+                            <input type="range" min="18" max="60" value={prefs.ageRange.min} onChange={e => setPrefs({ ...prefs, ageRange: { ...prefs.ageRange, min: parseInt(e.target.value) } })} className="w-full accent-pink-600" />
+                        </div>
+                        <div className="flex-1">
+                            <label className="text-xs font-bold text-gray-400 uppercase mb-1 block">Max Age</label>
+                            <input type="range" min="18" max="70" value={prefs.ageRange.max} onChange={e => setPrefs({ ...prefs, ageRange: { ...prefs.ageRange, max: parseInt(e.target.value) } })} className="w-full accent-pink-600" />
+                        </div>
                     </div>
                 </div>
 
                 {/* Gender */}
-                <div className="bg-white p-4 rounded-xl shadow-sm">
-                    <h3 className="font-medium text-gray-900 mb-4">Gender</h3>
-                    <select
-                        value={prefs.gender}
-                        onChange={(e) => setPrefs({ ...prefs, gender: e.target.value })}
-                        className="w-full p-2 border rounded-md"
-                    >
-                        <option value="any">Any</option>
-                        <option value="man">Man</option>
-                        <option value="woman">Woman</option>
-                    </select>
+                <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-gray-100 rounded-lg text-gray-600"><Users size={20} /></div>
+                        <h3 className="font-bold text-gray-900">Gender</h3>
+                    </div>
+                    <div className="flex gap-2">
+                        {['any', 'man', 'woman'].map(opt => (
+                            <OptionButton
+                                key={opt}
+                                label={opt === 'any' ? 'Everyone' : opt === 'man' ? 'Men' : 'Women'}
+                                active={prefs.gender === opt}
+                                onClick={() => setPrefs({ ...prefs, gender: opt })}
+                            />
+                        ))}
+                    </div>
                 </div>
 
-                {/* Religion */}
-                <div className="bg-white p-4 rounded-xl shadow-sm">
-                    <h3 className="font-medium text-gray-900 mb-4">Religion</h3>
-                    <select
-                        value={prefs.religion}
-                        onChange={(e) => setPrefs({ ...prefs, religion: e.target.value })}
-                        className="w-full p-2 border rounded-md"
-                    >
-                        <option value="any">Any</option>
-                        <option value="Buddhist">Buddhist</option>
-                        <option value="Christian">Christian</option>
-                        <option value="Hindu">Hindu</option>
-                        <option value="Islam">Islam</option>
-                    </select>
-                </div>
-
-                {/* Ethnicity */}
-                <div className="bg-white p-4 rounded-xl shadow-sm">
-                    <h3 className="font-medium text-gray-900 mb-4">Ethnicity</h3>
-                    <select
-                        value={prefs.ethnicity || 'any'}
-                        onChange={(e) => setPrefs({ ...prefs, ethnicity: e.target.value })}
-                        className="w-full p-2 border rounded-md"
-                    >
-                        <option value="any">Any</option>
-                        <option value="Sinhalese">Sinhalese</option>
-                        <option value="Tamil">Tamil</option>
-                        <option value="Muslim">Muslim</option>
-                        <option value="Burgher">Burgher</option>
-                    </select>
-                </div>
-
-                {/* District */}
-                <div className="bg-white p-4 rounded-xl shadow-sm">
-                    <h3 className="font-medium text-gray-900 mb-4">Location (District)</h3>
+                {/* Location */}
+                <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-gray-100 rounded-lg text-gray-600"><MapPin size={20} /></div>
+                        <h3 className="font-bold text-gray-900">Location</h3>
+                    </div>
                     <select
                         value={prefs.district || 'any'}
                         onChange={(e) => setPrefs({ ...prefs, district: e.target.value })}
-                        className="w-full p-2 border rounded-md"
+                        className="w-full p-3 bg-gray-50 border-none rounded-xl font-medium text-gray-700 focus:ring-2 focus:ring-pink-100"
                     >
-                        <option value="any">Any</option>
-                        {['Colombo', 'Gampaha', 'Kandy', 'Galle', 'Kurunegala', 'Kalutara', 'Matara', 'Ratnapura', 'Kegalle'].map(d => (
+                        <option value="any">Anywhere in Sri Lanka</option>
+                        {['Colombo', 'Gampaha', 'Kandy', 'Galle', 'Kurunegala', 'Kalutara', 'Matara', 'Ratnapura', 'Kegalle', 'Jaffna', 'Batticaloa', 'Anuradhapura', 'Nuwara Eliya'].map(d => (
                             <option key={d} value={d}>{d}</option>
                         ))}
                     </select>
                 </div>
+
+                {/* Advanced */}
+                <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-gray-100 rounded-lg text-gray-600"><BookHeart size={20} /></div>
+                        <h3 className="font-bold text-gray-900">Background</h3>
+                    </div>
+
+                    <div className="space-y-4">
+                        <div>
+                            <label className="text-xs font-bold text-gray-400 uppercase mb-2 block">Religion</label>
+                            <div className="flex flex-wrap gap-2">
+                                {['any', 'Buddhist', 'Christian', 'Hindu', 'Islam'].map(opt => (
+                                    <OptionButton
+                                        key={opt}
+                                        label={opt === 'any' ? 'Any' : opt}
+                                        active={prefs.religion === opt}
+                                        onClick={() => setPrefs({ ...prefs, religion: opt })}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="text-xs font-bold text-gray-400 uppercase mb-2 block">Ethnicity</label>
+                            <div className="flex flex-wrap gap-2">
+                                {['any', 'Sinhalese', 'Tamil', 'Muslim', 'Burgher'].map(opt => (
+                                    <OptionButton
+                                        key={opt}
+                                        label={opt === 'any' ? 'Any' : opt}
+                                        active={prefs.ethnicity === opt}
+                                        onClick={() => setPrefs({ ...prefs, ethnicity: opt })}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     );
