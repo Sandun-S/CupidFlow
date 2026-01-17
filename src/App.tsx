@@ -17,6 +17,7 @@ import ChatList from './components/chat/ChatList';
 import ChatWindow from './components/chat/ChatWindow';
 import UpgradePlan from './components/subscription/UpgradePlan';
 import PackageManager from './components/admin/PackageManager';
+import UserManagement from './components/admin/UserManagement';
 import SystemConfig from './components/admin/SystemConfig';
 import LikesYou from './components/app/LikesYou';
 import LandingPage from './components/marketing/LandingPage';
@@ -27,6 +28,7 @@ import SafetyTips from './components/marketing/SafetyTips';
 import EditProfile from './components/app/EditProfile';
 import PublicProfileView from './components/app/PublicProfileView';
 import Preferences from './components/app/Preferences';
+import Settings from './components/app/Settings';
 
 function App() {
     const { setUser, setUserData, setLoading, loading } = useAuthStore();
@@ -92,6 +94,7 @@ function App() {
                 <Route path="/app/upgrade" element={<UpgradePlan />} />
                 <Route path="/app/profile/edit" element={<EditProfile />} />
                 <Route path="/app/preferences" element={<Preferences />} />
+                <Route path="/app/settings" element={<Settings />} />
                 <Route path="/app/profile/view" element={<PublicProfileView />} />
 
                 {/* Admin Routes */}
@@ -101,6 +104,7 @@ function App() {
                         <Route path="verifications" element={<VerificationQueue />} />
                         <Route path="transactions" element={<TransactionManager />} />
                         <Route path="packages" element={<PackageManager />} />
+                        <Route path="users" element={<UserManagement />} />
                         <Route path="config" element={<SystemConfig />} />
                     </Route>
                 </Route>

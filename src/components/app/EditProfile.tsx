@@ -22,12 +22,15 @@ const FAMILY_PROFESSIONS = [
     "Farmer", "Military/Police", "Nurse", "Accountant", "Lawyer", "Deceased", "Other"
 ];
 
-const INTERESTS_LIST = [
-    "Photography", "Traveling", "Cooking", "Music", "Movies", "Reading",
-    "Gaming", "Hiking", "Cycling", "Swimming", "Dancing", "Singing",
-    "Art & Design", "Technology", "Fashion", "Pets", "Volunteering",
-    "Yoga", "Gym/Fitness", "Foodie", "Cricket", "Rugby"
-];
+const INTERESTS_CATEGORIES = {
+    "Creative": ["Art", "Music", "Photography", "Writing", "Dancing", "DIY/Crafts", "Design"],
+    "Active": ["Gym / Fitness", "Sports", "Hiking", "Swimming", "Yoga", "Running", "Cycling"],
+    "Social": ["Travel", "Foodie", "Politics", "Volunteering", "Events", "Board Games"],
+    "Relaxing": ["Movies", "Reading", "Cooking", "Gardening", "Pets", "Meditation", "Nature"],
+    "Tech & Geek": ["Gaming", "Tech", "Coding", "Sci-Fi", "Anime"]
+};
+
+
 
 export default function EditProfile() {
     const { user } = useAuthStore();
@@ -156,6 +159,10 @@ export default function EditProfile() {
             if (current.includes(interest)) {
                 return { ...prev, interests: current.filter(i => i !== interest) };
             } else {
+                if (current.length >= 10) {
+                    alert("You can select up to 10 interests.");
+                    return prev;
+                }
                 return { ...prev, interests: [...current, interest] };
             }
         });
@@ -196,7 +203,6 @@ export default function EditProfile() {
                 fields: ['all_fields'],
             });
 
-            // alert("Profile Updated!");
             navigate('/app/profile/view');
         } catch (err) {
             console.error(err);
@@ -227,9 +233,15 @@ export default function EditProfile() {
                                 <label className="label">Height (ft/cm)</label>
                                 <input type="text" value={formData.height} onChange={e => setFormData({ ...formData, height: e.target.value })} className="input-field" placeholder="5'8" />
                             </div>
+
+                            {/* Religion with Other */}
                             <div>
                                 <label className="label">Religion</label>
-                                <select value={formData.religion} onChange={e => setFormData({ ...formData, religion: e.target.value })} className="input-field">
+                                <select
+                                    value={['Buddhist', 'Christian', 'Hindu', 'Islam'].includes(formData.religion) ? formData.religion : (formData.religion ? "Other" : "")}
+                                    onChange={e => setFormData({ ...formData, religion: e.target.value === "Other" ? "Other" : e.target.value })}
+                                    className="input-field"
+                                >
                                     <option value="">Select</option>
                                     <option value="Buddhist">Buddhist</option>
                                     <option value="Christian">Christian</option>
@@ -237,10 +249,19 @@ export default function EditProfile() {
                                     <option value="Islam">Islam</option>
                                     <option value="Other">Other</option>
                                 </select>
+                                {(!['Buddhist', 'Christian', 'Hindu', 'Islam', ''].includes(formData.religion) || formData.religion === "Other") && (
+                                    <input type="text" value={formData.religion === "Other" ? "" : formData.religion} onChange={e => setFormData({ ...formData, religion: e.target.value })} className="input-field mt-2" placeholder="Specify Religion" />
+                                )}
                             </div>
+
+                            {/* Ethnicity with Other */}
                             <div>
                                 <label className="label">Ethnicity</label>
-                                <select value={formData.ethnicity} onChange={e => setFormData({ ...formData, ethnicity: e.target.value })} className="input-field">
+                                <select
+                                    value={['Sinhalese', 'Tamil', 'Muslim', 'Burgher'].includes(formData.ethnicity) ? formData.ethnicity : (formData.ethnicity ? "Other" : "")}
+                                    onChange={e => setFormData({ ...formData, ethnicity: e.target.value === "Other" ? "Other" : e.target.value })}
+                                    className="input-field"
+                                >
                                     <option value="">Select</option>
                                     <option value="Sinhalese">Sinhalese</option>
                                     <option value="Tamil">Tamil</option>
@@ -248,10 +269,19 @@ export default function EditProfile() {
                                     <option value="Burgher">Burgher</option>
                                     <option value="Other">Other</option>
                                 </select>
+                                {(!['Sinhalese', 'Tamil', 'Muslim', 'Burgher', ''].includes(formData.ethnicity) || formData.ethnicity === "Other") && (
+                                    <input type="text" value={formData.ethnicity === "Other" ? "" : formData.ethnicity} onChange={e => setFormData({ ...formData, ethnicity: e.target.value })} className="input-field mt-2" placeholder="Specify Ethnicity" />
+                                )}
                             </div>
+
+                            {/* Education with Other */}
                             <div>
                                 <label className="label">Education</label>
-                                <select value={formData.education} onChange={e => setFormData({ ...formData, education: e.target.value })} className="input-field">
+                                <select
+                                    value={['O/L', 'A/L', 'Diploma', 'Bachelors', 'Masters', 'Doctorate'].includes(formData.education) ? formData.education : (formData.education ? "Other" : "")}
+                                    onChange={e => setFormData({ ...formData, education: e.target.value === "Other" ? "Other" : e.target.value })}
+                                    className="input-field"
+                                >
                                     <option value="">Select</option>
                                     <option value="O/L">G.C.E O/L</option>
                                     <option value="A/L">G.C.E A/L</option>
@@ -261,11 +291,14 @@ export default function EditProfile() {
                                     <option value="Doctorate">Doctorate</option>
                                     <option value="Other">Other</option>
                                 </select>
+                                {(!['O/L', 'A/L', 'Diploma', 'Bachelors', 'Masters', 'Doctorate', ''].includes(formData.education) || formData.education === "Other") && (
+                                    <input type="text" value={formData.education === "Other" ? "" : formData.education} onChange={e => setFormData({ ...formData, education: e.target.value })} className="input-field mt-2" placeholder="Specify Education" />
+                                )}
                             </div>
                         </div>
 
                         {/* University - Only if Higher Ed */}
-                        {(['Diploma', 'Bachelors', 'Masters', 'Doctorate'].includes(formData.education)) && (
+                        {(['Diploma', 'Bachelors', 'Masters', 'Doctorate'].includes(formData.education) || (!['O/L', 'A/L', ''].includes(formData.education))) && (
                             <div className="animate-in fade-in slide-in-from-top-2">
                                 <label className="label">University / College</label>
                                 <input type="text" value={formData.university} onChange={e => setFormData({ ...formData, university: e.target.value })} className="input-field" placeholder="e.g. University of Colombo" />
@@ -427,23 +460,31 @@ export default function EditProfile() {
                 );
             case 'interests':
                 return (
-                    <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                        <label className="label mb-3">Select Interests</label>
-                        <div className="flex flex-wrap gap-2">
-                            {INTERESTS_LIST.map(interest => (
-                                <button
-                                    key={interest}
-                                    onClick={() => toggleInterest(interest)}
-                                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${formData.interests.includes(interest)
-                                            ? 'bg-pink-600 text-white shadow-md scale-105'
-                                            : 'bg-white border border-gray-200 text-gray-600 hover:border-pink-300'
-                                        }`}
-                                >
-                                    {interest}
-                                </button>
-                            ))}
-                        </div>
-                        <p className="text-xs text-gray-400 mt-4">Selected: {formData.interests.length}</p>
+                    <div className="animate-in fade-in slide-in-from-right-4 duration-300 h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                        <label className="label mb-3">Select Interests (Max 10)</label>
+
+                        {Object.entries(INTERESTS_CATEGORIES).map(([category, items]) => (
+                            <div key={category} className="mb-6">
+                                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 border-b pb-1">{category}</h4>
+                                <div className="flex flex-wrap gap-2">
+                                    {items.map((interest) => (
+                                        <button
+                                            key={interest}
+                                            onClick={() => toggleInterest(interest)}
+                                            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${formData.interests.includes(interest)
+                                                ? 'bg-pink-600 text-white shadow-md ring-2 ring-pink-100'
+                                                : 'bg-white border border-gray-200 text-gray-600 hover:border-pink-300'
+                                                }`}
+                                        >
+                                            {interest}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                        <p className="sticky bottom-0 bg-white/90 p-2 text-center text-xs text-gray-400 backdrop-blur-sm border-t">
+                            Selected: {formData.interests.length}/10
+                        </p>
                     </div>
                 );
             case 'basic':
@@ -458,7 +499,6 @@ export default function EditProfile() {
                             <div>
                                 <label className="label">Gender</label>
                                 <select value={formData.gender} onChange={e => setFormData({ ...formData, gender: e.target.value })} className="input-field">
-                                    <option value="">Select</option>
                                     <option value="man">Man</option>
                                     <option value="woman">Woman</option>
                                 </select>
@@ -497,6 +537,9 @@ export default function EditProfile() {
                 .label { display: block; font-size: 0.75rem; color: #6b7280; font-weight: 700; text-transform: uppercase; margin-bottom: 0.5rem; }
                 .input-field { width: 100%; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 0.75rem; background-color: white; color: #1f2937; font-weight: 500; outline: none; transition: box-shadow 0.2s; }
                 .input-field:focus { box-shadow: 0 0 0 2px #fbcfe8; border-color: #f472b6; }
+                .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+                .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+                .custom-scrollbar::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 99px; }
             `}</style>
 
             {/* Nav */}
@@ -551,8 +594,8 @@ export default function EditProfile() {
                                 key={section.id}
                                 onClick={() => setActiveSection(section.id)}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all ${isActive
-                                        ? 'bg-gray-900 text-white shadow-md'
-                                        : 'bg-white text-gray-500 hover:bg-gray-100'
+                                    ? 'bg-gray-900 text-white shadow-md'
+                                    : 'bg-white text-gray-500 hover:bg-gray-100'
                                     }`}
                             >
                                 <Icon size={16} />

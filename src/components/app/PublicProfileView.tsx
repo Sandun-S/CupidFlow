@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
-import { ArrowLeft, User, Briefcase, MapPin, Ruler, Book, Users, Wine } from 'lucide-react';
+import { ArrowLeft, User, Briefcase, MapPin, Ruler, Book, Users, Wine, Settings as SettingsIcon, Edit2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import BottomNav from './BottomNav';
 
@@ -30,27 +30,39 @@ export default function PublicProfileView() {
     }, [user]);
 
     if (loading) return <div>Loading...</div>;
-    if (!profile) return <div>Profile not found</div>;
+    // Handle case where profile hasn't been created yet
+    if (!loading && !profile) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen p-6">
+                <p className="mb-4 text-gray-600">Profile incomplete.</p>
+                <button onClick={() => navigate('/onboarding')} className="bg-pink-600 text-white px-6 py-2 rounded-full font-bold">
+                    Create Profile
+                </button>
+            </div>
+        )
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 pb-20">
-            <nav className="bg-white shadow-sm p-4 sticky top-0 z-10 flex items-center justify-between">
+            {/* Header Nav */}
+            <nav className="bg-white shadow-sm p-4 sticky top-0 z-20 flex items-center justify-between">
                 <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-full">
                     <ArrowLeft className="text-gray-600" />
                 </button>
-                <h1 className="text-lg font-bold">Public Preview</h1>
-                <div className="flex gap-3">
+                <h1 className="text-lg font-bold">My Profile</h1>
+                <div className="flex gap-2">
                     <button
-                        onClick={() => navigate('/app/preferences')}
-                        className="text-gray-500 font-bold text-sm hover:text-pink-600 transition-colors"
+                        onClick={() => navigate('/app/settings')}
+                        className="p-2 hover:bg-gray-100 rounded-full text-gray-600"
+                        title="Settings"
                     >
-                        Preferences
+                        <SettingsIcon size={20} />
                     </button>
                     <button
                         onClick={() => navigate('/app/profile/edit')}
-                        className="text-pink-600 font-bold text-sm hover:text-pink-700 transition-colors"
+                        className="bg-pink-600 text-white px-4 py-1.5 rounded-full text-sm font-bold flex items-center gap-1 hover:bg-pink-700 transition"
                     >
-                        Edit
+                        <Edit2 size={16} /> Edit
                     </button>
                 </div>
             </nav>
@@ -59,16 +71,16 @@ export default function PublicProfileView() {
                 {/* Main Photo */}
                 <div className="relative h-96 w-full">
                     <img
-                        src={profile.avatar}
+                        src={profile.avatar || "https://via.placeholder.com/400"}
                         alt={profile.displayName}
                         className="w-full h-full object-cover"
                     />
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 text-white pb-10">
                         <h2 className="text-3xl font-bold flex items-center gap-2">
-                            {profile.displayName}, {profile.age}
+                            {profile.displayName || "User"}, {profile.age || "??"}
                         </h2>
                         <div className="flex items-center gap-2 text-sm opacity-90 mt-1">
-                            <MapPin size={16} /> {profile.location?.city}, {profile.location?.district}
+                            <MapPin size={16} /> {profile.location?.city || "Unknown City"}, {profile.location?.district || ""}
                         </div>
                     </div>
                 </div>
@@ -88,28 +100,28 @@ export default function PublicProfileView() {
                             <User size={20} className="text-pink-500" />
                             <div>
                                 <p className="text-xs text-gray-500">Gender</p>
-                                <p className="font-medium capitalize">{profile.gender}</p>
+                                <p className="font-medium capitalize">{profile.gender || "N/A"}</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-3 text-gray-700 bg-gray-50 p-3 rounded-lg">
                             <Briefcase size={20} className="text-pink-500" />
                             <div>
                                 <p className="text-xs text-gray-500">Profession</p>
-                                <p className="font-medium text-sm line-clamp-2">{profile.profession}</p>
+                                <p className="font-medium text-sm line-clamp-2">{profile.profession || "N/A"}</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-3 text-gray-700 bg-gray-50 p-3 rounded-lg">
                             <Ruler size={20} className="text-pink-500" />
                             <div>
                                 <p className="text-xs text-gray-500">Height</p>
-                                <p className="font-medium">{profile.height}</p>
+                                <p className="font-medium">{profile.height || "N/A"}</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-3 text-gray-700 bg-gray-50 p-3 rounded-lg">
                             <Book size={20} className="text-pink-500" />
                             <div>
                                 <p className="text-xs text-gray-500">Education</p>
-                                <p className="font-medium text-sm line-clamp-2">{profile.education}</p>
+                                <p className="font-medium text-sm line-clamp-2">{profile.education || "N/A"}</p>
                                 {profile.university && <p className="text-xs text-gray-500 mt-1">{profile.university}</p>}
                             </div>
                         </div>
