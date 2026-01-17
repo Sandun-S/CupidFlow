@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
-import { User, Briefcase, MapPin, Ruler, Book, Users, Wine, BookOpen } from 'lucide-react';
+import { User, Briefcase, MapPin, Ruler, Book, Users, Wine, BookOpen, Settings as SettingsIcon } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import BottomNav from './BottomNav';
 
@@ -67,6 +67,16 @@ export default function PublicProfileView() {
                         alt={profile.displayName}
                         className="w-full h-full object-cover"
                     />
+                    {/* Settings Button (Owner Only) */}
+                    {isOwner && (
+                        <button
+                            onClick={() => navigate('/app/settings')}
+                            className="absolute top-4 right-4 p-2 bg-black/40 text-white rounded-full hover:bg-black/60 transition backdrop-blur-sm"
+                            title="Settings"
+                        >
+                            <SettingsIcon size={24} />
+                        </button>
+                    )}
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 text-white pb-10">
                         <h2 className="text-3xl font-bold flex items-center gap-2">
                             {profile.displayName || "User"}, {profile.age || "??"}

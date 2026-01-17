@@ -36,15 +36,22 @@ export default function EmailVerificationPending() {
         setChecking(true);
         try {
             await user.reload();
-            if (user.emailVerified) {
-                // Update Firestore
-                await updateDoc(doc(db, "users", user.uid), { emailVerified: true });
+
+            // Check Firestore as well (Admin Override)
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            const isFirestoreVerified = userDoc.exists() && userDoc.data().emailVerified === true;
+
+            if (user.emailVerified || isFirestoreVerified) {
+                // Ensure Firestore is in sync if Auth is verified
+                if (user.emailVerified && !isFirestoreVerified) {
+                    await updateDoc(doc(db, "users", user.uid), { emailVerified: true });
+                }
 
                 // Update Local State
-                const snap = await getDoc(doc(db, "users", user.uid));
-                if (snap.exists()) setUserData(snap.data());
+                if (userDoc.exists()) setUserData(userDoc.data());
 
-                alert("Email verified successfully!");
+                // No alert needed, just redirect
+                // alert("Email verified successfully!");
                 navigate('/app/profile/view'); // Redirect to App
             } else {
                 setMessage("Email still not verified. Check your inbox (and spam).");

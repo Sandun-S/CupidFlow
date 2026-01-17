@@ -47,7 +47,7 @@ export default function VerificationQueue() {
                     ...data,
                     userPhone,
                     displayName: profileData.displayName || "Unknown",
-                    fullName: `${profileData.firstName || ''} ${profileData.lastName || ''}`.trim() || "Unknown Name",
+                    fullName: `${profileData.firstName || ''} ${profileData.lastName || ''}`.trim() || profileData.displayName || "Unknown Name",
                     location: profileData.location ? `${profileData.location.city}, ${profileData.location.district}` : "Unknown Location",
                     address: profileData.location?.address || "No Address Provided",
                     age: profileData.age || "N/A"
