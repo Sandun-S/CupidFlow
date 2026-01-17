@@ -1,52 +1,32 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Check, Star, Crown, Zap, X, Copy, Upload } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { db } from '../../lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, getDocs } from 'firebase/firestore';
 import { uploadImage } from '../../lib/cloudinary';
-
-const PACKAGES = [
-    {
-        id: 'silver',
-        name: 'Silver',
-        price: 'LKR 1,500',
-        duration: '1 Month',
-        color: 'bg-gray-100 border-gray-300',
-        text: 'text-gray-700',
-        icon: <Star className="w-6 h-6 text-gray-500" />,
-        features: ['10 Swipes/Day', 'See who likes you', 'Standard Support']
-    },
-    {
-        id: 'gold',
-        name: 'Gold',
-        price: 'LKR 3,500',
-        duration: '3 Months',
-        popular: true,
-        color: 'bg-yellow-50 border-yellow-400',
-        text: 'text-yellow-700',
-        icon: <Zap className="w-6 h-6 text-yellow-500" />,
-        features: ['Unlimited Swipes', 'See who likes you', 'Priority Support', 'Profile Badge']
-    },
-    {
-        id: 'platinum',
-        name: 'Platinum',
-        price: 'LKR 9,000',
-        duration: '12 Months',
-        color: 'bg-purple-50 border-purple-400',
-        text: 'text-purple-700',
-        icon: <Crown className="w-6 h-6 text-purple-500" />,
-        features: ['Everything in Gold', 'Profile Boost (1/mo)', 'Read Receipts']
-    }
-];
 
 export default function UpgradePlan() {
     const { user } = useAuthStore();
+    const [packages, setPackages] = useState<any[]>([]);
     const [selectedPackage, setSelectedPackage] = useState<any>(null);
     const [isUploadOpen, setIsUploadOpen] = useState(false);
     const [slipImage, setSlipImage] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string>('');
     const [uploading, setUploading] = useState(false);
     const [success, setSuccess] = useState(false);
+
+    useEffect(() => {
+        const fetchPackages = async () => {
+            const snap = await getDocs(collection(db, 'packages'));
+            if (!snap.empty) {
+                const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                setPackages(data.sort((a: any, b: any) => a.order - b.order));
+            } else {
+                // Fallback if no packages in DB? Or just show empty.
+            }
+        };
+        fetchPackages();
+    }, []);
 
     const handleCopy = (text: string) => {
         navigator.clipboard.writeText(text);
@@ -114,7 +94,7 @@ export default function UpgradePlan() {
 
             {/* Packages Grid */}
             <div className="px-4 grid gap-6 md:grid-cols-3 max-w-5xl mx-auto">
-                {PACKAGES.map((pkg) => (
+                {packages.map((pkg) => (
                     <div
                         key={pkg.id}
                         className={`relative rounded-3xl p-6 border-2 transition-transform hover:scale-105 ${pkg.color} ${pkg.popular ? 'shadow-2xl scale-105 z-10' : 'shadow-lg'}`}
@@ -125,15 +105,17 @@ export default function UpgradePlan() {
                             </div>
                         )}
                         <div className="flex justify-between items-start mb-4">
-                            <h3 className={`text-2xl font-bold ${pkg.text}`}>{pkg.name}</h3>
-                            {pkg.icon}
+                            <h3 className={`text-2xl font-bold`}>{pkg.name}</h3>
+                            {pkg.id === 'gold' && <Zap className="w-6 h-6 text-yellow-500" />}
+                            {pkg.id === 'platinum' && <Crown className="w-6 h-6 text-purple-500" />}
+                            {pkg.id === 'silver' && <Star className="w-6 h-6 text-gray-500" />}
                         </div>
                         <div className="mb-6">
-                            <span className="text-4xl font-extrabold text-gray-800">{pkg.price}</span>
+                            <span className="text-4xl font-extrabold text-gray-800">{pkg.displayPrice}</span>
                             <span className="text-gray-500 text-sm ml-1">/ {pkg.duration}</span>
                         </div>
                         <ul className="space-y-3 mb-8">
-                            {pkg.features.map((feature, i) => (
+                            {pkg.features.map((feature: string, i: number) => (
                                 <li key={i} className="flex items-center gap-2 text-gray-700">
                                     <div className="bg-white rounded-full p-1 shadow-sm">
                                         <Check size={14} className="text-green-500" />
@@ -148,8 +130,8 @@ export default function UpgradePlan() {
                                 setIsUploadOpen(true);
                             }}
                             className={`w-full py-3.5 rounded-xl font-bold text-white shadow-lg transition-colors ${pkg.id === 'gold' ? 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600' :
-                                    pkg.id === 'platinum' ? 'bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600' :
-                                        'bg-gray-800 hover:bg-gray-900'
+                                pkg.id === 'platinum' ? 'bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600' :
+                                    'bg-gray-800 hover:bg-gray-900'
                                 }`}
                         >
                             Select Plan
