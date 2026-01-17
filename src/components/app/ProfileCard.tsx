@@ -1,6 +1,8 @@
 import { Profile } from '../../store/userStore';
-import { Heart, X, MapPin, Briefcase } from 'lucide-react';
+import { Heart, X, MapPin, Briefcase, Lock } from 'lucide-react';
 import { differenceInYears } from 'date-fns';
+import { useAuthStore } from '../../store/authStore';
+import { useNavigate } from 'react-router-dom';
 
 interface ProfileCardProps {
     profile: Profile;
@@ -8,6 +10,10 @@ interface ProfileCardProps {
 }
 
 export default function ProfileCard({ profile, onSwipe }: ProfileCardProps) {
+    const { userData } = useAuthStore();
+    const navigate = useNavigate();
+    const isPremium = userData?.isPremium === true;
+
     // Handle birthDate (string) or dob (Timestamp) if legacy
     let age = 'N/A';
     if (profile.birthDate) {
@@ -18,15 +24,40 @@ export default function ProfileCard({ profile, onSwipe }: ProfileCardProps) {
 
     return (
         <div className="relative w-full max-w-sm h-[600px] bg-white rounded-3xl shadow-2xl overflow-hidden mx-auto">
-            {/* Main Photo */}
-            <img
-                src={profile.photos?.[0] || 'https://via.placeholder.com/400x600'}
-                alt={profile.displayName}
-                className="w-full h-full object-cover"
-            />
+            {/* Image & Blur Overlay */}
+            <div className="absolute inset-0 bg-gray-200">
+                {profile.photos?.[0] ? (
+                    <img
+                        src={profile.photos[0]}
+                        alt={profile.displayName}
+                        className={`w-full h-full object-cover transition-all duration-500 ${!isPremium ? 'blur-xl scale-110' : ''}`}
+                    />
+                ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-pink-100 text-pink-300 font-bold text-4xl">
+                        {profile.displayName[0]}
+                    </div>
+                )}
 
-            {/* Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                {/* Premium Lock Overlay */}
+                {!isPremium && (
+                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/40 backdrop-blur-sm p-6 text-center">
+                        <div className="bg-white/20 p-4 rounded-full mb-4 backdrop-blur-md">
+                            <Lock className="w-8 h-8 text-white" />
+                        </div>
+                        <h3 className="text-white text-2xl font-bold mb-2">Upgrade to See Photos</h3>
+                        <p className="text-white/80 mb-6 text-sm">Unlock clear photos and see who likes you with CupidFlow Premium.</p>
+                        <button
+                            onClick={() => navigate('/app/upgrade')}
+                            className="bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:scale-105 transition-transform"
+                        >
+                            Unlock Now
+                        </button>
+                    </div>
+                )}
+
+                {/* Gradient Overlay for Text Visibility (Only if Premium or simple info) */}
+                <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
+            </div>
 
             {/* Content */}
             <div className="absolute bottom-0 left-0 right-0 p-6 text-white">

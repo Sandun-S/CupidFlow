@@ -6,7 +6,8 @@ import TransactionManager from './components/admin/TransactionManager';
 import Login from './components/auth/Login';
 import { useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from './lib/firebase';
+import { doc, getDoc } from 'firebase/firestore';
+import { auth, db } from './lib/firebase';
 import { useAuthStore } from './store/authStore';
 import ProfileWizard from './components/onboarding/ProfileWizard';
 import ExploreFeed from './components/app/ExploreFeed';
@@ -16,15 +17,30 @@ import UpgradePlan from './components/subscription/UpgradePlan';
 import PackageManager from './components/admin/PackageManager';
 
 function App() {
-    const { setUser, setLoading, loading } = useAuthStore();
+    const { setUser, setUserData, setLoading, loading } = useAuthStore();
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            setUser(user);
+        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+            setUser(currentUser);
+            if (currentUser) {
+                // Fetch extra user data (like isPremium)
+                try {
+                    const docSnap = await getDoc(doc(db, "users", currentUser.uid));
+                    if (docSnap.exists()) {
+                        setUserData(docSnap.data());
+                    } else {
+                        setUserData(null);
+                    }
+                } catch (e) {
+                    console.error("Error fetching user data", e);
+                }
+            } else {
+                setUserData(null);
+            }
             setLoading(false);
         });
         return () => unsubscribe();
-    }, [setUser, setLoading]);
+    }, [setUser, setUserData, setLoading]);
 
     if (loading) {
         return <div className="h-screen flex items-center justify-center text-pink-600">Loading...</div>;
