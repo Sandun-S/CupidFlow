@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
 import { auth, db } from '../../lib/firebase';
 import { useNavigate, Link } from 'react-router-dom';
-import { doc, getDoc, serverTimestamp, runTransaction } from 'firebase/firestore';
 import { useAuthStore } from '../../store/authStore';
 import { logAction } from '../../lib/audit';
 import { Mail, Lock, Chrome, Phone } from 'lucide-react';
+import { handleUserAuthSuccess } from './authUtils';
 
 // Add global window declarations for Firebase Auth
 declare global {
@@ -72,75 +72,6 @@ export default function Login() {
         };
     }, [isPhoneLogin]);
 
-    const checkUserStatus = async (user: any) => {
-        const userRef = doc(db, "users", user.uid);
-        const userSnap = await getDoc(userRef);
-
-        if (userSnap.exists()) {
-            const data = userSnap.data();
-            if (data.role === 'admin') {
-                navigate('/admin/dashboard');
-            } else if (!data.isVerified && data.nicStatus === 'pending') {
-                navigate('/verify-status');
-            } else if (!data.isVerified && data.nicStatus === 'rejected') {
-                navigate('/onboarding/photos');
-            } else {
-                navigate('/app/explore');
-            }
-        } else {
-            // New User Logic (First 1000 Free)
-            await runTransaction(db, async (transaction) => {
-                const sysConfigRef = doc(db, "system", "config");
-                const sysConfigSnap = await transaction.get(sysConfigRef);
-
-                let packageId = "free";
-                let accessStatus = "active"; // Default active for free
-                let accountExpiry = null;
-
-                if (sysConfigSnap.exists()) {
-                    const config = sysConfigSnap.data();
-                    const currentCount = config.userCount || 0;
-                    const limit = config.freeUserLimit || 1000;
-
-                    if (currentCount < limit) {
-                        packageId = config.defaultPackageId || "gold"; // Gift Gold
-                        // Set expiry for gifted package (e.g. 6 months)
-                        const expiryDate = new Date();
-                        expiryDate.setMonth(expiryDate.getMonth() + (config.defaultExpiryMonths || 6));
-                        accountExpiry = expiryDate;
-                        accessStatus = "active";
-                    } else {
-                        // Late user -> Free plan
-                        packageId = "free";
-                    }
-
-                    // Increment count
-                    transaction.update(sysConfigRef, { userCount: currentCount + 1 });
-                }
-
-                transaction.set(userRef, {
-                    uid: user.uid,
-                    email: user.email || '',
-                    phone: user.phoneNumber || '', // Capture phone if available
-                    role: 'user',
-                    createdAt: serverTimestamp(),
-                    isVerified: false,
-                    nicStatus: 'pending',
-                    packageId: packageId,
-                    accessStatus: accessStatus,
-                    accountExpiry: accountExpiry,
-                    dailySwipeCount: 0,
-                    lastSwipeDate: new Date().toISOString().split('T')[0]
-                });
-            });
-
-            // Log New User
-            await logAction('USER_SIGNUP', { method: isPhoneLogin ? 'phone' : 'email/google' });
-
-            navigate('/onboarding/basic-info');
-        }
-    };
-
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
@@ -149,7 +80,7 @@ export default function Login() {
             const result = await signInWithEmailAndPassword(auth, email, password);
             setUser(result.user);
             await logAction('USER_LOGIN', { method: 'email' });
-            await checkUserStatus(result.user);
+            await handleUserAuthSuccess(result.user, navigate, 'email');
         } catch (err: any) {
             console.error(err);
             setError("Invalid email or password.");
@@ -165,7 +96,7 @@ export default function Login() {
             const result = await signInWithPopup(auth, provider);
             setUser(result.user);
             await logAction('USER_LOGIN', { method: 'google' });
-            await checkUserStatus(result.user);
+            await handleUserAuthSuccess(result.user, navigate, 'google');
         } catch (err: any) {
             console.error(err);
             setError("Google sign-in failed.");
@@ -183,9 +114,7 @@ export default function Login() {
         try {
             const appVerifier = window.recaptchaVerifier;
             const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
-            // We store confirmationResult in window to access it in the next step
             window.confirmationResult = confirmationResult;
-
             setShowOtpInput(true);
             setLoading(false);
         } catch (error: any) {
@@ -202,7 +131,7 @@ export default function Login() {
             const result = await confirmationResult.confirm(otp);
             setUser(result.user);
             await logAction('USER_LOGIN', { method: 'phone' });
-            await checkUserStatus(result.user);
+            await handleUserAuthSuccess(result.user, navigate, 'phone');
         } catch (error: any) {
             console.error(error);
             setError("Invalid verification code.");
