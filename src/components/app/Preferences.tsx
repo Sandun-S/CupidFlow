@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
-import { ArrowLeft, Save, SlidersHorizontal, MapPin, Users, BookHeart, User } from 'lucide-react';
+import { ArrowLeft, SlidersHorizontal, MapPin, Users, BookHeart, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const defaultPreferences = {
