@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
+import { logAction } from '../../lib/audit';
 import NICUploader from '../verification/NICUploader';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -56,6 +57,13 @@ export default function EditProfile() {
                 photos: formData.photos,
                 avatar: formData.photos[0] || '' // Ensure avatar is sync
             });
+
+            // Log Profile Update
+            await logAction('PROFILE_UPDATE', {
+                fields: ['displayName', 'bio', 'profession', 'photos'], // We could be more granular but this is sufficient
+                photoCount: formData.photos.length
+            });
+
             alert("Profile Updated!");
             navigate('/app/explore');
         } catch (err) {

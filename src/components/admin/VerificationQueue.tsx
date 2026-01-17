@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { collection, query, where, getDocs, doc, writeBatch, getDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
+import { logAction } from '../../lib/audit';
 import { CheckCircle, XCircle, Phone } from 'lucide-react';
 
 interface Request {
@@ -84,6 +85,17 @@ export default function VerificationQueue() {
             }
 
             await batch.commit();
+
+            // Log Admin Action
+            await logAction(
+                action === 'approve' ? 'ADMIN_VERIFY_APPROVE' : 'ADMIN_VERIFY_REJECT',
+                {
+                    requestId: selectedReq.id,
+                    nicNumber: selectedReq.nicNumber,
+                    note: note
+                },
+                selectedReq.id // Target User ID
+            );
 
             // Refresh
             setSelectedReq(null);

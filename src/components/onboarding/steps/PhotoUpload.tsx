@@ -6,6 +6,7 @@ import { doc, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
 import SHA256 from 'crypto-js/sha256';
 import { useNavigate } from 'react-router-dom';
+import { logAction } from '../../../lib/audit';
 
 // Duplicate imports removed
 
@@ -161,6 +162,15 @@ export default function PhotoUpload() {
                     createdAt: serverTimestamp()
                 });
             }
+
+            // Log detailed signup action
+            await logAction('USER_SIGNUP', {
+                timestamp: serverTimestamp(),
+                nicNumber,
+                photosCount: validPhotos.length,
+                profession: draft.profession,
+                district: draft.location.district
+            });
 
             navigate('/verify-status');
 
