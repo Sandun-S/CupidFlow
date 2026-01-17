@@ -21,8 +21,8 @@ service cloud.firestore {
 
     // Verification: Admin read only, User write (create only)
     match /verification_requests/{userId} {
-      allow create: if request.auth.uid == userId;
-      allow read, update, delete: if isAdmin();
+      allow read: if request.auth.uid == userId || isAdmin();
+      allow write: if request.auth.uid == userId;
     }
 
     // Transactions: User create, Admin manage
