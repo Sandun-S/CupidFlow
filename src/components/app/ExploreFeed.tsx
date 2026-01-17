@@ -4,8 +4,9 @@ import { db } from '../../lib/firebase';
 import { useAuthStore } from '../../store/authStore';
 import ProfileCard from './ProfileCard';
 import { useMatching } from '../../hooks/useMatching';
-import { Loader, Rocket, HelpCircle, Mail } from 'lucide-react';
+import { Loader, Rocket, HelpCircle, Mail, Filter, X } from 'lucide-react';
 import BottomNav from './BottomNav';
+import { DISTRICTS } from '../../lib/constants';
 
 export default function ExploreFeed() {
     const { user, userData } = useAuthStore();
@@ -14,6 +15,15 @@ export default function ExploreFeed() {
     const { swipe, matchDetails, setMatchDetails } = useMatching();
     const [boostActive, setBoostActive] = useState(false);
 
+    // Filters & Search State
+    const [showFilters, setShowFilters] = useState(false);
+    const [filters, setFilters] = useState({
+        minAge: 18,
+        maxAge: 50,
+        district: '',
+        expandSearch: true
+    });
+
     useEffect(() => {
         fetchProfiles();
         // Check if currently boosted
@@ -21,7 +31,7 @@ export default function ExploreFeed() {
             const end = userData.boostedUntil.seconds * 1000;
             if (end > Date.now()) setBoostActive(true);
         }
-    }, [user, userData]); // Re-run if userData updates (e.g. after boost)
+    }, [user, userData]);
 
     const fetchProfiles = async () => {
         if (!user) return;
@@ -34,12 +44,11 @@ export default function ExploreFeed() {
             swipedUserIds.add(user.uid);
 
             // 2. Fetch Profiles - Prioritize Boosted Users
-            // Note: Composite index needed for 'boostedUntil' desc + 'isActive' etc usually.
-            // For now, simpler approach: orderBy boostedUntil desc
+            // Fetching a larger limit to allow client-side filtering
             const q = query(
                 collection(db, "profiles"),
-                orderBy("boostedUntil", "desc"), // Boosted users first
-                limit(50)
+                orderBy("boostedUntil", "desc"),
+                limit(100)
             );
 
             const querySnapshot = await getDocs(q);
@@ -47,7 +56,8 @@ export default function ExploreFeed() {
             const validProfiles = [];
             for (const d of querySnapshot.docs) {
                 if (!swipedUserIds.has(d.id)) {
-                    if (d.data().displayName) {
+                    // Check if critical data exists
+                    if (d.data().displayName && d.data().age) {
                         validProfiles.push({ id: d.id, ...d.data() });
                     }
                 }
@@ -56,8 +66,8 @@ export default function ExploreFeed() {
 
         } catch (error) {
             console.error("Error fetching profiles:", error);
+            // Simple fallback if index fails
             if ((error as any).code === 'failed-precondition') {
-                // Fallback: Simple query, filter purely in memory against 'user.uid'
                 const q = query(collection(db, "profiles"), limit(50));
                 const snap = await getDocs(q);
                 const validProfiles = snap.docs
@@ -70,17 +80,28 @@ export default function ExploreFeed() {
         }
     };
 
+    // Client-side Filtering
+    const filteredProfiles = profiles.filter(p => {
+        const matchesAge = (p.age || 18) >= filters.minAge && (p.age || 18) <= filters.maxAge;
+        const matchesDistrict = filters.district ? (p.location?.district === filters.district) : true;
+        return matchesAge && matchesDistrict;
+    });
+
+    // Elastic Logic
+    const displayProfiles = (filters.expandSearch && filteredProfiles.length < 5)
+        ? profiles // Show all if too few matches and elastic is ON
+        : filteredProfiles;
+
+    const isElasticActive = filters.expandSearch && filteredProfiles.length < 5 && profiles.length >= 5;
+
     const handleSwipe = async (direction: 'left' | 'right') => {
-        // We always operate on the *first* displayed profile.
-        // But since displayProfiles is derived, we need to find which ID we just swiped 
-        // and remove it from the main 'profiles' state.
-        
         if (displayProfiles.length === 0) return;
+
         const swipedProfile = displayProfiles[0];
-        
-        // Remove from main state
+
+        // Optimistic UI update: Remove from main profiles list
         setProfiles(prev => prev.filter(p => p.id !== swipedProfile.id));
-        
+
         const isMatch = await swipe(swipedProfile.id, direction);
         if (isMatch) { /* Handled via UI state */ }
     };
@@ -97,14 +118,12 @@ export default function ExploreFeed() {
         if (!window.confirm("Activate your 1-hour Profile Boost?")) return;
 
         try {
-            // Set boostedUntil to 1 hour from now
             const boostEnd = new Date();
             boostEnd.setHours(boostEnd.getHours() + 1);
 
             await updateDoc(doc(db, "users", user!.uid), {
                 boostedUntil: Timestamp.fromDate(boostEnd)
             });
-            // Update public profile too for sorting
             await updateDoc(doc(db, "profiles", user!.uid), {
                 boostedUntil: Timestamp.fromDate(boostEnd)
             });
@@ -131,10 +150,11 @@ export default function ExploreFeed() {
         );
     }
 
+    // Empty State Handling
     if (profiles.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center h-screen bg-pink-50 p-4 text-center">
-                <div className="bg-white p-8 rounded-2xl shadow-lg">
+                <div className="bg-white p-8 rounded-2xl shadow-lg max-w-sm w-full">
                     <h2 className="text-2xl font-bold text-gray-800 mb-2">No more profiles</h2>
                     <p className="text-gray-500 mb-6">You've seen everyone nearby! Check back later.</p>
                     <button onClick={fetchProfiles} className="text-pink-600 font-bold hover:underline">
@@ -146,50 +166,13 @@ export default function ExploreFeed() {
                         </button>
                     </div>
                 </div>
-                <div className="mt-auto w-full">
-                    {/* Spacing for bottom nav */}
-                </div>
                 <BottomNav />
             </div >
         );
     }
 
     return (
-        <div className="min-h-screen bg-pink-50 flex flex-col items-center py-6 px-4 relative">
-import { Filter, X } from 'lucide-react';
-import { DISTRICTS } from '../../lib/constants';
-
-// ... inside component ...
-    const [showFilters, setShowFilters] = useState(false);
-    const [filters, setFilters] = useState({
-        minAge: 18,
-        maxAge: 50,
-        district: '',
-        expandSearch: true
-    });
-
-    // ... existing fetchProfiles ...
-    // Note: We need to modify fetchProfiles or the rendering logic to apply filters.
-    // Let's modify the RENDER/Processing logic.
-
-    const filteredProfiles = profiles.filter(p => {
-        // 1. Basic Filters
-        const matchesAge = p.age >= filters.minAge && p.age <= filters.maxAge;
-        const matchesDistrict = filters.district ? p.location?.district === filters.district : true;
-        
-        return matchesAge && matchesDistrict;
-    });
-
-    // Elastic Match Logic: If filtered count < 5 and expandSearch is TRUE, show ALL profiles (relaxed).
-    // Or simpler: Just use 'profiles' (which is the full fetched list) if filtered is too low.
-    const displayProfiles = (filters.expandSearch && filteredProfiles.length < 5) 
-        ? profiles 
-        : filteredProfiles;
-
-    const isElasticActive = filters.expandSearch && filteredProfiles.length < 5 && profiles.length >= 5;
-
-// ... UI ...
-
+        <div className="min-h-screen bg-pink-50 flex flex-col items-center py-6 px-4 relative pb-24 overflow-hidden">
             {/* Header / Actions */}
             <div className="w-full max-w-sm flex justify-between items-center mb-6 relative z-30">
                 <h1 className="text-2xl font-bold text-pink-600">CupidFlow</h1>
@@ -201,6 +184,15 @@ import { DISTRICTS } from '../../lib/constants';
                         className={`p-2 rounded-full shadow-sm transition-all ${showFilters ? 'bg-pink-100 text-pink-600' : 'bg-white text-gray-500'}`}
                     >
                         <Filter size={20} />
+                    </button>
+
+                    {/* Support Button */}
+                    <button
+                        onClick={handleSupport}
+                        className="p-2 bg-white rounded-full text-gray-400 hover:text-gray-600 shadow-sm"
+                        title="Contact Support"
+                    >
+                        <HelpCircle size={20} />
                     </button>
 
                     {/* Boost Button */}
@@ -219,37 +211,39 @@ import { DISTRICTS } from '../../lib/constants';
 
             {/* Filter Panel */}
             {showFilters && (
-                <div className="w-full max-w-sm bg-white p-4 rounded-2xl shadow-xl mb-4 border border-pink-100 animate-in slide-in-from-top-2">
+                <div className="w-full max-w-sm bg-white p-4 rounded-2xl shadow-xl mb-4 border border-pink-100 animate-in slide-in-from-top-2 relative z-20">
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="font-bold text-gray-800">Filters</h3>
-                        <button onClick={() => setShowFilters(false)}><X size={16} /></button>
+                        <button onClick={() => setShowFilters(false)} className="text-gray-400 hover:text-gray-600">
+                            <X size={16} />
+                        </button>
                     </div>
-                    
+
                     <div className="space-y-4">
                         <div>
                             <label className="text-xs font-bold text-gray-500 uppercase">Age Range</label>
                             <div className="flex items-center gap-2 mt-1">
-                                <input 
-                                    type="number" 
-                                    value={filters.minAge} 
-                                    onChange={e => setFilters({...filters, minAge: parseInt(e.target.value)})}
-                                    className="w-full p-2 border rounded-lg bg-gray-50"
+                                <input
+                                    type="number"
+                                    value={filters.minAge}
+                                    onChange={e => setFilters({ ...filters, minAge: parseInt(e.target.value) || 18 })}
+                                    className="w-full p-2 border rounded-lg bg-gray-50 text-center"
                                 />
                                 <span className="text-gray-400">-</span>
-                                <input 
-                                    type="number" 
-                                    value={filters.maxAge} 
-                                    onChange={e => setFilters({...filters, maxAge: parseInt(e.target.value)})}
-                                    className="w-full p-2 border rounded-lg bg-gray-50"
+                                <input
+                                    type="number"
+                                    value={filters.maxAge}
+                                    onChange={e => setFilters({ ...filters, maxAge: parseInt(e.target.value) || 60 })}
+                                    className="w-full p-2 border rounded-lg bg-gray-50 text-center"
                                 />
                             </div>
                         </div>
 
                         <div>
                             <label className="text-xs font-bold text-gray-500 uppercase">District</label>
-                            <select 
+                            <select
                                 value={filters.district}
-                                onChange={e => setFilters({...filters, district: e.target.value})}
+                                onChange={e => setFilters({ ...filters, district: e.target.value })}
                                 className="w-full p-2 border rounded-lg bg-gray-50 mt-1"
                             >
                                 <option value="">Anywhere</option>
@@ -257,77 +251,82 @@ import { DISTRICTS } from '../../lib/constants';
                             </select>
                         </div>
 
-                        <div className="flex items-center gap-2 pt-2 border-t">
-                            <input 
-                                type="checkbox" 
+                        <div className="flex items-center gap-3 pt-2 border-t mt-2">
+                            <input
+                                type="checkbox"
                                 id="expand"
                                 checked={filters.expandSearch}
-                                onChange={e => setFilters({...filters, expandSearch: e.target.checked})}
-                                className="w-4 h-4 text-pink-600 rounded"
+                                onChange={e => setFilters({ ...filters, expandSearch: e.target.checked })}
+                                className="w-5 h-5 text-pink-600 rounded border-gray-300 focus:ring-pink-500"
                             />
-                            <label htmlFor="expand" className="text-sm text-gray-700">
-                                <strong>Elastic Search</strong> (Show verified users outside preference if matches run out)
+                            <label htmlFor="expand" className="text-sm text-gray-700 leading-snug">
+                                <strong>Elastic Search</strong><br />
+                                <span className="text-xs text-gray-500">Show people outside filters if matches run out</span>
                             </label>
                         </div>
                     </div>
                 </div>
             )}
-            
+
             {/* Elastic Indicator */}
             {isElasticActive && (
-                <div className="w-full max-w-sm bg-blue-50 text-blue-600 px-4 py-2 rounded-lg text-sm mb-4 flex items-center gap-2 border border-blue-100">
-                    <Rocket size={14} />
-                    <span>Expanded search to find you more matches!</span>
+                <div className="w-full max-w-sm bg-indigo-50 text-indigo-700 px-4 py-3 rounded-xl text-sm mb-4 flex items-center gap-2 border border-indigo-100 shadow-sm animate-in fade-in zoom-in duration-300">
+                    <div className="bg-indigo-100 p-1.5 rounded-full">
+                        <Rocket size={14} className="text-indigo-600" />
+                    </div>
+                    <span>Expanded search to verify more matches!</span>
                 </div>
             )}
 
             {/* Card Stack */}
-            <div className="w-full max-w-sm relative h-[600px]">
-                {/* We only render the top card for interaction, maybe one below for visual depth */}
-                {displayProfiles.length > 1 && (
-                    <div className="absolute top-4 left-0 right-0 scale-95 opacity-50 pointer-events-none transform translate-y-4">
-                        <ProfileCard profile={displayProfiles[1]} onSwipe={() => { }} />
-                    </div>
-                )}
-
+            <div className="w-full max-w-sm relative h-[580px]">
                 {displayProfiles.length > 0 ? (
-                <div className="absolute inset-0 z-10 transition-transform">
-                    <ProfileCard
-                        key={displayProfiles[0].id}
-                        profile={displayProfiles[0]}
-                        onSwipe={handleSwipe}
-                    />
-                </div>
+                    <>
+                        {/* Second Card (Background) */}
+                        {displayProfiles.length > 1 && (
+                            <div className="absolute top-4 left-0 right-0 scale-95 opacity-50 pointer-events-none transform translate-y-4 transition-all duration-300">
+                                <ProfileCard profile={displayProfiles[1]} onSwipe={() => { }} />
+                            </div>
+                        )}
+
+                        {/* Top Card */}
+                        <div className="absolute inset-0 z-10 transition-transform duration-300">
+                            <ProfileCard
+                                key={displayProfiles[0].id}
+                                profile={displayProfiles[0]}
+                                onSwipe={handleSwipe}
+                            />
+                        </div>
+                    </>
                 ) : (
-                   <div className="flex flex-col items-center justify-center h-full text-center p-8 bg-white/50 rounded-2xl border-2 border-dashed border-gray-300">
-                        <Filter size={48} className="text-gray-300 mb-4" />
-                        <h3 className="text-xl font-bold text-gray-600">No matches found</h3>
-                        <p className="text-gray-500 mb-4">Try relaxing your filters to see more people.</p>
-                        <button 
+                    <div className="flex flex-col items-center justify-center h-full text-center p-8 bg-white/60 backdrop-blur-sm rounded-3xl border-2 border-dashed border-gray-300 shadow-sm">
+                        <div className="bg-gray-100 p-4 rounded-full mb-4">
+                            <Filter size={32} className="text-gray-400" />
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-700">No matches found</h3>
+                        <p className="text-gray-500 mb-6 mt-2">
+                            We couldn't find anyone matching your current filters.
+                        </p>
+                        <button
                             onClick={() => setFilters({ minAge: 18, maxAge: 60, district: '', expandSearch: true })}
-                            className="text-pink-600 font-bold hover:underline"
+                            className="bg-white border border-pink-200 text-pink-600 px-6 py-2 rounded-full font-bold shadow-sm hover:bg-pink-50 transition-colors"
                         >
                             Reset Filters
                         </button>
-                   </div>
+                    </div>
                 )}
             </div>
 
             {/* Match Modal */}
             {matchDetails && (
-                <div className="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-4">
+                <div className="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-4 animate-in fade-in duration-300">
                     <h2 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500 mb-8 animate-bounce">
                         IT'S A MATCH!
                     </h2>
                     <div className="flex gap-4 mb-8">
-                        {/* Me */}
-                        <div className="w-24 h-24 rounded-full bg-gray-200 overflow-hidden border-4 border-white">
-                            {/* Placeholder */}
-                        </div>
-                        {/* Them */}
-                        <div className="w-24 h-24 rounded-full bg-gray-200 overflow-hidden border-4 border-white">
-                            {/* Placeholder */}
-                        </div>
+                        {/* Simple placeholders or avatars if available in matchDetails */}
+                        <div className="w-24 h-24 rounded-full bg-gray-600 border-4 border-white animate-pulse" />
+                        <div className="w-24 h-24 rounded-full bg-pink-600 border-4 border-white animate-pulse delay-75" />
                     </div>
                     <button
                         onClick={() => setMatchDetails(null)}
