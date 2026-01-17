@@ -14,14 +14,11 @@ export default function FamilyDetails() {
     // Detailed Sibling State
     const [siblingGender, setSiblingGender] = useState('Brother');
     const [siblingStatus, setSiblingStatus] = useState('Student');
-    const [siblingsList, setSiblingsList] = useState<{ gender: string, status: string }[]>([]);
-
-    // Logic to parse existing string back to list if possible (Simple parsing or reset)
-    // For now, if string exists and doesn't match our format, we might just show it as "Legacy" or override.
-    // Let's assume we start fresh or append.
+    const [siblingOrder, setSiblingOrder] = useState('Elder'); // New State
+    const [siblingsList, setSiblingsList] = useState<{ gender: string, status: string, order: string }[]>([]);
 
     const addSibling = () => {
-        const newItem = { gender: siblingGender, status: siblingStatus };
+        const newItem = { gender: siblingGender, status: siblingStatus, order: siblingOrder };
         const newList = [...siblingsList, newItem];
         setSiblingsList(newList);
         updateSiblingString(newList);
@@ -33,22 +30,14 @@ export default function FamilyDetails() {
         updateSiblingString(newList);
     };
 
-    const updateSiblingString = (list: { gender: string, status: string }[]) => {
+    const updateSiblingString = (list: { gender: string, status: string, order: string }[]) => {
         if (list.length === 0) {
             updateDraft({ family: { ...draft.family, siblings: "Only Child" } });
             return;
         }
 
-        // Count logic
-        // const brothers = list.filter(i => i.gender === 'Brother').length;
-        // const sisters = list.filter(i => i.gender === 'Sister').length;
-
-        // Detailed string: "1 Brother (Married), 1 Sister (Student)"
-        // Or simplified if many.
-        // Let's just create a comma separated list of details for now
-        // e.g. "Brother (Married), Sister (Student)"
-
-        const details = list.map(s => `${s.gender} (${s.status})`).join(", ");
+        // Detailed string: "Elder Brother (Married), Younger Sister (Student)"
+        const details = list.map(s => `${s.order} ${s.gender} (${s.status})`).join(", ");
         updateDraft({ family: { ...draft.family, siblings: details } });
     };
 
@@ -133,6 +122,15 @@ export default function FamilyDetails() {
                             <option value="Sister">Sister</option>
                         </select>
                         <select
+                            value={siblingOrder}
+                            onChange={(e) => setSiblingOrder(e.target.value)}
+                            className="flex-1 p-2 border rounded-md text-sm"
+                        >
+                            <option value="Elder">Elder</option>
+                            <option value="Younger">Younger</option>
+                            <option value="Twin">Twin</option>
+                        </select>
+                        <select
                             value={siblingStatus}
                             onChange={(e) => setSiblingStatus(e.target.value)}
                             className="flex-1 p-2 border rounded-md text-sm"
@@ -162,7 +160,7 @@ export default function FamilyDetails() {
                                 <div key={idx} className="flex justify-between items-center bg-pink-50 text-pink-700 px-3 py-2 rounded-lg border border-pink-100">
                                     <div className="flex items-center gap-2">
                                         <User size={16} />
-                                        <span className="font-medium">{item.gender}</span>
+                                        <span className="font-medium">{item.order} {item.gender}</span>
                                         <span className="text-sm opacity-75">- {item.status}</span>
                                     </div>
                                     <button onClick={() => removeSibling(idx)} className="text-pink-400 hover:text-pink-700">

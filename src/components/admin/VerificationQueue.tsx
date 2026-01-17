@@ -13,6 +13,9 @@ interface Request {
     status: string;
     submittedAt: any;
     userPhone?: string; // Fetched from user doc
+    displayName?: string;
+    location?: string;
+    age?: string | number;
 }
 
 export default function VerificationQueue() {
@@ -33,10 +36,17 @@ export default function VerificationQueue() {
                 const userDoc = await getDoc(doc(db, "users", data.uid));
                 const userPhone = userDoc.exists() ? userDoc.data().phone : "N/A";
 
+                // Fetch profile for additional details
+                const profileDoc = await getDoc(doc(db, "profiles", data.uid));
+                const profileData = profileDoc.exists() ? profileDoc.data() : {};
+
                 reqList.push({
                     id: d.id,
                     ...data,
-                    userPhone
+                    userPhone,
+                    displayName: profileData.displayName || "Unknown",
+                    location: profileData.location ? `${profileData.location.city}, ${profileData.location.district}` : "Unknown Location",
+                    age: profileData.age || "N/A"
                 } as Request);
             }
             setRequests(reqList);
@@ -143,9 +153,11 @@ export default function VerificationQueue() {
                         {/* Header */}
                         <div className="p-4 border-b flex justify-between items-center bg-gray-50">
                             <div>
-                                <h2 className="text-xl font-bold">Reviewing: {selectedReq.nicNumber}</h2>
-                                <p className="text-sm text-gray-500 flex items-center gap-2">
-                                    <Phone size={14} /> {selectedReq.userPhone}
+                                <h2 className="text-xl font-bold">Reviewing: {selectedReq.displayName} ({selectedReq.age})</h2>
+                                <p className="text-sm text-gray-500 flex flex-col gap-1 mt-1">
+                                    <span className="flex items-center gap-2"><Phone size={14} /> {selectedReq.userPhone}</span>
+                                    <span className="flex items-center gap-2">📍 {selectedReq.location}</span>
+                                    <span className="text-xs text-gray-400">NIC: {selectedReq.nicNumber}</span>
                                 </p>
                             </div>
                             <button onClick={() => setSelectedReq(null)} className="text-gray-500 hover:text-gray-800">Close</button>
