@@ -39,12 +39,20 @@ export default function PublicProfileView() {
                     <ArrowLeft className="text-gray-600" />
                 </button>
                 <h1 className="text-lg font-bold">Public Preview</h1>
-                <button
-                    onClick={() => navigate('/app/profile/edit')}
-                    className="text-pink-600 font-bold text-sm"
-                >
-                    Edit
-                </button>
+                <div className="flex gap-3">
+                    <button
+                        onClick={() => navigate('/app/preferences')}
+                        className="text-gray-500 font-bold text-sm hover:text-pink-600 transition-colors"
+                    >
+                        Preferences
+                    </button>
+                    <button
+                        onClick={() => navigate('/app/profile/edit')}
+                        className="text-pink-600 font-bold text-sm hover:text-pink-700 transition-colors"
+                    >
+                        Edit
+                    </button>
+                </div>
             </nav>
 
             <div className="max-w-md mx-auto bg-white min-h-screen shadow-lg overflow-hidden relative">
