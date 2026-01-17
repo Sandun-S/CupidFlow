@@ -2,7 +2,7 @@ import { db } from '../../lib/firebase';
 import { doc, getDoc, serverTimestamp, runTransaction } from 'firebase/firestore';
 import { logAction } from '../../lib/audit';
 
-export const handleUserAuthSuccess = async (user: any, navigate: any, method: string) => {
+export const handleUserAuthSuccess = async (user: any, navigate: any, method: string, extraData?: { phone?: string }) => {
     const userRef = doc(db, "users", user.uid);
     const userSnap = await getDoc(userRef);
 
@@ -48,7 +48,7 @@ export const handleUserAuthSuccess = async (user: any, navigate: any, method: st
             transaction.set(userRef, {
                 uid: user.uid,
                 email: user.email || '',
-                phone: user.phoneNumber || '',
+                phone: extraData?.phone || user.phoneNumber || '',
                 role: 'user',
                 createdAt: serverTimestamp(),
                 isVerified: false,

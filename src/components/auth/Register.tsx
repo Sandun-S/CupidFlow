@@ -79,6 +79,22 @@ export default function Register() {
                             />
                         </div>
                     </div>
+
+                    {/* New Phone Input */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Mobile Number (Optional)</label>
+                        <div className="relative">
+                            <span className="absolute left-3 top-3 text-gray-400">📞</span>
+                            <input
+                                type="tel"
+                                value={phone}
+                                onChange={(e) => setPhone(e.target.value)}
+                                className="pl-10 w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pink-200 outline-none"
+                                placeholder="+94 7X XXX XXXX"
+                            />
+                        </div>
+                    </div>
+
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
                         <div className="relative">
