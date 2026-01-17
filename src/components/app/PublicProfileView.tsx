@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
-import { ArrowLeft, User, Briefcase, MapPin } from 'lucide-react';
+import { ArrowLeft, User, Briefcase, MapPin, Ruler, Book, Users, Wine } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import BottomNav from './BottomNav';
 
@@ -90,8 +90,49 @@ export default function PublicProfileView() {
                                 <p className="font-medium">{profile.profession}</p>
                             </div>
                         </div>
-                        {/* Add more quick details here (Height, Religion etc) */}
+                        <div className="flex items-center gap-3 text-gray-700 bg-gray-50 p-3 rounded-lg">
+                            <Ruler size={20} className="text-pink-500" />
+                            <div>
+                                <p className="text-xs text-gray-500">Height</p>
+                                <p className="font-medium">{profile.height}</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3 text-gray-700 bg-gray-50 p-3 rounded-lg">
+                            <Book size={20} className="text-pink-500" />
+                            <div>
+                                <p className="text-xs text-gray-500">Education</p>
+                                <p className="font-medium">{profile.education}</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3 text-gray-700 bg-gray-50 p-3 rounded-lg">
+                            <Users size={20} className="text-pink-500" />
+                            <div>
+                                <p className="text-xs text-gray-500">Family</p>
+                                <p className="font-medium">{profile.family?.siblings ? `${profile.family.siblings} Siblings` : 'N/A'}</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3 text-gray-700 bg-gray-50 p-3 rounded-lg">
+                            <Wine size={20} className="text-pink-500" />
+                            <div>
+                                <p className="text-xs text-gray-500">Habits</p>
+                                <p className="font-medium text-xs">{profile.habits?.drinking} / {profile.habits?.smoking}</p>
+                            </div>
+                        </div>
                     </div>
+
+                    {/* Interests */}
+                    {profile.interests && profile.interests.length > 0 && (
+                        <div>
+                            <h3 className="text-lg font-bold text-gray-900 mb-3">Interests</h3>
+                            <div className="flex flex-wrap gap-2">
+                                {profile.interests.map((interest: string, idx: number) => (
+                                    <span key={idx} className="px-3 py-1 bg-pink-50 text-pink-600 rounded-full text-sm border border-pink-100">
+                                        {interest}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     {/* Gallery */}
                     {profile.photos && profile.photos.length > 1 && (
