@@ -58,7 +58,7 @@ export default function AboutUs() {
                 <div className="prose prose-lg mx-auto text-gray-600">
                     <h2 className="text-2xl font-bold text-gray-900 mb-4">Our Story</h2>
                     <p className="mb-6">
-                        Launched in 2024, CupidFlow started as a response to the growing need for a reliable dating platform in Sri Lanka. Traditional matchmaking can be restrictive, and international apps often lack local context or safety measures. CupidFlow bridges this gap.
+                        Launched in 2026, CupidFlow started as a response to the growing need for a reliable dating platform in Sri Lanka. Traditional matchmaking can be restrictive, and international apps often lack local context or safety measures. CupidFlow bridges this gap.
                     </p>
                     <p>
                         Whether you are looking for marriage, a serious relationship, or simply to meet new people, CupidFlow provides the tools and environment to do so with confidence.
@@ -67,7 +67,7 @@ export default function AboutUs() {
             </div>
 
             <footer className="bg-gray-50 py-8 text-center text-gray-500 text-sm">
-                © 2024 CupidFlow. Made with ❤️ in Sri Lanka.
+                © 2026 CupidFlow. Made with ❤️ in Sri Lanka.
             </footer>
         </div>
     );

@@ -147,7 +147,7 @@ export default function LandingPage() {
                         </div>
                         <h3 className="text-2xl font-bold text-gray-900 mb-3">Modern Experience</h3>
                         <p className="text-gray-600 leading-relaxed">
-                            A smooth, premium app experience designed for 2024. Swipe, match, and chat with an intuitive interface.
+                            A smooth, premium app experience designed for 2026. Swipe, match, and chat with an intuitive interface.
                         </p>
                     </div>
 
