@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { auth, db } from '../../lib/firebase';
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, User } from 'firebase/auth';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, User } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import { Lock, Mail, Chrome } from 'lucide-react';
@@ -30,23 +30,22 @@ export default function Login() {
         }
     };
 
-    const handleEmailLogin = async (e: React.FormEvent) => {
+    const [isLogin, setIsLogin] = useState(true);
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError('');
+
         try {
-            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            let userCredential;
+            if (isLogin) {
+                userCredential = await signInWithEmailAndPassword(auth, email, password);
+            } else {
+                userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            }
+
             setUser(userCredential.user);
             await checkUserStatus(userCredential.user);
-        } catch (err: any) {
-            setError(err.message);
-        }
-    };
-
-    const handleGoogleLogin = async () => {
-        const provider = new GoogleAuthProvider();
-        try {
-            const result = await signInWithPopup(auth, provider);
-            setUser(result.user);
-            await checkUserStatus(result.user);
         } catch (err: any) {
             setError(err.message);
         }
@@ -66,7 +65,22 @@ export default function Login() {
                     </div>
                 )}
 
-                <form onSubmit={handleEmailLogin} className="space-y-4">
+                <div className="flex bg-gray-100 p-1 rounded-lg mb-6">
+                    <button
+                        className={`flex-1 py-2 rounded-md text-sm font-medium transition-all ${isLogin ? 'bg-white shadow text-pink-600' : 'text-gray-500'}`}
+                        onClick={() => setIsLogin(true)}
+                    >
+                        Sign In
+                    </button>
+                    <button
+                        className={`flex-1 py-2 rounded-md text-sm font-medium transition-all ${!isLogin ? 'bg-white shadow text-pink-600' : 'text-gray-500'}`}
+                        onClick={() => setIsLogin(false)}
+                    >
+                        Sign Up
+                    </button>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                         <div className="relative">
@@ -101,7 +115,7 @@ export default function Login() {
                         type="submit"
                         className="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-2.5 rounded-lg transition-colors"
                     >
-                        Sign In
+                        {isLogin ? "Sign In" : "Create Account"}
                     </button>
                 </form>
 
@@ -116,7 +130,16 @@ export default function Login() {
                     </div>
 
                     <button
-                        onClick={handleGoogleLogin}
+                        onClick={async () => {
+                            const provider = new GoogleAuthProvider();
+                            try {
+                                const result = await signInWithPopup(auth, provider);
+                                setUser(result.user);
+                                await checkUserStatus(result.user);
+                            } catch (err: any) {
+                                setError(err.message);
+                            }
+                        }}
                         className="mt-6 w-full flex items-center justify-center gap-2 border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 font-medium py-2.5 rounded-lg transition-colors"
                     >
                         <Chrome className="h-5 w-5 text-blue-500" />
