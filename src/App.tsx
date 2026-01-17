@@ -39,36 +39,48 @@ function AppContent() {
             setUser(currentUser);
             if (currentUser) {
                 try {
-                    const docSnap = await getDoc(doc(db, "users", currentUser.uid));
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
+                    // Fetch both user and profile docs in parallel
+                    const [userSnap, profileSnap] = await Promise.all([
+                        getDoc(doc(db, "users", currentUser.uid)),
+                        getDoc(doc(db, "profiles", currentUser.uid))
+                    ]);
+
+                    if (userSnap.exists()) {
+                        const data = userSnap.data();
                         setUserData(data);
 
                         // Routing Logic
-                        // 1. Admin Bypass
-                        // if (data.role === 'admin') return; // Removed to fix infinite loading
-
-
                         const path = window.location.pathname;
                         const status = data.nicStatus || 'unverified'; // Default to unverified if missing
+                        const profileExists = profileSnap.exists();
 
-                        // 2. Pending Verification -> Status Page
-                        if (status === 'pending') {
-                            if (path !== '/verify-status') navigate('/verify-status');
+                        // 0. Public Pages (Always allow)
+                        if (['/login', '/signup', '/forgot-password', '/', '/terms', '/privacy', '/about', '/safety'].includes(path)) {
+                            // Do nothing, allow access
                         }
-                        // 3. Unverified/Rejected -> Onboarding
-                        else if (['unverified', 'rejected'].includes(status)) {
-                            // Allow public pages
-                            if (['/login', '/signup', '/forgot-password', '/', '/terms', '/privacy', '/about', '/safety'].includes(path)) return;
-
-                            // Otherwise force onboarding if not there
+                        // 1. Admin Bypass
+                        else if (data.role === 'admin') {
+                            // Allow admin access
+                        }
+                        // 2. Force Onboarding if Profile Missing (CRITICAL FIX)
+                        else if (!profileExists) {
                             if (!path.startsWith('/onboarding')) {
                                 navigate('/onboarding');
                             }
                         }
-                        // 4. Verified -> App
+                        // 3. Pending Verification -> Status Page
+                        else if (status === 'pending') {
+                            if (path !== '/verify-status') navigate('/verify-status');
+                        }
+                        // 4. Unverified/Rejected -> Onboarding (Double check, though profileExists should catch most)
+                        else if (['unverified', 'rejected'].includes(status)) {
+                            if (!path.startsWith('/onboarding')) {
+                                navigate('/onboarding');
+                            }
+                        }
+                        // 5. Verified -> App
                         else if (status === 'verified') {
-                            if (path === '/' || path.startsWith('/onboarding') || path === '/login' || path === '/signup') {
+                            if (path === '/' || path.startsWith('/onboarding') || path === '/login' || path === '/signup' || path === '/verify-status') {
                                 navigate('/app/profile/view'); // Or explore
                             }
                         }
