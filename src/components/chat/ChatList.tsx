@@ -83,26 +83,26 @@ export default function ChatList() {
     if (loading) return <div className="p-4 text-center">Loading chats...</div>;
 
     return (
-        <div className="min-h-screen bg-pink-50 pb-20">
-            <div className="max-w-md mx-auto bg-white min-h-screen shadow-xl relative">
-                <div className="p-4 border-b bg-white sticky top-0 z-10">
-                    <h1 className="text-2xl font-bold text-pink-600">Messages</h1>
+        <div className="min-h-screen bg-pink-50 pb-20 dark:bg-gray-900 transition-colors duration-300">
+            <div className="max-w-md mx-auto bg-white min-h-screen shadow-xl relative dark:bg-gray-900 dark:shadow-none transition-colors duration-300">
+                <div className="p-4 border-b bg-white sticky top-0 z-10 dark:bg-gray-900 dark:border-gray-800 transition-colors duration-300">
+                    <h1 className="text-2xl font-bold text-pink-600 dark:text-pink-500">Messages</h1>
                 </div>
 
                 {/* Likes You Teaser */}
                 <div className="mb-6 p-4">
                     <div
                         onClick={() => navigate('/app/likes')}
-                        className="bg-gradient-to-r from-pink-50 to-pink-100 p-4 rounded-xl flex items-center gap-4 cursor-pointer hover:shadow-md transition-shadow border border-pink-200"
+                        className="bg-gradient-to-r from-pink-50 to-pink-100 p-4 rounded-xl flex items-center gap-4 cursor-pointer hover:shadow-md transition-shadow border border-pink-200 dark:from-gray-800 dark:to-gray-800 dark:border-gray-700"
                     >
-                        <div className="bg-pink-200 p-3 rounded-full">
-                            <MessageCircle className="w-6 h-6 text-pink-600" />
+                        <div className="bg-pink-200 p-3 rounded-full dark:bg-gray-700">
+                            <MessageCircle className="w-6 h-6 text-pink-600 dark:text-pink-400" />
                         </div>
                         <div className="flex-1">
-                            <h3 className="font-bold text-gray-800">Likes Sent to You</h3>
-                            <p className="text-xs text-gray-600">See who wants to match with you</p>
+                            <h3 className="font-bold text-gray-800 dark:text-white">Likes Sent to You</h3>
+                            <p className="text-xs text-gray-600 dark:text-gray-400">See who wants to match with you</p>
                         </div>
-                        <div className="bg-pink-600 text-white text-xs font-bold px-2 py-1 rounded-full">
+                        <div className="bg-pink-600 text-white text-xs font-bold px-2 py-1 rounded-full dark:bg-pink-700">
                             View
                         </div>
                     </div>
@@ -119,7 +119,7 @@ export default function ChatList() {
                             <div
                                 key={match.id}
                                 onClick={() => navigate(`/app/chat/${match.id}`)}
-                                className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4 active:scale-95 transition-transform cursor-pointer border border-gray-100"
+                                className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4 active:scale-95 transition-transform cursor-pointer border border-gray-100 dark:bg-gray-800 dark:border-gray-700"
                             >
                                 <div className="w-14 h-14 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
                                     {match.otherUser.photoUrl ? (
@@ -131,8 +131,8 @@ export default function ChatList() {
                                     )}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <h3 className="font-bold text-gray-800 truncate">{match.otherUser.displayName}</h3>
-                                    <p className="text-sm text-gray-500 truncate">{match.lastMessage}</p>
+                                    <h3 className="font-bold text-gray-800 truncate dark:text-white">{match.otherUser.displayName}</h3>
+                                    <p className="text-sm text-gray-500 truncate dark:text-gray-400">{match.lastMessage}</p>
                                 </div>
                             </div>
                         ))}

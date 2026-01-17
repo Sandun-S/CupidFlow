@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { useAuthStore } from '../../store/authStore';
-import { Heart, Lock } from 'lucide-react';
+import { Heart, Lock, Crown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import BottomNav from './BottomNav';
 
@@ -100,6 +100,32 @@ export default function LikesYou() {
                         {likers.length}
                     </span>
                 </div>
+
+                {/* Top Picks Section (New) */}
+                {likers.length > 0 && (
+                    <div className="px-4 pt-4 pb-2">
+                        <div className="flex items-center gap-2 mb-3">
+                            <div className="bg-yellow-100 p-1.5 rounded-full dark:bg-yellow-900/30">
+                                <Crown className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+                            </div>
+                            <h2 className="font-bold text-gray-800 text-sm uppercase tracking-wide dark:text-gray-200">Top Picks</h2>
+                        </div>
+                        <div className="flex gap-3 overflow-x-auto pb-4 no-scrollbar">
+                            {likers.slice(0, 5).map((profile) => (
+                                <div key={`top-${profile.uid}`} className="relative w-28 h-40 flex-shrink-0 rounded-xl overflow-hidden shadow-sm border border-yellow-100 dark:border-yellow-900/30">
+                                    <img src={profile.avatar} className={`w-full h-full object-cover ${!isPremium ? 'blur-sm' : ''}`} />
+                                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-2">
+                                        <p className="text-white text-xs font-bold truncate">{profile.displayName}</p>
+                                        <div className="flex items-center gap-1">
+                                            <span className="bg-yellow-500 text-[8px] text-white px-1.5 rounded-sm font-bold">GOLD</span>
+                                        </div>
+                                    </div>
+                                    {!isPremium && <div className="absolute inset-0 bg-white/10 backdrop-blur-[1px]" />}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 <div className="p-4">
                     {likers.length === 0 ? (

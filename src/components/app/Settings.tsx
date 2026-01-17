@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, ArrowLeft, Bell, Shield, HelpCircle, ChevronRight, User, Sliders, Crown, Moon } from 'lucide-react';
-import { auth } from '../../lib/firebase';
+import { auth, db } from '../../lib/firebase';
 import { signOut } from 'firebase/auth';
+import { collection, query, where, getDocs, deleteDoc } from 'firebase/firestore';
 
 export default function Settings() {
     const { setUser } = useAuthStore();
@@ -16,6 +17,21 @@ export default function Settings() {
             navigate('/login');
         } catch (error) {
             console.error("Logout failed", error);
+        }
+    };
+
+    const handleResetSwipes = async () => {
+        if (!confirm("Are you sure? This will clear all your likes/dislikes and you will see everyone again.")) return;
+        try {
+            // Delete swipes where fromUid == me
+            const q = query(collection(db, "swipes"), where("fromUid", "==", auth.currentUser?.uid));
+            const snapshot = await getDocs(q);
+            const deletePromises = snapshot.docs.map(d => deleteDoc(d.ref));
+            await Promise.all(deletePromises);
+            alert("Swipes reset! Go back to Explore to see profiles again.");
+        } catch (error) {
+            console.error("Reset failed", error);
+            alert("Failed to reset swipes.");
         }
     };
 
@@ -98,6 +114,20 @@ export default function Settings() {
                                 <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isDarkMode ? 'translate-x-6' : 'translate-x-1'}`} />
                             </button>
                         </div>
+                    </div>
+
+                    {/* Developer Options (Visible for testing) */}
+                    <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-6 border border-gray-100 dark:bg-gray-800 dark:border-gray-700 transition-colors duration-300">
+                        <div className="p-4 border-b border-gray-100 bg-gray-50/50 dark:bg-gray-800 dark:border-gray-700 transition-colors duration-300">
+                            <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Developer Options</h2>
+                        </div>
+                        <button
+                            onClick={handleResetSwipes}
+                            className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors text-red-500 dark:hover:bg-gray-700 dark:bg-gray-800"
+                        >
+                            <span className="font-medium text-sm">Reset My Swipes</span>
+                            <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full dark:bg-red-900/40 dark:text-red-300">Debug</span>
+                        </button>
                     </div>
 
                     <button

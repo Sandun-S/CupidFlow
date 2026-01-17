@@ -91,18 +91,18 @@ export default function ChatWindow() {
     };
 
     return (
-        <div className="flex flex-col h-screen bg-gray-50">
+        <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
             {/* Header */}
-            <div className="bg-white p-4 shadow-sm flex items-center gap-4 z-10">
-                <button onClick={() => navigate(-1)} className="text-gray-600">
+            <div className="bg-white p-4 shadow-sm flex items-center gap-4 z-10 dark:bg-gray-900 dark:border-b dark:border-gray-800 transition-colors duration-300">
+                <button onClick={() => navigate(-1)} className="text-gray-600 dark:text-gray-300">
                     <ArrowLeft />
                 </button>
                 {otherUser && (
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
+                        <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden dark:bg-gray-700">
                             {otherUser.photos?.[0] && <img src={otherUser.photos[0]} className="w-full h-full object-cover" />}
                         </div>
-                        <h2 className="font-bold text-gray-800">{otherUser.displayName}</h2>
+                        <h2 className="font-bold text-gray-800 dark:text-white">{otherUser.displayName}</h2>
                     </div>
                 )}
             </div>
@@ -114,8 +114,8 @@ export default function ChatWindow() {
                     return (
                         <div key={msg.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
                             <div className={`max-w-[75%] px-4 py-2 rounded-2xl ${isMine
-                                ? 'bg-pink-500 text-white rounded-tr-none'
-                                : 'bg-white border border-gray-100 text-gray-800 rounded-tl-none shadow-sm'
+                                ? 'bg-pink-500 text-white rounded-tr-none dark:bg-pink-600'
+                                : 'bg-white border border-gray-100 text-gray-800 rounded-tl-none shadow-sm dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200'
                                 }`}>
                                 {msg.text}
                                 {/* Read Receipt (Only if mine + premium + enabled) */}
@@ -136,14 +136,14 @@ export default function ChatWindow() {
             </div>
 
             {/* Input */}
-            <div className="bg-white p-4 border-t border-gray-100">
+            <div className="bg-white p-4 border-t border-gray-100 dark:bg-gray-900 dark:border-gray-800 transition-colors duration-300">
                 <form onSubmit={handleSend} className="flex gap-2">
                     <input
                         type="text"
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         placeholder="Type a message..."
-                        className="flex-1 bg-gray-100 rounded-full px-4 py-3 outline-none focus:ring-2 focus:ring-pink-500/20"
+                        className="flex-1 bg-gray-100 rounded-full px-4 py-3 outline-none focus:ring-2 focus:ring-pink-500/20 dark:bg-gray-800 dark:text-white dark:focus:ring-pink-500/40"
                     />
                     <button
                         type="submit"
