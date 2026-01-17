@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useUserStore } from '../../../store/userStore';
 import { Plus, X, User } from 'lucide-react';
 
