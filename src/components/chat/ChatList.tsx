@@ -90,7 +90,7 @@ export default function ChatList() {
                 </div>
 
                 {/* Likes You Teaser */}
-                <div className="mb-6">
+                <div className="mb-6 p-4">
                     <div
                         onClick={() => navigate('/app/likes')}
                         className="bg-gradient-to-r from-pink-50 to-pink-100 p-4 rounded-xl flex items-center gap-4 cursor-pointer hover:shadow-md transition-shadow border border-pink-200"
@@ -109,17 +109,17 @@ export default function ChatList() {
                 </div>
 
                 {matches.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-64 text-gray-400">
+                    <div className="flex flex-col items-center justify-center h-64 text-gray-400 p-4">
                         <MessageCircle size={48} className="mb-2 opacity-50" />
                         <p>No matches yet. Keep swiping!</p>
                     </div>
                 ) : (
-                    <div className="space-y-3">
+                    <div className="space-y-3 p-4">
                         {matches.map(match => (
                             <div
                                 key={match.id}
                                 onClick={() => navigate(`/app/chat/${match.id}`)}
-                                className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4 active:scale-95 transition-transform cursor-pointer"
+                                className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4 active:scale-95 transition-transform cursor-pointer border border-gray-100"
                             >
                                 <div className="w-14 h-14 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
                                     {match.otherUser.photoUrl ? (
@@ -140,5 +140,6 @@ export default function ChatList() {
                 )}
                 <BottomNav />
             </div>
-            );
+        </div>
+    );
 }

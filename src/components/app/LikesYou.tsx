@@ -18,10 +18,6 @@ export default function LikesYou() {
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
-    // Check if premium (simple check: packageId != 'free' and 'silver')
-    // Adjust based on your package logic. Let's assume 'gold' and 'platinum' give this feature.
-    // Or just check a flag if we had one. For now, let's assume 'gold' | 'platinum'.
-    // Better: Helper function or just check ID.
     const isPremium = ['silver', 'gold', 'platinum'].includes(userData?.packageId || '');
 
     useEffect(() => {
@@ -38,13 +34,6 @@ export default function LikesYou() {
                 );
                 const querySnapshot = await getDocs(q);
 
-                // 2. Filter out those who I have already swiped (Matches are handled separately)
-                // Actually, if it's a match, it's NOT a pending like. 
-                // We need to check if I have ALREADY swiped them.
-                // For simplicity, let's just fetch profiles. 
-                // Matches are usually removed from "Likes You" or kept differently.
-                // Let's crude way: fetch them all.
-
                 const senderIds = querySnapshot.docs.map(d => d.data().fromUid);
 
                 if (senderIds.length === 0) {
@@ -53,11 +42,7 @@ export default function LikesYou() {
                     return;
                 }
 
-                // Fetch profiles (This might be heavy if many likes, limit to 20?)
-                // Also need to check if *I* already swiped them right (Match).
-                // If Match, they shouldn't appear here (they appear in Chat).
-                // We need to query MY swipes to exclude matches.
-
+                // 2. Filter out matches (people I also swiped right on)
                 const mySwipesQ = query(
                     collection(db, "swipes"),
                     where("fromUid", "==", user.uid)
@@ -69,12 +54,13 @@ export default function LikesYou() {
 
                 if (pendingLikers.length === 0) {
                     setLikers([]);
+                    setLoading(false);
                     return;
                 }
 
                 const profiles: LikerProfile[] = [];
-                // Firestore 'in' has limit of 10. We loop.
-                for (const uid of pendingLikers.slice(0, 10)) { // Limit to 10 for now
+                // Firestore 'in' has limit of 10. We loop/slice for now.
+                for (const uid of pendingLikers.slice(0, 10)) {
                     const docSnap = await getDoc(doc(db, "profiles", uid));
                     if (docSnap.exists()) {
                         const d = docSnap.data();
@@ -82,7 +68,7 @@ export default function LikesYou() {
                             uid: d.uid,
                             displayName: d.displayName,
                             age: d.age,
-                            avatar: d.avatar
+                            avatar: d.avatar,
                         });
                     }
                 }
@@ -96,27 +82,7 @@ export default function LikesYou() {
         };
 
         fetchLikers();
-    }, [user]);
-
-    const isPremium = ['silver', 'gold', 'platinum'].includes(userData?.packageId || '');
-
-    useEffect(() => {
-        if (!user) return;
-
-        const fetchLikers = async () => {
-            // ... existing fetch logic is fine, keeping it implicitly via ... 
-            // actually I need to replace the RENDER part mainly.
-            // Let's replace the whole return statement to be safe.
-            setLoading(true);
-            // ... (Logic is unchanged, just re-rendering this block safely?)
-            // No, let's just replace the RETURN block.
-        };
-        // Wait, I can't skip logic in replace. 
-    }, [user]);
-
-    // ... 
-    // Coping the fetch logic is risky if I don't see it all. 
-    // I will just replace the return statement.
+    }, [user, userData]);
 
     if (loading) return <div className="p-8 text-center text-gray-500">Loading your admirers...</div>;
 
@@ -169,18 +135,18 @@ export default function LikesYou() {
                             ))}
                         </div>
                     )}
-
-                    {!isPremium && likers.length > 0 && (
-                        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t z-20 max-w-md mx-auto">
-                            <button
-                                onClick={() => navigate('/app/upgrade')}
-                                className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold py-3 rounded-xl shadow-lg animate-pulse"
-                            >
-                                Upgrade to See Who Likes You
-                            </button>
-                        </div>
-                    )}
                 </div>
+
+                {!isPremium && likers.length > 0 && (
+                    <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t z-20 max-w-md mx-auto">
+                        <button
+                            onClick={() => navigate('/app/upgrade')}
+                            className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold py-3 rounded-xl shadow-lg animate-pulse"
+                        >
+                            Upgrade to See Who Likes You
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );
