@@ -87,7 +87,7 @@ export default function PublicProfileView() {
                             <Briefcase size={20} className="text-pink-500" />
                             <div>
                                 <p className="text-xs text-gray-500">Profession</p>
-                                <p className="font-medium text-sm truncate">{profile.profession}</p>
+                                <p className="font-medium text-sm line-clamp-2">{profile.profession}</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-3 text-gray-700 bg-gray-50 p-3 rounded-lg">
@@ -101,7 +101,7 @@ export default function PublicProfileView() {
                             <Book size={20} className="text-pink-500" />
                             <div>
                                 <p className="text-xs text-gray-500">Education</p>
-                                <p className="font-medium text-sm truncate">{profile.education}</p>
+                                <p className="font-medium text-sm line-clamp-2">{profile.education}</p>
                             </div>
                         </div>
                         <div className="flex items-start gap-3 text-gray-700 bg-gray-50 p-3 rounded-lg col-span-2">
