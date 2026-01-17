@@ -87,7 +87,7 @@ export default function PublicProfileView() {
                             <Briefcase size={20} className="text-pink-500" />
                             <div>
                                 <p className="text-xs text-gray-500">Profession</p>
-                                <p className="font-medium">{profile.profession}</p>
+                                <p className="font-medium text-sm truncate">{profile.profession}</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-3 text-gray-700 bg-gray-50 p-3 rounded-lg">
@@ -101,21 +101,35 @@ export default function PublicProfileView() {
                             <Book size={20} className="text-pink-500" />
                             <div>
                                 <p className="text-xs text-gray-500">Education</p>
-                                <p className="font-medium">{profile.education}</p>
+                                <p className="font-medium text-sm truncate">{profile.education}</p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3 text-gray-700 bg-gray-50 p-3 rounded-lg">
-                            <Users size={20} className="text-pink-500" />
-                            <div>
+                        <div className="flex items-start gap-3 text-gray-700 bg-gray-50 p-3 rounded-lg col-span-2">
+                            <Users size={20} className="text-pink-500 mt-1" />
+                            <div className="w-full">
                                 <p className="text-xs text-gray-500">Family</p>
-                                <p className="font-medium">{profile.family?.siblings ? `${profile.family.siblings} Siblings` : 'N/A'}</p>
+                                <p className="text-xs font-medium mt-1">
+                                    <span className="block text-gray-600">Father: {profile.family?.fatherProfession || 'N/A'}</span>
+                                    <span className="block text-gray-600">Mother: {profile.family?.motherProfession || 'N/A'}</span>
+                                    <span className="block text-gray-800 border-t border-gray-200 mt-1 pt-1">{profile.family?.siblings ? profile.family.siblings : 'N/A'}</span>
+                                </p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3 text-gray-700 bg-gray-50 p-3 rounded-lg">
+                        <div className="flex items-center gap-3 text-gray-700 bg-gray-50 p-3 rounded-lg col-span-2">
                             <Wine size={20} className="text-pink-500" />
-                            <div>
-                                <p className="text-xs text-gray-500">Habits</p>
-                                <p className="font-medium text-xs">{profile.habits?.drinking} / {profile.habits?.smoking}</p>
+                            <div className="flex flex-wrap gap-2">
+                                <div>
+                                    <p className="text-xs text-gray-500">Drinking</p>
+                                    <p className="font-medium text-sm">{profile.habits?.drinking || 'No'}</p>
+                                </div>
+                                <div className="border-l pl-2">
+                                    <p className="text-xs text-gray-500">Smoking</p>
+                                    <p className="font-medium text-sm">{profile.habits?.smoking || 'No'}</p>
+                                </div>
+                                <div className="border-l pl-2">
+                                    <p className="text-xs text-gray-500">Food</p>
+                                    <p className="font-medium text-sm">{profile.habits?.food || 'Any'}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -126,7 +140,7 @@ export default function PublicProfileView() {
                             <h3 className="text-lg font-bold text-gray-900 mb-3">Interests</h3>
                             <div className="flex flex-wrap gap-2">
                                 {profile.interests.map((interest: string, idx: number) => (
-                                    <span key={idx} className="px-3 py-1 bg-pink-50 text-pink-600 rounded-full text-sm border border-pink-100">
+                                    <span key={idx} className="px-3 py-1 bg-pink-50 text-pink-600 rounded-full text-sm border border-pink-100 font-medium">
                                         {interest}
                                     </span>
                                 ))}
