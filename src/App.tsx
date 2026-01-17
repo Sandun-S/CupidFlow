@@ -9,6 +9,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './lib/firebase';
 import { useAuthStore } from './store/authStore';
 import ProfileWizard from './components/onboarding/ProfileWizard';
+import ExploreFeed from './components/app/ExploreFeed';
 
 function App() {
     const { setUser, setLoading, loading } = useAuthStore();
@@ -46,7 +47,7 @@ function App() {
                         </div>
                     </div>
                 } />
-                <Route path="/app/explore" element={<div>Explore Feed (Coming Soon)</div>} />
+                <Route path="/app/explore" element={<ExploreFeed />} />
 
                 {/* Admin Routes */}
                 <Route path="/admin" element={<AdminRoute />}>

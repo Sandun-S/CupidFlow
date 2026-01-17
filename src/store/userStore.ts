@@ -1,6 +1,11 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+export interface Profile extends UserProfileDraft {
+    id?: string;
+    photos?: string[];
+}
+
 export interface UserProfileDraft {
     displayName: string;
     gender: "man" | "woman" | "non-binary" | "";
