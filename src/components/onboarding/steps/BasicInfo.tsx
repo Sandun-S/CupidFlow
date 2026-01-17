@@ -1,11 +1,5 @@
 import { useUserStore } from '../../../store/userStore';
-
-const districts = [
-    "Ampara", "Anuradhapura", "Badulla", "Batticaloa", "Colombo", "Galle", "Gampaha",
-    "Hambantota", "Jaffna", "Kalutara", "Kandy", "Kegalle", "Kilinochchi", "Kurunegala",
-    "Mannar", "Matale", "Matara", "Monaragala", "Mullaitivu", "Nuwara Eliya",
-    "Polonnaruwa", "Puttalam", "Ratnapura", "Trincomalee", "Vavuniya"
-];
+import { DISTRICTS } from '../../../lib/constants'; // Import shared constants
 
 const ethnicities = ["Sinhalese", "Tamil", "Muslim", "Burgher", "Other"];
 const religions = ["Buddhist", "Christian", "Hindu", "Islam", "Other"];
@@ -83,8 +77,10 @@ export default function BasicInfo() {
                             onChange={(e) => updateDraft({ location: { ...draft.location, district: e.target.value } })}
                             className="mt-1 w-full p-2 border rounded-md"
                         >
-                            <option value="">Select</option>
-                            {districts.map(d => <option key={d} value={d}>{d}</option>)}
+                            <option value="">Select District</option>
+                            {DISTRICTS.map((district) => (
+                                <option key={district} value={district}>{district}</option>
+                            ))}
                         </select>
                     </div>
                     <div>
