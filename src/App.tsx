@@ -15,6 +15,7 @@ import ChatList from './components/chat/ChatList';
 import ChatWindow from './components/chat/ChatWindow';
 import UpgradePlan from './components/subscription/UpgradePlan';
 import PackageManager from './components/admin/PackageManager';
+import SystemConfig from './components/admin/SystemConfig';
 import LikesYou from './components/app/LikesYou';
 import LandingPage from './components/marketing/LandingPage';
 import Terms from './components/legal/Terms';
@@ -94,6 +95,7 @@ function App() {
                         <Route path="verifications" element={<VerificationQueue />} />
                         <Route path="transactions" element={<TransactionManager />} />
                         <Route path="packages" element={<PackageManager />} />
+                        <Route path="config" element={<SystemConfig />} />
                     </Route>
                 </Route>
             </Routes>
