@@ -15,6 +15,7 @@ import ChatList from './components/chat/ChatList';
 import ChatWindow from './components/chat/ChatWindow';
 import UpgradePlan from './components/subscription/UpgradePlan';
 import PackageManager from './components/admin/PackageManager';
+import LikesYou from './components/app/LikesYou';
 
 function App() {
     const { setUser, setUserData, setLoading, loading } = useAuthStore();
@@ -69,6 +70,7 @@ function App() {
                 } />
                 <Route path="/app/explore" element={<ExploreFeed />} />
                 <Route path="/app/chat" element={<ChatList />} />
+                <Route path="/app/likes" element={<LikesYou />} />
                 <Route path="/app/chat/:matchId" element={<ChatWindow />} />
                 <Route path="/app/upgrade" element={<UpgradePlan />} />
 

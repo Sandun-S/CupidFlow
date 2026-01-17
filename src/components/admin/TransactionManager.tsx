@@ -82,10 +82,18 @@ export default function TransactionManager() {
                 const expiryDate = new Date();
                 expiryDate.setDate(now.getDate() + pkg.durationDays);
 
-                // 2. Update User
+                // 2. Update User (Private)
                 batch.update(userRef, {
                     packageId: selectedTxn.packageId,
                     subscriptionExpiry: Timestamp.fromDate(expiryDate),
+                    isPremium: true
+                });
+
+                // 2b. Update Profile (Public)
+                // Ensure field exists in Profile interface if sticking to strict types, but Firestore is flexible.
+                const profileRef = doc(db, "profiles", selectedTxn.uid);
+                batch.update(profileRef, {
+                    packageId: selectedTxn.packageId,
                     isPremium: true
                 });
 

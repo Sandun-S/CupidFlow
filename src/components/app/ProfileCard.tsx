@@ -1,5 +1,5 @@
 import { Profile } from '../../store/userStore';
-import { Heart, X, MapPin, Briefcase, Lock } from 'lucide-react';
+import { Heart, X, MapPin, Briefcase, Lock, Zap, Crown } from 'lucide-react';
 import { differenceInYears } from 'date-fns';
 import { useAuthStore } from '../../store/authStore';
 import { useNavigate } from 'react-router-dom';
@@ -62,8 +62,19 @@ export default function ProfileCard({ profile, onSwipe }: ProfileCardProps) {
             {/* Content */}
             <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
                 <div className="mb-2">
-                    <h2 className="text-3xl font-bold flex items-end gap-2">
+                    <h2 className="text-3xl font-bold flex items-center gap-2">
                         {profile.displayName}, <span className="text-2xl font-normal opacity-90">{age}</span>
+                        {/* Badges */}
+                        {(profile as any).packageId === 'gold' && (
+                            <div className="bg-yellow-400 text-yellow-900 rounded-full p-1 shadow-lg" title="Gold Member">
+                                <Zap size={20} fill="currentColor" />
+                            </div>
+                        )}
+                        {(profile as any).packageId === 'platinum' && (
+                            <div className="bg-purple-500 text-purple-100 rounded-full p-1 shadow-lg border border-purple-300" title="Platinum Member">
+                                <Crown size={20} fill="currentColor" />
+                            </div>
+                        )}
                     </h2>
                 </div>
 

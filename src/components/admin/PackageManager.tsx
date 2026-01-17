@@ -13,6 +13,8 @@ interface Package {
     color: string;
     popular?: boolean;
     order: number;
+    dailySwipeLimit: number; // Added limit
+    isActive?: boolean;
 }
 
 const DEFAULT_PACKAGES: Package[] = [
@@ -24,7 +26,9 @@ const DEFAULT_PACKAGES: Package[] = [
         duration: '1 Month',
         color: 'bg-gray-100 border-gray-300',
         features: ['10 Swipes/Day', 'See who likes you', 'Standard Support'],
-        order: 1
+        order: 1,
+        dailySwipeLimit: 10,
+        isActive: true
     },
     {
         id: 'gold',
@@ -35,7 +39,9 @@ const DEFAULT_PACKAGES: Package[] = [
         popular: true,
         color: 'bg-yellow-50 border-yellow-400',
         features: ['Unlimited Swipes', 'See who likes you', 'Priority Support', 'Profile Badge'],
-        order: 2
+        order: 2,
+        dailySwipeLimit: 1000,
+        isActive: true
     },
     {
         id: 'platinum',
@@ -45,7 +51,9 @@ const DEFAULT_PACKAGES: Package[] = [
         duration: '12 Months',
         color: 'bg-purple-50 border-purple-400',
         features: ['Everything in Gold', 'Profile Boost (1/mo)', 'Read Receipts'],
-        order: 3
+        order: 3,
+        dailySwipeLimit: 1000,
+        isActive: true
     }
 ];
 
@@ -54,6 +62,7 @@ export default function PackageManager() {
     const [loading, setLoading] = useState(true);
     const [editingPkg, setEditingPkg] = useState<Package | null>(null);
 
+    // ... (fetch logic same) ...
     useEffect(() => {
         fetchPackages();
     }, []);
@@ -122,8 +131,10 @@ export default function PackageManager() {
                             displayPrice: 'LKR 0',
                             duration: '1 Month',
                             color: 'bg-white border-gray-200',
-                            features: ['Feature 1'],
-                            order: packages.length + 1
+                            features: ['Unlimted Swipes'],
+                            order: packages.length + 1,
+                            dailySwipeLimit: 10,
+                            isActive: true
                         })}
                         className="flex items-center gap-2 bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700 text-sm"
                     >
@@ -136,15 +147,21 @@ export default function PackageManager() {
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                         <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Features</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Limits</th>
                             <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                         {packages.map((pkg) => (
-                            <tr key={pkg.id}>
+                            <tr key={pkg.id} className={pkg.isActive === false ? 'opacity-50 bg-gray-50' : ''}>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${pkg.isActive !== false ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                        {pkg.isActive !== false ? 'Active' : 'Disabled'}
+                                    </span>
+                                </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <div className="font-bold">{pkg.name}</div>
                                     <div className="text-xs text-gray-500">{pkg.duration}</div>
@@ -153,10 +170,7 @@ export default function PackageManager() {
                                     {pkg.displayPrice}
                                 </td>
                                 <td className="px-6 py-4">
-                                    <ul className="list-disc list-inside text-xs text-gray-600">
-                                        {pkg.features.slice(0, 2).map((f, i) => <li key={i}>{f}</li>)}
-                                        {pkg.features.length > 2 && <li>+{pkg.features.length - 2} more</li>}
-                                    </ul>
+                                    <div className="text-sm font-medium text-gray-900">{pkg.dailySwipeLimit} Swipes/Day</div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <button onClick={() => setEditingPkg(pkg)} className="text-indigo-600 hover:text-indigo-900 mr-4">
@@ -221,13 +235,44 @@ export default function PackageManager() {
                                 </div>
                             </div>
 
+                            {/* Limits Section */}
+                            <div className="p-3 bg-blue-50 rounded border border-blue-100">
+                                <h4 className="font-semibold text-blue-900 text-sm mb-2">Technical Limits</h4>
+                                <div>
+                                    <label className="block text-sm font-medium text-blue-800">Daily Swipe Limit</label>
+                                    <input
+                                        type="number"
+                                        value={editingPkg.dailySwipeLimit}
+                                        onChange={e => setEditingPkg({ ...editingPkg, dailySwipeLimit: Number(e.target.value) })}
+                                        className="mt-1 w-full border border-blue-200 rounded p-2"
+                                        placeholder="e.g. 10 or 1000"
+                                    />
+                                    <p className="text-xs text-blue-600 mt-1">Set to 1000 or more for 'Unlimited'</p>
+                                </div>
+                            </div>
+
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Features (Comma separated)</label>
+                                <label className="block text-sm font-medium text-gray-700">Marketing Features (Bullet points)</label>
+                                <p className="text-xs text-gray-500 mb-1">These are just text displayed to the user (e.g., "Unlimited Swipes"). They do not control actual app logic.</p>
                                 <textarea
                                     value={editingPkg.features.join(', ')}
                                     onChange={e => setEditingPkg({ ...editingPkg, features: e.target.value.split(',').map(s => s.trim()) })}
                                     className="mt-1 w-full border border-gray-300 rounded p-2 h-24"
                                 />
+                            </div>
+
+
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="checkbox"
+                                    id="isActive"
+                                    checked={editingPkg.isActive !== false}
+                                    onChange={e => setEditingPkg({ ...editingPkg, isActive: e.target.checked })}
+                                    className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
+                                />
+                                <label htmlFor="isActive" className="text-sm font-medium text-gray-700">
+                                    Package enabled
+                                </label>
                             </div>
 
                             <div className="flex justify-end gap-3 mt-6">

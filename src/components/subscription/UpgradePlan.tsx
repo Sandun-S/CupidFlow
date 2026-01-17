@@ -20,7 +20,10 @@ export default function UpgradePlan() {
             const snap = await getDocs(collection(db, 'packages'));
             if (!snap.empty) {
                 const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                setPackages(data.sort((a: any, b: any) => a.order - b.order));
+                // Allow isActive to be undefined (default true) or explicitly true.
+                // Exclude only if false.
+                const activePackages = data.filter((p: any) => p.isActive !== false).sort((a: any, b: any) => a.order - b.order);
+                setPackages(activePackages);
             } else {
                 // Fallback if no packages in DB? Or just show empty.
             }

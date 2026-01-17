@@ -1,18 +1,21 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, doc, getDoc, writeBatch } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { useAuthStore } from '../../store/authStore';
-import { Send, ArrowLeft } from 'lucide-react';
+import { Send, ArrowLeft, Check, CheckCheck } from 'lucide-react';
 
 export default function ChatWindow() {
     const { matchId } = useParams();
-    const { user } = useAuthStore();
+    const { user, userData } = useAuthStore(); // Need userData for checking my package
     const navigate = useNavigate();
     const [messages, setMessages] = useState<any[]>([]);
     const [newMessage, setNewMessage] = useState('');
     const [otherUser, setOtherUser] = useState<any>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
+
+    // Check if I am Platinum (to see read receipts)
+    const canSeeReadReceipts = userData?.packageId === 'platinum';
 
     useEffect(() => {
         if (!matchId || !user) return;
@@ -42,6 +45,24 @@ export default function ChatWindow() {
             setMessages(msgs);
             // Scroll to bottom
             setTimeout(() => scrollRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+
+            // 3. Mark unread messages as read (if they are from the OTHER user and I haven't read them)
+            // We can't do async inside this sync callback easily without caution, but firing and forgetting is mostly ok for this.
+            // Better: Filter for unread messages sent by partner.
+            const unreadIds = snapshot.docs
+                .filter(doc => {
+                    const data = doc.data();
+                    return data.senderId !== user.uid && !data.read;
+                })
+                .map(doc => doc.id);
+
+            if (unreadIds.length > 0) {
+                const batch = writeBatch(db);
+                unreadIds.forEach(id => {
+                    batch.update(doc(db, "matches", matchId, "messages", id), { read: true });
+                });
+                batch.commit().catch(e => console.error("Error marking read", e));
+            }
         });
 
         return () => unsubscribe();
@@ -56,6 +77,7 @@ export default function ChatWindow() {
             await addDoc(collection(db, "matches", matchId, "messages"), {
                 text: newMessage,
                 senderId: user.uid,
+                read: false, // Default unread
                 createdAt: serverTimestamp()
             });
 
@@ -92,10 +114,20 @@ export default function ChatWindow() {
                     return (
                         <div key={msg.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
                             <div className={`max-w-[75%] px-4 py-2 rounded-2xl ${isMine
-                                    ? 'bg-pink-500 text-white rounded-tr-none'
-                                    : 'bg-white border border-gray-100 text-gray-800 rounded-tl-none shadow-sm'
+                                ? 'bg-pink-500 text-white rounded-tr-none'
+                                : 'bg-white border border-gray-100 text-gray-800 rounded-tl-none shadow-sm'
                                 }`}>
                                 {msg.text}
+                                {/* Read Receipt (Only if mine + premium + enabled) */}
+                                {isMine && canSeeReadReceipts && (
+                                    <div className="flex justify-end mt-1">
+                                        {msg.read ? (
+                                            <CheckCheck size={14} className="text-white/70" />
+                                        ) : (
+                                            <Check size={14} className="text-white/50" />
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     );
