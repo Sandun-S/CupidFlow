@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { collection, query, where, getDocs, doc, writeBatch, getDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { logAction } from '../../lib/audit';
-import { CheckCircle, XCircle, Phone } from 'lucide-react';
+import { CheckCircle, XCircle, Phone, User } from 'lucide-react';
 
 interface Request {
     id: string; // uid
@@ -14,7 +14,9 @@ interface Request {
     submittedAt: any;
     userPhone?: string; // Fetched from user doc
     displayName?: string;
+    fullName?: string;
     location?: string;
+    address?: string;
     age?: string | number;
 }
 
@@ -45,7 +47,9 @@ export default function VerificationQueue() {
                     ...data,
                     userPhone,
                     displayName: profileData.displayName || "Unknown",
+                    fullName: `${profileData.firstName || ''} ${profileData.lastName || ''}`.trim() || "Unknown Name",
                     location: profileData.location ? `${profileData.location.city}, ${profileData.location.district}` : "Unknown Location",
+                    address: profileData.location?.address || "No Address Provided",
                     age: profileData.age || "N/A"
                 } as Request);
             }
@@ -155,8 +159,9 @@ export default function VerificationQueue() {
                             <div>
                                 <h2 className="text-xl font-bold">Reviewing: {selectedReq.displayName} ({selectedReq.age})</h2>
                                 <p className="text-sm text-gray-500 flex flex-col gap-1 mt-1">
+                                    <span className="flex items-center gap-2 font-medium text-gray-900"><User size={14} /> {selectedReq.fullName}</span>
                                     <span className="flex items-center gap-2"><Phone size={14} /> {selectedReq.userPhone}</span>
-                                    <span className="flex items-center gap-2">📍 {selectedReq.location}</span>
+                                    <span className="flex items-center gap-2">📍 {selectedReq.address} ({selectedReq.location})</span>
                                     <span className="text-xs text-gray-400">NIC: {selectedReq.nicNumber}</span>
                                 </p>
                             </div>

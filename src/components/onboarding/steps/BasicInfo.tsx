@@ -1,14 +1,97 @@
+import { useState, useEffect } from 'react';
 import { useUserStore } from '../../../store/userStore';
 import { DISTRICTS } from '../../../lib/constants'; // Import shared constants
+import { RecaptchaVerifier, linkWithPhoneNumber } from 'firebase/auth';
+import { auth, db } from '../../../lib/firebase';
+import { Phone, CheckCircle, Loader } from 'lucide-react';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 
 const ethnicities = ["Sinhalese", "Tamil", "Muslim", "Burgher", "Other"];
 const religions = ["Buddhist", "Christian", "Hindu", "Islam", "Other"];
 
 export default function BasicInfo() {
     const { draft, updateDraft } = useUserStore();
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [otp, setOtp] = useState('');
+    const [verificationId, setVerificationId] = useState<any>(null); // confirmationResult object
+    const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState('');
+    const [isPhoneVerified, setIsPhoneVerified] = useState(false);
+
+    useEffect(() => {
+        // Check if user already has a phone saved
+        const checkPhone = async () => {
+            if (auth.currentUser) {
+                const docSnap = await getDoc(doc(db, "users", auth.currentUser.uid));
+                if (docSnap.exists() && docSnap.data().phone) {
+                    setPhoneNumber(docSnap.data().phone);
+                    setIsPhoneVerified(true); // Assume saved = verified for simplicity/legacy, or check explicit flag
+                }
+            }
+        };
+        checkPhone();
+    }, []);
+
+    const sendOtp = async () => {
+        if (!phoneNumber) return;
+        setLoading(true);
+        setMessage('');
+
+        try {
+            // Cleanup existing verifier if happens to exist
+            if (window.recaptchaVerifier) {
+                window.recaptchaVerifier.clear();
+            }
+
+            window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container-onboard', {
+                'size': 'invisible',
+            });
+
+            const appVerifier = window.recaptchaVerifier;
+            const confirmationResult = await linkWithPhoneNumber(auth.currentUser!, phoneNumber, appVerifier);
+            setVerificationId(confirmationResult);
+            setMessage("OTP Sent! Check your phone.");
+        } catch (err: any) {
+            console.error("Link Phone Error", err);
+            if (err.code === 'auth/credential-already-in-use') {
+                setMessage("Error: Number already linked to another account.");
+            } else if (err.code === 'auth/invalid-phone-number') {
+                setMessage("Invalid Phone Number");
+            } else {
+                setMessage("Failed to send OTP: " + err.message);
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const verifyOtp = async () => {
+        if (!verificationId || !otp) return;
+        setLoading(true);
+        try {
+            await verificationId.confirm(otp);
+            setMessage("Phone Verified Successfully!");
+            setIsPhoneVerified(true);
+            setVerificationId(null);
+
+            // Save to Firestore Immediate
+            if (auth.currentUser) {
+                await updateDoc(doc(db, "users", auth.currentUser.uid), {
+                    phone: phoneNumber
+                });
+            }
+        } catch (err) {
+            console.error(err);
+            setMessage("Invalid OTP. Try again.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="space-y-6">
+            <div id="recaptcha-container-onboard"></div>
+
             <div className="grid grid-cols-2 gap-4">
                 <div>
                     <label className="block text-sm font-medium text-gray-700">First Name <span className="text-xs text-gray-500">(Private)</span></label>
@@ -41,6 +124,71 @@ export default function BasicInfo() {
                     className="mt-1 w-full p-2 border rounded-md"
                     placeholder="e.g. JD"
                 />
+            </div>
+
+            {/* Phone Verification Section */}
+            <div className={`p-4 rounded-xl border ${isPhoneVerified ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-200'}`}>
+                <label className="block text-sm font-medium text-gray-800 mb-2">Mobile Number (For Notifications & Login)</label>
+
+                {isPhoneVerified ? (
+                    <div className="flex items-center gap-2 text-green-700 font-medium">
+                        <CheckCircle size={20} />
+                        <span>{phoneNumber} (Verified)</span>
+                    </div>
+                ) : (
+                    <div className="space-y-3">
+                        <div className="flex gap-2">
+                            <input
+                                type="tel"
+                                value={phoneNumber}
+                                onChange={(e) => setPhoneNumber(e.target.value)}
+                                className="flex-1 p-2 border rounded-md"
+                                placeholder="+94 7X XXX XXXX"
+                                disabled={!!verificationId}
+                            />
+                            {!verificationId && (
+                                <button
+                                    onClick={sendOtp}
+                                    disabled={loading || !phoneNumber}
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium disabled:opacity-50"
+                                >
+                                    {loading ? 'Sending...' : 'Verify'}
+                                </button>
+                            )}
+                        </div>
+
+                        {verificationId && (
+                            <div className="flex gap-2 animate-in fade-in slide-in-from-top-2">
+                                <input
+                                    type="text"
+                                    value={otp}
+                                    onChange={(e) => setOtp(e.target.value)}
+                                    className="flex-1 p-2 border rounded-md"
+                                    placeholder="Enter OTP Code"
+                                />
+                                <button
+                                    onClick={verifyOtp}
+                                    disabled={loading}
+                                    className="px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium disabled:opacity-50"
+                                >
+                                    {loading ? 'Verifying...' : 'Confirm'}
+                                </button>
+                                <button
+                                    onClick={() => { setVerificationId(null); setMessage(''); }}
+                                    className="text-xs text-gray-500 underline"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        )}
+
+                        {message && (
+                            <p className={`text-xs ${message.includes('Error') || message.includes('Failed') || message.includes('Invalid') ? 'text-red-500' : 'text-blue-600'}`}>
+                                {message}
+                            </p>
+                        )}
+                    </div>
+                )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -94,7 +242,7 @@ export default function BasicInfo() {
                     </div>
                 </div>
                 <div className="mt-4">
-                    <label className="block text-sm font-medium text-gray-700">Address <span className="text-xs text-gray-500">(Private)</span></label>
+                    <label className="block text-sm font-medium text-gray-700">Address <span className="text-xs text-gray-500">(Private - Visible to Admin)</span></label>
                     <textarea
                         value={draft.location.address || ''}
                         onChange={(e) => updateDraft({ location: { ...draft.location, address: e.target.value } })}
