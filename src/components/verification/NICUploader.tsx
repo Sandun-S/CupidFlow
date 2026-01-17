@@ -7,9 +7,10 @@ interface NICUploaderProps {
     onUpload: (url: string) => void;
     type: "verification" | "public"; // "verification" for NIC, "public" for profile pics
     initialUrl?: string;
+    minimal?: boolean;
 }
 
-export default function NICUploader({ label, onUpload, type, initialUrl }: NICUploaderProps) {
+export default function NICUploader({ label, onUpload, type, initialUrl, minimal = false }: NICUploaderProps) {
     const [image, setImage] = useState<string | null>(initialUrl || null);
     const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -44,15 +45,15 @@ export default function NICUploader({ label, onUpload, type, initialUrl }: NICUp
     };
 
     return (
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col items-center justify-center bg-gray-50 hover:bg-white transition-colors">
-            <p className="text-sm font-medium text-gray-700 mb-3">{label}</p>
+        <div className={`flex flex-col items-center justify-center transition-colors ${minimal ? 'w-full h-full' : 'border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50 hover:bg-white'}`}>
+            {!minimal && <p className="text-sm font-medium text-gray-700 mb-3">{label}</p>}
 
             {image ? (
-                <div className="relative w-full aspect-video rounded-md overflow-hidden bg-black">
-                    <img src={image} alt="Preview" className="w-full h-full object-contain" />
+                <div className={`relative w-full ${minimal ? 'h-full' : 'aspect-video'} rounded-md overflow-hidden bg-black`}>
+                    <img src={image} alt="Preview" className="w-full h-full object-cover" />
                     <button
                         onClick={clearImage}
-                        className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full hover:bg-red-600"
+                        className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 z-10"
                     >
                         <X className="h-4 w-4" />
                     </button>
@@ -63,23 +64,34 @@ export default function NICUploader({ label, onUpload, type, initialUrl }: NICUp
                     )}
                 </div>
             ) : (
-                <div className="flex gap-4">
+                <div className="flex gap-4 w-full h-full items-center justify-center">
                     <button
                         onClick={() => fileInputRef.current?.click()}
-                        className="flex flex-col items-center gap-1 text-gray-500 hover:text-pink-600"
+                        className={`flex flex-col items-center gap-1 text-gray-500 hover:text-pink-600 ${minimal ? 'w-full h-full justify-center' : ''}`}
                     >
-                        <Upload className="h-8 w-8" />
-                        <span className="text-xs">Upload</span>
+                        {/* If minimal, maybe Show nothing or just trigger area? EditProfile handles the icon overlay. 
+                             But NICUploader handles the click. 
+                             Let's make NICUploader invisible trigger in minimal mode if needed, 
+                             OR just assume NICUploader controls the trigger.
+                             In EditProfile we added an overlay with Camera icon.
+                             So here, if minimal, we should make the button fill the area and maybe be invisible opacity?
+                             Or just minimal UI.
+                          */}
+                        {!minimal && <Upload className="h-8 w-8" />}
+                        {!minimal && <span className="text-xs">Upload</span>}
+                        {minimal && <div className="w-full h-full absolute inset-0" />} {/* Click target */}
                     </button>
 
-                    {/* Mobile Camera Trigger (Input accept="image/*" capture="environment" handles this natively on mobile) */}
-                    <button
-                        onClick={() => fileInputRef.current?.click()}
-                        className="flex flex-col items-center gap-1 text-gray-500 hover:text-pink-600"
-                    >
-                        <Camera className="h-8 w-8" />
-                        <span className="text-xs">Camera</span>
-                    </button>
+                    {/* Camera button only for non-minimal */}
+                    {!minimal && (
+                        <button
+                            onClick={() => fileInputRef.current?.click()}
+                            className="flex flex-col items-center gap-1 text-gray-500 hover:text-pink-600"
+                        >
+                            <Camera className="h-8 w-8" />
+                            <span className="text-xs">Camera</span>
+                        </button>
+                    )}
                 </div>
             )}
 
