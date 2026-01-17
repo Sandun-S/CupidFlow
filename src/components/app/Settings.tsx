@@ -41,9 +41,10 @@ export default function Settings() {
                         <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Account</h2>
                     </div>
                     {settingItems.map((item, idx) => (
-                        key = { idx }
-                            onClick = { item.action }
-                            className = "w-full flex items-center justify-between p-3 hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0"
+                        <button
+                            key={idx}
+                            onClick={item.action}
+                            className="w-full flex items-center justify-between p-3 hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0"
                         >
                             <div className="flex items-center gap-3">
                                 <item.icon size={18} className="text-gray-500" />
@@ -52,20 +53,20 @@ export default function Settings() {
                             <ChevronRight size={16} className="text-gray-400" />
                         </button>
                     ))}
+                </div>
+
+                <button
+                    onClick={handleLogout}
+                    className="w-full bg-white text-red-500 font-bold py-4 rounded-xl shadow-sm hover:bg-red-50 transition flex items-center justify-center gap-2"
+                >
+                    <LogOut size={20} />
+                    Log Out
+                </button>
+
+                <p className="text-center text-xs text-gray-400 mt-8">
+                    CupidFlow v1.0.0
+                </p>
             </div>
-
-            <button
-                onClick={handleLogout}
-                className="w-full bg-white text-red-500 font-bold py-4 rounded-xl shadow-sm hover:bg-red-50 transition flex items-center justify-center gap-2"
-            >
-                <LogOut size={20} />
-                Log Out
-            </button>
-
-            <p className="text-center text-xs text-gray-400 mt-8">
-                CupidFlow v1.0.0
-            </p>
-        </div>
         </div >
     );
 }

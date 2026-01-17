@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
-import { ArrowLeft, User, Briefcase, MapPin, Ruler, Book, Users, Wine, Settings as SettingsIcon, Edit2 } from 'lucide-react';
+import { ArrowLeft, User, Briefcase, MapPin, Ruler, Book, Users, Wine, Settings as SettingsIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import BottomNav from './BottomNav';
 
