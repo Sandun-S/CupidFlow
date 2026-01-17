@@ -10,6 +10,7 @@ import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import ForgotPassword from './components/auth/ForgotPassword';
 import EmailVerificationPending from './components/auth/EmailVerificationPending';
+import AuthAction from './components/auth/AuthAction';
 import ProfileWizard from './components/onboarding/ProfileWizard';
 import ExploreFeed from './components/app/ExploreFeed';
 import ChatList from './components/chat/ChatList';
@@ -142,6 +143,7 @@ function AppContent() {
             <Route path="/safety" element={<SafetyTips />} />
 
             {/* Verification Staging */}
+            <Route path="/auth/action" element={<AuthAction />} />
             <Route path="/verify-email" element={<EmailVerificationPending />} />
             <Route path="/verify-status" element={
                 <div className="flex items-center justify-center min-h-screen bg-pink-50 p-4">
