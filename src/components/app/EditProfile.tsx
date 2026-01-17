@@ -199,6 +199,18 @@ export default function EditProfile() {
         if (!user) return;
         setSaving(true);
         try {
+            // Calculate Age
+            let age = null;
+            if (formData.birthDate) {
+                const today = new Date();
+                const birthDate = new Date(formData.birthDate);
+                age = today.getFullYear() - birthDate.getFullYear();
+                const m = today.getMonth() - birthDate.getMonth();
+                if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                    age--;
+                }
+            }
+
             await updateDoc(doc(db, "profiles", user.uid), {
                 displayName: formData.displayName,
                 bio: formData.about,
@@ -209,6 +221,7 @@ export default function EditProfile() {
 
                 gender: formData.gender,
                 birthDate: formData.birthDate,
+                age: age, // Save calculated age
                 civilStatus: formData.civilStatus,
 
                 height: formData.height,

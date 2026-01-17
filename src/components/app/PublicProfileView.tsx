@@ -13,6 +13,19 @@ export default function PublicProfileView() {
     const [loading, setLoading] = useState(true);
     const [carouselIndex, setCarouselIndex] = useState(0);
 
+    // Derived State: Age
+    let displayAge = profile?.age;
+    if (profile?.birthDate) {
+        const today = new Date();
+        const birthDate = new Date(profile.birthDate);
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        displayAge = age;
+    }
+
     // Check if we are viewing *another* user (passed via location state or query?)
     // Or if this is for the current user.
     // Ideally this component should accept a prop or read from URL param `:uid`
@@ -111,7 +124,7 @@ export default function PublicProfileView() {
                     )}
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 text-white pb-10 pointer-events-none">
                         <h2 className="text-3xl font-bold flex items-center gap-2">
-                            {profile.displayName || "User"}, {profile.age || "??"}
+                            {profile.displayName || "User"}, {displayAge || "??"}
                         </h2>
                         <div className="flex items-center gap-2 text-sm opacity-90 mt-1">
                             <MapPin size={16} /> {profile.location?.city || "Unknown City"}, {profile.location?.district || ""}
