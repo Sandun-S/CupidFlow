@@ -1,9 +1,8 @@
 import { Profile } from '../../store/userStore';
-import { Heart, X, MapPin, Briefcase, Lock, Zap, Crown, User, Book, Ruler, Users, Utensils, Wine, ArrowDown } from 'lucide-react';
+import { Heart, X, MapPin, Briefcase, Lock, Zap, Crown, User, Book, Ruler, Users, Wine, ArrowDown } from 'lucide-react';
 import { useState } from 'react';
 import { differenceInYears } from 'date-fns';
 import { useAuthStore } from '../../store/authStore';
-import { useNavigate } from 'react-router-dom';
 
 interface ProfileCardProps {
     profile: Profile;
@@ -12,7 +11,6 @@ interface ProfileCardProps {
 
 export default function ProfileCard({ profile, onSwipe }: ProfileCardProps) {
     const { userData } = useAuthStore();
-    const navigate = useNavigate();
     const isPremium = userData?.isPremium === true;
     const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
     const [showInfo, setShowInfo] = useState(false);
