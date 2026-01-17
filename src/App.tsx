@@ -46,7 +46,8 @@ function AppContent() {
 
                         // Routing Logic
                         // 1. Admin Bypass
-                        if (data.role === 'admin') return;
+                        // if (data.role === 'admin') return; // Removed to fix infinite loading
+
 
                         const path = window.location.pathname;
                         const status = data.nicStatus || 'unverified'; // Default to unverified if missing
