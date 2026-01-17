@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import AdminRoute from './components/admin/AdminRoute';
 import AdminLayout from './components/admin/AdminLayout';
 import VerificationQueue from './components/admin/VerificationQueue';
+import TransactionManager from './components/admin/TransactionManager';
 import Login from './components/auth/Login';
 import { useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -52,7 +53,7 @@ function App() {
                     <Route element={<AdminLayout />}>
                         <Route index element={<div className="text-center p-10">Welcome to Admin Dashboard. Select an item from the sidebar.</div>} />
                         <Route path="verifications" element={<VerificationQueue />} />
-                        <Route path="transactions" element={<div>Transactions Coming Soon</div>} />
+                        <Route path="transactions" element={<TransactionManager />} />
                     </Route>
                 </Route>
             </Routes>
