@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Heart, Shield, CheckCircle, ArrowRight, Smartphone, Globe } from 'lucide-react';
 
 export default function LandingPage() {
@@ -224,14 +224,14 @@ export default function LandingPage() {
                     </div>
 
                     <div className="flex gap-8 text-sm font-medium text-gray-600">
-                        <a href="#" onClick={() => navigate('/about')} className="hover:text-pink-600 transition-colors">About Us</a>
-                        <a href="#" onClick={() => navigate('/safety')} className="hover:text-pink-600 transition-colors">Safety Tips</a>
-                        <a href="#" onClick={() => navigate('/terms')} className="hover:text-pink-600 transition-colors">Terms</a>
-                        <a href="#" onClick={() => navigate('/privacy')} className="hover:text-pink-600 transition-colors">Privacy</a>
+                        <Link to="/about" className="hover:text-pink-600 transition-colors">About Us</Link>
+                        <Link to="/safety" className="hover:text-pink-600 transition-colors">Safety Tips</Link>
+                        <Link to="/terms" className="hover:text-pink-600 transition-colors">Terms</Link>
+                        <Link to="/privacy" className="hover:text-pink-600 transition-colors">Privacy</Link>
                     </div>
 
                     <div className="text-sm text-gray-500">
-                        © 2024 CupidFlow. All rights reserved.
+                        © {new Date().getFullYear()} CupidFlow. All rights reserved.
                     </div>
                 </div>
             </footer>
