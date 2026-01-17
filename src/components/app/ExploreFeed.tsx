@@ -71,10 +71,17 @@ export default function ExploreFeed() {
     };
 
     const handleSwipe = async (direction: 'left' | 'right') => {
-        if (profiles.length === 0) return;
-        const currentProfile = profiles[0];
-        setProfiles(prev => prev.slice(1));
-        const isMatch = await swipe(currentProfile.id, direction);
+        // We always operate on the *first* displayed profile.
+        // But since displayProfiles is derived, we need to find which ID we just swiped 
+        // and remove it from the main 'profiles' state.
+        
+        if (displayProfiles.length === 0) return;
+        const swipedProfile = displayProfiles[0];
+        
+        // Remove from main state
+        setProfiles(prev => prev.filter(p => p.id !== swipedProfile.id));
+        
+        const isMatch = await swipe(swipedProfile.id, direction);
         if (isMatch) { /* Handled via UI state */ }
     };
 
@@ -149,18 +156,51 @@ export default function ExploreFeed() {
 
     return (
         <div className="min-h-screen bg-pink-50 flex flex-col items-center py-6 px-4 relative">
+import { Filter, X } from 'lucide-react';
+import { DISTRICTS } from '../../lib/constants';
+
+// ... inside component ...
+    const [showFilters, setShowFilters] = useState(false);
+    const [filters, setFilters] = useState({
+        minAge: 18,
+        maxAge: 50,
+        district: '',
+        expandSearch: true
+    });
+
+    // ... existing fetchProfiles ...
+    // Note: We need to modify fetchProfiles or the rendering logic to apply filters.
+    // Let's modify the RENDER/Processing logic.
+
+    const filteredProfiles = profiles.filter(p => {
+        // 1. Basic Filters
+        const matchesAge = p.age >= filters.minAge && p.age <= filters.maxAge;
+        const matchesDistrict = filters.district ? p.location?.district === filters.district : true;
+        
+        return matchesAge && matchesDistrict;
+    });
+
+    // Elastic Match Logic: If filtered count < 5 and expandSearch is TRUE, show ALL profiles (relaxed).
+    // Or simpler: Just use 'profiles' (which is the full fetched list) if filtered is too low.
+    const displayProfiles = (filters.expandSearch && filteredProfiles.length < 5) 
+        ? profiles 
+        : filteredProfiles;
+
+    const isElasticActive = filters.expandSearch && filteredProfiles.length < 5 && profiles.length >= 5;
+
+// ... UI ...
+
             {/* Header / Actions */}
-            <div className="w-full max-w-sm flex justify-between items-center mb-6">
+            <div className="w-full max-w-sm flex justify-between items-center mb-6 relative z-30">
                 <h1 className="text-2xl font-bold text-pink-600">CupidFlow</h1>
 
                 <div className="flex gap-3">
-                    {/* Support Button */}
+                    {/* Filter Button */}
                     <button
-                        onClick={handleSupport}
-                        className="p-2 bg-white rounded-full text-gray-400 hover:text-gray-600 shadow-sm"
-                        title="Contact Support"
+                        onClick={() => setShowFilters(!showFilters)}
+                        className={`p-2 rounded-full shadow-sm transition-all ${showFilters ? 'bg-pink-100 text-pink-600' : 'bg-white text-gray-500'}`}
                     >
-                        <HelpCircle size={20} />
+                        <Filter size={20} />
                     </button>
 
                     {/* Boost Button */}
@@ -177,22 +217,100 @@ export default function ExploreFeed() {
                 </div>
             </div>
 
+            {/* Filter Panel */}
+            {showFilters && (
+                <div className="w-full max-w-sm bg-white p-4 rounded-2xl shadow-xl mb-4 border border-pink-100 animate-in slide-in-from-top-2">
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="font-bold text-gray-800">Filters</h3>
+                        <button onClick={() => setShowFilters(false)}><X size={16} /></button>
+                    </div>
+                    
+                    <div className="space-y-4">
+                        <div>
+                            <label className="text-xs font-bold text-gray-500 uppercase">Age Range</label>
+                            <div className="flex items-center gap-2 mt-1">
+                                <input 
+                                    type="number" 
+                                    value={filters.minAge} 
+                                    onChange={e => setFilters({...filters, minAge: parseInt(e.target.value)})}
+                                    className="w-full p-2 border rounded-lg bg-gray-50"
+                                />
+                                <span className="text-gray-400">-</span>
+                                <input 
+                                    type="number" 
+                                    value={filters.maxAge} 
+                                    onChange={e => setFilters({...filters, maxAge: parseInt(e.target.value)})}
+                                    className="w-full p-2 border rounded-lg bg-gray-50"
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="text-xs font-bold text-gray-500 uppercase">District</label>
+                            <select 
+                                value={filters.district}
+                                onChange={e => setFilters({...filters, district: e.target.value})}
+                                className="w-full p-2 border rounded-lg bg-gray-50 mt-1"
+                            >
+                                <option value="">Anywhere</option>
+                                {DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
+                            </select>
+                        </div>
+
+                        <div className="flex items-center gap-2 pt-2 border-t">
+                            <input 
+                                type="checkbox" 
+                                id="expand"
+                                checked={filters.expandSearch}
+                                onChange={e => setFilters({...filters, expandSearch: e.target.checked})}
+                                className="w-4 h-4 text-pink-600 rounded"
+                            />
+                            <label htmlFor="expand" className="text-sm text-gray-700">
+                                <strong>Elastic Search</strong> (Show verified users outside preference if matches run out)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            )}
+            
+            {/* Elastic Indicator */}
+            {isElasticActive && (
+                <div className="w-full max-w-sm bg-blue-50 text-blue-600 px-4 py-2 rounded-lg text-sm mb-4 flex items-center gap-2 border border-blue-100">
+                    <Rocket size={14} />
+                    <span>Expanded search to find you more matches!</span>
+                </div>
+            )}
+
             {/* Card Stack */}
             <div className="w-full max-w-sm relative h-[600px]">
                 {/* We only render the top card for interaction, maybe one below for visual depth */}
-                {profiles.length > 1 && (
+                {displayProfiles.length > 1 && (
                     <div className="absolute top-4 left-0 right-0 scale-95 opacity-50 pointer-events-none transform translate-y-4">
-                        <ProfileCard profile={profiles[1]} onSwipe={() => { }} />
+                        <ProfileCard profile={displayProfiles[1]} onSwipe={() => { }} />
                     </div>
                 )}
 
+                {displayProfiles.length > 0 ? (
                 <div className="absolute inset-0 z-10 transition-transform">
                     <ProfileCard
-                        key={profiles[0].id}
-                        profile={profiles[0]}
+                        key={displayProfiles[0].id}
+                        profile={displayProfiles[0]}
                         onSwipe={handleSwipe}
                     />
                 </div>
+                ) : (
+                   <div className="flex flex-col items-center justify-center h-full text-center p-8 bg-white/50 rounded-2xl border-2 border-dashed border-gray-300">
+                        <Filter size={48} className="text-gray-300 mb-4" />
+                        <h3 className="text-xl font-bold text-gray-600">No matches found</h3>
+                        <p className="text-gray-500 mb-4">Try relaxing your filters to see more people.</p>
+                        <button 
+                            onClick={() => setFilters({ minAge: 18, maxAge: 60, district: '', expandSearch: true })}
+                            className="text-pink-600 font-bold hover:underline"
+                        >
+                            Reset Filters
+                        </button>
+                   </div>
+                )}
             </div>
 
             {/* Match Modal */}
