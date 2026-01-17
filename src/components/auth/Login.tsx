@@ -32,13 +32,45 @@ export default function Login() {
 
     // Initialize Recaptcha
     useEffect(() => {
-        if (!window.recaptchaVerifier) {
-            window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-                'size': 'invisible',
-                'callback': () => { }
-            });
+        if (isPhoneLogin) {
+            // Ensure any previous instance is cleared
+            if (window.recaptchaVerifier) {
+                try {
+                    window.recaptchaVerifier.clear();
+                } catch (e) {
+                    console.warn("Failed to clear previous recaptcha", e);
+                }
+                window.recaptchaVerifier = null;
+            }
+
+            try {
+                window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+                    'size': 'invisible',
+                    'callback': () => {
+                        // reCAPTCHA solved - will allow signInWithPhoneNumber.
+                    },
+                    'expired-callback': () => {
+                        // Response expired. Ask user to solve reCAPTCHA again.
+                        console.log("Recaptcha expired");
+                    }
+                });
+            } catch (err) {
+                console.error("Recaptcha Init Error", err);
+            }
         }
-    }, []);
+
+        // Cleanup on unmount or mode switch
+        return () => {
+            if (window.recaptchaVerifier) {
+                try {
+                    window.recaptchaVerifier.clear();
+                } catch (e) {
+                    // ignore
+                }
+                window.recaptchaVerifier = null;
+            }
+        };
+    }, [isPhoneLogin]);
 
     const checkUserStatus = async (user: any) => {
         const userRef = doc(db, "users", user.uid);
