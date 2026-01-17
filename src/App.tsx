@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
@@ -33,14 +33,7 @@ import TransactionManager from './components/admin/TransactionManager';
 
 // Layouts
 import AdminLayout from './components/admin/AdminLayout';
-
-function AdminRoute({ children }: { children: React.ReactNode }) {
-    const { userData, loading } = useAuthStore();
-    if (loading) return <div>Loading...</div>;
-    if (userData?.role !== 'admin') return <Navigate to="/app/explore" />;
-    return <>{children}</>;
-}
-
+import AdminRoute from './components/admin/AdminRoute';
 
 function AppContent() {
     const { setUser, setUserData, setLoading, loading } = useAuthStore();
@@ -174,13 +167,15 @@ function AppContent() {
             <Route path="/app/profile/view" element={<PublicProfileView />} />
 
             {/* Admin Routes */}
-            <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
-                <Route index element={<div className="text-center p-10">Welcome to Admin Dashboard. Select an item from the sidebar.</div>} />
-                <Route path="verifications" element={<VerificationQueue />} />
-                <Route path="transactions" element={<TransactionManager />} />
-                <Route path="packages" element={<PackageManager />} />
-                <Route path="users" element={<UserManagement />} />
-                <Route path="config" element={<SystemConfig />} />
+            <Route path="/admin" element={<AdminRoute />}>
+                <Route element={<AdminLayout />}>
+                    <Route index element={<div className="text-center p-10">Welcome to Admin Dashboard. Select an item from the sidebar.</div>} />
+                    <Route path="verifications" element={<VerificationQueue />} />
+                    <Route path="transactions" element={<TransactionManager />} />
+                    <Route path="packages" element={<PackageManager />} />
+                    <Route path="users" element={<UserManagement />} />
+                    <Route path="config" element={<SystemConfig />} />
+                </Route>
             </Route>
         </Routes>
     );

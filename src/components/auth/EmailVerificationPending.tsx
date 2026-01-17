@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { auth, db } from '../../lib/firebase';
 import { sendEmailVerification, signOut } from 'firebase/auth';
 import { useAuthStore } from '../../store/authStore';
