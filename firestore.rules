@@ -54,6 +54,11 @@ service cloud.firestore {
       allow create: if request.auth != null; // Ideally check if hash matches content but simple for now
     }
 
+    match /audit_logs/{logId} {
+      allow read: if isAdmin();
+      allow create: if request.auth != null;
+    }
+
     // Packages: Public Read, Admin Write
     match /packages/{packageId} {
       allow read: if true;

@@ -52,7 +52,7 @@ export const handleUserAuthSuccess = async (user: any, navigate: any, method: st
                 role: 'user',
                 createdAt: serverTimestamp(),
                 isVerified: false,
-                nicStatus: 'pending',
+                nicStatus: 'unverified',
                 packageId: packageId,
                 accessStatus: accessStatus,
                 accountExpiry: accountExpiry,
