@@ -159,7 +159,7 @@ export default function Login() {
     const handleVerifyOtp = async () => {
         setLoading(true);
         try {
-            const confirmationResult = (window as any).confirmationResult;
+            const confirmationResult = window.confirmationResult;
             const result = await confirmationResult.confirm(otp);
             setUser(result.user);
             await logAction('USER_LOGIN', { method: 'phone' });
