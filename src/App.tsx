@@ -12,6 +12,7 @@ import ProfileWizard from './components/onboarding/ProfileWizard';
 import ExploreFeed from './components/app/ExploreFeed';
 import ChatList from './components/chat/ChatList';
 import ChatWindow from './components/chat/ChatWindow';
+import UpgradePlan from './components/subscription/UpgradePlan';
 
 function App() {
     const { setUser, setLoading, loading } = useAuthStore();
@@ -52,6 +53,7 @@ function App() {
                 <Route path="/app/explore" element={<ExploreFeed />} />
                 <Route path="/app/chat" element={<ChatList />} />
                 <Route path="/app/chat/:matchId" element={<ChatWindow />} />
+                <Route path="/app/upgrade" element={<UpgradePlan />} />
 
                 {/* Admin Routes */}
                 <Route path="/admin" element={<AdminRoute />}>
