@@ -215,6 +215,33 @@ export default function BasicInfo() {
                 </div>
             </div>
 
+            <div className="grid grid-cols-2 gap-4">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700">Height (ft/cm)</label>
+                    <input
+                        type="text"
+                        value={draft.height || ''}
+                        onChange={(e) => updateDraft({ height: e.target.value })}
+                        className="mt-1 w-full p-2 border rounded-md"
+                        placeholder="e.g. 5'8"
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-700">Civil Status</label>
+                    <select
+                        value={draft.civilStatus || ''}
+                        onChange={(e) => updateDraft({ civilStatus: e.target.value })}
+                        className="mt-1 w-full p-2 border rounded-md"
+                    >
+                        <option value="">Select</option>
+                        <option value="Single">Single</option>
+                        <option value="Divorced">Divorced</option>
+                        <option value="Widowed">Widowed</option>
+                        <option value="Separated">Separated</option>
+                    </select>
+                </div>
+            </div>
+
             <div className="border-t pt-4">
                 <h3 className="text-sm font-medium text-gray-900 mb-3">Location</h3>
                 <div className="grid grid-cols-2 gap-4">

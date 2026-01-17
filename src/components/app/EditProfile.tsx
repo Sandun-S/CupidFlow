@@ -285,6 +285,29 @@ export default function EditProfile() {
                             <label className="label">Display Name</label>
                             <input type="text" value={formData.displayName} onChange={e => setFormData({ ...formData, displayName: e.target.value })} className="input-field" />
                         </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="label">Gender</label>
+                                <select value={formData.gender} onChange={e => setFormData({ ...formData, gender: e.target.value })} className="input-field">
+                                    <option value="man">Man</option>
+                                    <option value="woman">Woman</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="label">Civil Status</label>
+                                <select value={formData.civilStatus} onChange={e => setFormData({ ...formData, civilStatus: e.target.value })} className="input-field">
+                                    <option value="">Select</option>
+                                    <option value="Single">Single</option>
+                                    <option value="Divorced">Divorced</option>
+                                    <option value="Widowed">Widowed</option>
+                                    <option value="Separated">Separated</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label className="label">Date of Birth</label>
+                            <input type="date" value={formData.birthDate} onChange={e => setFormData({ ...formData, birthDate: e.target.value })} className="input-field" />
+                        </div>
                         <div>
                             <label className="label">About Me</label>
                             <textarea value={formData.about} onChange={e => setFormData({ ...formData, about: e.target.value })} className="input-field h-24" />
@@ -362,8 +385,8 @@ export default function EditProfile() {
                                 key={section.id}
                                 onClick={() => setActiveSection(section.id)}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all ${isActive
-                                        ? 'bg-gray-900 text-white shadow-md'
-                                        : 'bg-white text-gray-500 hover:bg-gray-100'
+                                    ? 'bg-gray-900 text-white shadow-md'
+                                    : 'bg-white text-gray-500 hover:bg-gray-100'
                                     }`}
                             >
                                 <Icon size={16} />

@@ -9,6 +9,7 @@ const defaultPreferences = {
     ageRange: { min: 20, max: 40 },
     gender: 'any',
     district: 'any',
+    ethnicity: 'any',
     religion: 'any'
 };
 
@@ -118,6 +119,37 @@ export default function Preferences() {
                         <option value="Christian">Christian</option>
                         <option value="Hindu">Hindu</option>
                         <option value="Islam">Islam</option>
+                    </select>
+                </div>
+
+                {/* Ethnicity */}
+                <div className="bg-white p-4 rounded-xl shadow-sm">
+                    <h3 className="font-medium text-gray-900 mb-4">Ethnicity</h3>
+                    <select
+                        value={prefs.ethnicity || 'any'}
+                        onChange={(e) => setPrefs({ ...prefs, ethnicity: e.target.value })}
+                        className="w-full p-2 border rounded-md"
+                    >
+                        <option value="any">Any</option>
+                        <option value="Sinhalese">Sinhalese</option>
+                        <option value="Tamil">Tamil</option>
+                        <option value="Muslim">Muslim</option>
+                        <option value="Burgher">Burgher</option>
+                    </select>
+                </div>
+
+                {/* District */}
+                <div className="bg-white p-4 rounded-xl shadow-sm">
+                    <h3 className="font-medium text-gray-900 mb-4">Location (District)</h3>
+                    <select
+                        value={prefs.district || 'any'}
+                        onChange={(e) => setPrefs({ ...prefs, district: e.target.value })}
+                        className="w-full p-2 border rounded-md"
+                    >
+                        <option value="any">Any</option>
+                        {['Colombo', 'Gampaha', 'Kandy', 'Galle', 'Kurunegala', 'Kalutara', 'Matara', 'Ratnapura', 'Kegalle'].map(d => (
+                            <option key={d} value={d}>{d}</option>
+                        ))}
                     </select>
                 </div>
             </div>
