@@ -23,6 +23,15 @@ export default function Register() {
         setError('');
         try {
             const result = await createUserWithEmailAndPassword(auth, email, password);
+
+            // Send Verification Email
+            try {
+                await import('firebase/auth').then(mod => mod.sendEmailVerification(result.user));
+                alert("Verification email sent! Please check your inbox.");
+            } catch (emailErr) {
+                console.warn("Failed to send verification email", emailErr);
+            }
+
             setUser(result.user);
             // handleUserAuthSuccess will handle the Firestore creation AND navigation
             await handleUserAuthSuccess(result.user, navigate, 'email_signup');

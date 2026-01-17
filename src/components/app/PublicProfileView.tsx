@@ -145,8 +145,8 @@ export default function PublicProfileView() {
 
                         {/* NEW: Family Details (if available) */}
                         {profile.family && (profile.family.fatherProfession || profile.family.motherProfession) && (
-                            <div className="flex items-center gap-3 text-gray-700 bg-blue-50 p-3 rounded-lg col-span-2">
-                                <Users size={20} className="text-blue-500" />
+                            <div className="flex items-center gap-3 text-gray-700 bg-pink-50 p-2 rounded-lg col-span-2">
+                                <Users size={20} className="text-pink-500" />
                                 <div>
                                     <p className="font-bold text-sm">Family Background</p>
                                     <p className="text-xs text-gray-600">

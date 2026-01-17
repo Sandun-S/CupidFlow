@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
@@ -35,9 +35,24 @@ const INTERESTS_CATEGORIES = {
 export default function EditProfile() {
     const { user } = useAuthStore();
     const navigate = useNavigate();
+
+    // Form States
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [activeSection, setActiveSection] = useState('basic');
+
+    // Tab Scroll ref
+    const tabsRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        // Auto-scroll active tab into view
+        if (tabsRef.current) {
+            const activeTab = tabsRef.current.querySelector(`[data-tab="${activeSection}"]`);
+            if (activeTab) {
+                activeTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            }
+        }
+    }, [activeSection]);
 
     // Sibling Builder State
     const [siblingGender, setSiblingGender] = useState('Brother');
@@ -385,18 +400,18 @@ export default function EditProfile() {
                         {/* Siblings */}
                         <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
                             <label className="label mb-3">Siblings Builder</label>
-                            <div className="flex flex-wrap gap-2 mb-3">
-                                <select value={siblingOrder} onChange={e => setSiblingOrder(e.target.value)} className="p-2 border rounded text-xs flex-1">
+                            <div className="grid grid-cols-3 gap-2 mb-3">
+                                <select value={siblingOrder} onChange={e => setSiblingOrder(e.target.value)} className="p-2 border rounded text-xs w-full">
                                     <option>Elder</option><option>Younger</option><option>Twin</option>
                                 </select>
-                                <select value={siblingGender} onChange={e => setSiblingGender(e.target.value)} className="p-2 border rounded text-xs flex-1">
+                                <select value={siblingGender} onChange={e => setSiblingGender(e.target.value)} className="p-2 border rounded text-xs w-full">
                                     <option>Brother</option><option>Sister</option>
                                 </select>
-                                <select value={siblingStatus} onChange={e => setSiblingStatus(e.target.value)} className="p-2 border rounded text-xs flex-1">
+                                <select value={siblingStatus} onChange={e => setSiblingStatus(e.target.value)} className="p-2 border rounded text-xs w-full">
                                     <option>Student</option><option>Employed</option><option>Married</option>
                                 </select>
-                                <button onClick={addSibling} className="bg-gray-900 text-white p-2 rounded hover:bg-black"><Plus size={16} /></button>
                             </div>
+                            <button onClick={addSibling} className="w-full bg-gray-900 text-white p-2 rounded hover:bg-black flex items-center justify-center gap-2 mb-3"><Plus size={16} /> Add Sibling</button>
 
                             {/* Live List Preview */}
                             {(siblingsList.length > 0) && (
@@ -512,14 +527,30 @@ export default function EditProfile() {
                         {/* Phone Number Logic */}
                         <div>
                             <label className="label">Mobile Number (Private)</label>
-                            <input
-                                type="tel"
-                                value={formData.phone}
-                                onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                                className="input-field"
-                                placeholder="+94 7X XXX XXXX"
-                            />
-                            <p className="text-xs text-gray-400 mt-1">Shared only with confirmed matches (if enabled) or Admin.</p>
+                            <div className="relative">
+                                <input
+                                    type="tel"
+                                    value={formData.phone}
+                                    onFocus={() => {
+                                        if (!formData.phone) setFormData({ ...formData, phone: '+94' });
+                                    }}
+                                    onChange={e => {
+                                        const val = e.target.value;
+                                        // Allow + and numbers only
+                                        if (/^[0-9+]*$/.test(val)) {
+                                            setFormData({ ...formData, phone: val });
+                                        }
+                                    }}
+                                    className="input-field"
+                                    placeholder="+94 7X XXX XXXX"
+                                />
+                                {formData.phone && formData.phone.length >= 10 && (
+                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    </div>
+                                )}
+                            </div>
+                            <p className="text-xs text-gray-400 mt-1">We'll save this automatically. Shared only with confirmed matches (if enabled) or Admin.</p>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
@@ -611,16 +642,17 @@ export default function EditProfile() {
                 </div>
 
                 {/* Section Tabs */}
-                <div className="flex overflow-x-auto gap-2 pb-4 mb-2 no-scrollbar">
+                <div ref={tabsRef} className="flex overflow-x-auto gap-2 pb-4 mb-2 no-scrollbar scroll-smooth">
                     {SECTIONS.map((section) => {
                         const Icon = section.icon;
                         const isActive = activeSection === section.id;
                         return (
                             <button
                                 key={section.id}
+                                data-tab={section.id}
                                 onClick={() => setActiveSection(section.id)}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all ${isActive
-                                    ? 'bg-gray-900 text-white shadow-md'
+                                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all flex-shrink-0 ${isActive
+                                    ? 'bg-pink-100 text-pink-600 shadow-sm ring-1 ring-pink-200'
                                     : 'bg-white text-gray-500 hover:bg-gray-100'
                                     }`}
                             >

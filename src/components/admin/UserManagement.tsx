@@ -126,7 +126,23 @@ export default function UserManagement() {
                                         </td>
                                         <td className="p-4">
                                             <div className="text-gray-600">{user.email}</div>
-                                            <div className="text-xs text-gray-400">{user.phone || "No Phone"}</div>
+                                            <div className="flex items-center gap-2">
+                                                <div className="text-xs text-gray-400">{user.phone || "No Phone"}</div>
+                                                {/* Email Verification Status */}
+                                                <button
+                                                    onClick={async () => {
+                                                        const newVal = !user.emailVerified;
+                                                        if (confirm(`Manually set Email Verified to ${newVal}?`)) {
+                                                            await updateDoc(doc(db, "users", user.id), { emailVerified: newVal });
+                                                            setUsers(users.map(u => u.id === user.id ? { ...u, emailVerified: newVal } : u));
+                                                        }
+                                                    }}
+                                                    className={`text-[10px] px-1 rounded border ${user.emailVerified ? 'bg-green-100 text-green-700 border-green-200' : 'bg-gray-100 text-gray-500 border-gray-200'}`}
+                                                    title="Click to toggle email verification"
+                                                >
+                                                    {user.emailVerified ? 'Email Verified' : 'Email Unverified'}
+                                                </button>
+                                            </div>
                                         </td>
                                         <td className="p-4">
                                             <select

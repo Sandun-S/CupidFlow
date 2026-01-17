@@ -8,7 +8,7 @@ import Register from './components/auth/Register';
 import ForgotPassword from './components/auth/ForgotPassword';
 import { useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { auth, db } from './lib/firebase';
 import { useAuthStore } from './store/authStore';
 import ProfileWizard from './components/onboarding/ProfileWizard';
@@ -47,6 +47,15 @@ function AppContent() {
 
                     if (userSnap.exists()) {
                         const data = userSnap.data();
+
+                        // Sync Email Verification Status
+                        if (currentUser.emailVerified && !data.emailVerified) {
+                            await updateDoc(doc(db, "users", currentUser.uid), {
+                                emailVerified: true
+                            });
+                            data.emailVerified = true; // Update local state copy
+                        }
+
                         setUserData(data);
 
                         // Routing Logic
