@@ -166,44 +166,43 @@ export default function ExploreFeed() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-screen bg-pink-50">
+            <div className="flex items-center justify-center h-screen bg-pink-50 dark:bg-gray-900 transition-colors duration-300">
                 <Loader className="animate-spin text-pink-500 w-10 h-10" />
             </div>
         );
     }
 
-    // Empty State Handling
     if (profiles.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center h-screen bg-pink-50 p-4 text-center">
-                <div className="bg-white p-8 rounded-2xl shadow-lg max-w-sm w-full">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-2">No more profiles</h2>
-                    <p className="text-gray-500 mb-6">You've seen everyone nearby! Check back later.</p>
-                    <button onClick={fetchProfiles} className="text-pink-600 font-bold hover:underline">
+            <div className="flex flex-col items-center justify-center h-screen bg-pink-50 p-4 text-center dark:bg-gray-900 transition-colors duration-300">
+                <div className="bg-white p-8 rounded-2xl shadow-lg max-w-sm w-full dark:bg-gray-800 dark:shadow-none">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-2 dark:text-white">No more profiles</h2>
+                    <p className="text-gray-500 mb-6 dark:text-gray-400">You've seen everyone nearby! Check back later.</p>
+                    <button onClick={fetchProfiles} className="text-pink-600 font-bold hover:underline mb-4 dark:text-pink-400">
                         Refresh
                     </button>
-                    <div className="mt-8 pt-6 border-t w-full">
-                        <button onClick={handleSupport} className="flex items-center justify-center gap-2 text-gray-400 hover:text-pink-600">
+                    <div className="pt-6 border-t w-full dark:border-gray-700">
+                        <button onClick={handleSupport} className="flex items-center justify-center gap-2 text-gray-400 hover:text-pink-600 mx-auto dark:hover:text-pink-400">
                             <Mail size={16} /> Contact Support
                         </button>
                     </div>
                 </div>
                 <BottomNav />
-            </div >
+            </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-pink-50 flex flex-col items-center py-6 px-4 relative pb-24 overflow-hidden">
+        <div className="min-h-screen bg-pink-50 flex flex-col items-center py-6 px-4 relative pb-24 overflow-hidden dark:bg-gray-900 transition-colors duration-300">
             {/* Header / Actions */}
             <div className="w-full max-w-sm flex justify-between items-center mb-6 relative z-30">
-                <h1 className="text-2xl font-bold text-pink-600">CupidFlow</h1>
+                <h1 className="text-2xl font-bold text-pink-600 dark:text-pink-500">CupidFlow</h1>
 
                 <div className="flex gap-3">
                     {/* Filter Button -> Preferences */}
                     <button
                         onClick={() => window.location.href = '/app/preferences'}
-                        className="p-2 rounded-full shadow-sm bg-white text-gray-500 hover:text-pink-600 transition-colors"
+                        className="p-2 rounded-full shadow-sm bg-white text-gray-500 hover:text-pink-600 transition-colors dark:bg-gray-800 dark:text-gray-400 dark:hover:text-pink-400"
                         title="Preferences"
                     >
                         <Filter size={20} />
@@ -212,7 +211,7 @@ export default function ExploreFeed() {
                     {/* Support Button */}
                     <button
                         onClick={handleSupport}
-                        className="p-2 bg-white rounded-full text-gray-400 hover:text-gray-600 shadow-sm"
+                        className="p-2 bg-white rounded-full text-gray-400 hover:text-gray-600 shadow-sm dark:bg-gray-800 dark:text-gray-400 dark:hover:text-gray-300"
                         title="Contact Support"
                     >
                         <HelpCircle size={20} />
@@ -222,8 +221,8 @@ export default function ExploreFeed() {
                     <button
                         onClick={handleBoost}
                         className={`p-2 rounded-full shadow-sm transition-all ${boostActive
-                            ? 'bg-purple-600 text-white shadow-purple-200 ring-2 ring-purple-300'
-                            : 'bg-white text-purple-600 hover:bg-purple-50'
+                            ? 'bg-purple-600 text-white shadow-purple-200 ring-2 ring-purple-300 dark:shadow-none'
+                            : 'bg-white text-purple-600 hover:bg-purple-50 dark:bg-gray-800 dark:text-purple-400 dark:hover:bg-gray-700'
                             }`}
                         title="Boost Profile"
                     >
@@ -263,17 +262,17 @@ export default function ExploreFeed() {
                         </div>
                     </>
                 ) : (
-                    <div className="flex flex-col items-center justify-center h-full text-center p-8 bg-white/60 backdrop-blur-sm rounded-3xl border-2 border-dashed border-gray-300 shadow-sm">
-                        <div className="bg-gray-100 p-4 rounded-full mb-4">
-                            <Filter size={32} className="text-gray-400" />
+                    <div className="flex flex-col items-center justify-center h-full text-center p-8 bg-white/60 backdrop-blur-sm rounded-3xl border-2 border-dashed border-gray-300 shadow-sm dark:bg-gray-800/80 dark:border-gray-700 dark:text-gray-200">
+                        <div className="bg-gray-100 p-4 rounded-full mb-4 dark:bg-gray-700">
+                            <Filter size={32} className="text-gray-400 dark:text-gray-300" />
                         </div>
-                        <h3 className="text-xl font-bold text-gray-700">No matches found</h3>
-                        <p className="text-gray-500 mb-6 mt-2">
+                        <h3 className="text-xl font-bold text-gray-700 dark:text-white">No matches found</h3>
+                        <p className="text-gray-500 mb-6 mt-2 dark:text-gray-400">
                             Check your preferences or try again later.
                         </p>
                         <button
                             onClick={() => window.location.href = '/app/preferences'}
-                            className="bg-white border border-pink-200 text-pink-600 px-6 py-2 rounded-full font-bold shadow-sm hover:bg-pink-50 transition-colors"
+                            className="bg-white border border-pink-200 text-pink-600 px-6 py-2 rounded-full font-bold shadow-sm hover:bg-pink-50 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-pink-400 dark:hover:bg-gray-600"
                         >
                             Update Preferences
                         </button>
@@ -282,26 +281,28 @@ export default function ExploreFeed() {
             </div>
 
             {/* Match Modal */}
-            {matchDetails && (
-                <div className="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-4 animate-in fade-in duration-300">
-                    <h2 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500 mb-8 animate-bounce">
-                        IT'S A MATCH!
-                    </h2>
-                    <div className="flex gap-4 mb-8">
-                        {/* Simple placeholders or avatars if available in matchDetails */}
-                        <div className="w-24 h-24 rounded-full bg-gray-600 border-4 border-white animate-pulse" />
-                        <div className="w-24 h-24 rounded-full bg-pink-600 border-4 border-white animate-pulse delay-75" />
+            {
+                matchDetails && (
+                    <div className="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-4 animate-in fade-in duration-300">
+                        <h2 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500 mb-8 animate-bounce">
+                            IT'S A MATCH!
+                        </h2>
+                        <div className="flex gap-4 mb-8">
+                            {/* Simple placeholders or avatars if available in matchDetails */}
+                            <div className="w-24 h-24 rounded-full bg-gray-600 border-4 border-white animate-pulse" />
+                            <div className="w-24 h-24 rounded-full bg-pink-600 border-4 border-white animate-pulse delay-75" />
+                        </div>
+                        <button
+                            onClick={() => setMatchDetails(null)}
+                            className="bg-white text-pink-600 px-8 py-3 rounded-full font-bold text-lg hover:scale-105 transition-transform"
+                        >
+                            Keep Swiping
+                        </button>
                     </div>
-                    <button
-                        onClick={() => setMatchDetails(null)}
-                        className="bg-white text-pink-600 px-8 py-3 rounded-full font-bold text-lg hover:scale-105 transition-transform"
-                    >
-                        Keep Swiping
-                    </button>
-                </div>
-            )}
+                )
+            }
 
             <BottomNav />
-        </div>
+        </div >
     );
 }

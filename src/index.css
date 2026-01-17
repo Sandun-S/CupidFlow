@@ -1,3 +1,32 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    :root {
+        --background: 255 255 255;
+        --foreground: 0 0 0;
+    }
+
+    .dark {
+        --background: 17 24 39;
+        /* gray-900 */
+        --foreground: 255 255 255;
+    }
+
+    body {
+        @apply bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-white transition-colors duration-300;
+    }
+}
+
+/* Custom Hide Scrollbar for Story/Feed */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+}

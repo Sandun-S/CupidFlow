@@ -14,14 +14,14 @@ export default function BottomNav() {
 
     return (
         <div className="fixed bottom-0 left-0 right-0 z-50">
-            <div className="bg-white border-t border-gray-100 py-3 px-6 flex justify-between items-center max-w-md mx-auto shadow-lg-up">
+            <div className="bg-white border-t border-gray-100 py-3 px-6 flex justify-between items-center max-w-md mx-auto shadow-lg-up dark:bg-gray-900 dark:border-gray-800 transition-colors duration-300">
                 {navItems.map((item) => {
                     const isActive = location.pathname === item.path;
                     return (
                         <button
                             key={item.path}
                             onClick={() => navigate(item.path)}
-                            className={`flex flex-col items-center gap-1 ${isActive ? 'text-pink-600' : 'text-gray-400 hover:text-gray-600'}`}
+                            className={`flex flex-col items-center gap-1 ${isActive ? 'text-pink-600 dark:text-pink-500' : 'text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300'}`}
                         >
                             <item.icon size={24} fill={isActive ? "currentColor" : "none"} />
                             <span className="text-[10px] font-medium">{item.label}</span>

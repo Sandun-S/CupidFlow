@@ -602,27 +602,35 @@ export default function EditProfile() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-20">
+        <div className="min-h-screen bg-gray-50 pb-20 dark:bg-gray-900 transition-colors duration-300">
             <style>{`
                 .label { display: block; font-size: 0.75rem; color: #6b7280; font-weight: 700; text-transform: uppercase; margin-bottom: 0.5rem; }
                 .input-field { width: 100%; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 0.75rem; background-color: white; color: #1f2937; font-weight: 500; outline: none; transition: box-shadow 0.2s; }
                 .input-field:focus { box-shadow: 0 0 0 2px #fbcfe8; border-color: #f472b6; }
+                
+                /* Dark Mode Overrides */
+                .dark .label { color: #9ca3af; }
+                .dark .input-field { background-color: #374151; border-color: #4b5563; color: #e5e7eb; }
+                .dark .input-field:focus { box-shadow: 0 0 0 2px #831843; border-color: #be185d; }
+                .dark .bg-white { background-color: #111827; }
+
                 .custom-scrollbar::-webkit-scrollbar { width: 4px; }
                 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
                 .custom-scrollbar::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 99px; }
+                .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #4b5563; }
             `}</style>
 
             {/* Nav */}
-            <div className="bg-white sticky top-0 z-20 shadow-sm">
+            <div className="bg-white sticky top-0 z-20 shadow-sm dark:bg-gray-900 dark:border-b dark:border-gray-800 transition-colors duration-300">
                 <nav className="max-w-md mx-auto p-4 flex items-center justify-between">
-                    <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-full">
-                        <ArrowLeft className="text-gray-600" />
+                    <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-full dark:hover:bg-gray-800">
+                        <ArrowLeft className="text-gray-600 dark:text-gray-300" />
                     </button>
-                    <h1 className="text-lg font-bold">Edit Profile</h1>
+                    <h1 className="text-lg font-bold dark:text-white">Edit Profile</h1>
                     <button
                         onClick={handleSave}
                         disabled={saving}
-                        className="px-4 py-1.5 bg-pink-600 text-white rounded-full font-bold text-sm shadow-sm hover:bg-pink-700 disabled:opacity-50 transition-all"
+                        className="px-4 py-1.5 bg-pink-600 text-white rounded-full font-bold text-sm shadow-sm hover:bg-pink-700 disabled:opacity-50 transition-all dark:bg-pink-700 dark:hover:bg-pink-600"
                     >
                         {saving ? '...' : 'Save'}
                     </button>
@@ -633,11 +641,11 @@ export default function EditProfile() {
                 {/* Photos Section */}
                 <div className="mb-8">
                     <div className="flex justify-between items-center mb-3 px-1">
-                        <h3 className="font-bold text-gray-900">My Photos</h3>
+                        <h3 className="font-bold text-gray-900 dark:text-gray-200">My Photos</h3>
                     </div>
                     <div className="grid grid-cols-3 gap-3">
                         {[0, 1, 2, 3, 4, 5].map((idx) => (
-                            <div key={idx} className="relative aspect-[3/4] bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm flex flex-col items-center justify-center hover:border-pink-300 transition-colors group">
+                            <div key={idx} className="relative aspect-[3/4] bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm flex flex-col items-center justify-center hover:border-pink-300 transition-colors group dark:bg-gray-800 dark:border-gray-700">
                                 <NICUploader
                                     label={`#${idx + 1}`}
                                     type="public"
@@ -646,7 +654,7 @@ export default function EditProfile() {
                                     minimal={true}
                                 />
                                 {!formData.photos[idx] && (
-                                    <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-gray-400 group-hover:text-pink-400 transition-colors">
+                                    <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-gray-400 group-hover:text-pink-400 transition-colors dark:text-gray-600">
                                         <Camera size={20} className="mb-1" />
                                         <span className="text-[10px] font-bold uppercase">Add</span>
                                     </div>
@@ -667,8 +675,8 @@ export default function EditProfile() {
                                 data-tab={section.id}
                                 onClick={() => setActiveSection(section.id)}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all flex-shrink-0 ${isActive
-                                    ? 'bg-pink-100 text-pink-600 shadow-sm ring-1 ring-pink-200'
-                                    : 'bg-white text-gray-500 hover:bg-gray-100'
+                                    ? 'bg-pink-100 text-pink-600 shadow-sm ring-1 ring-pink-200 dark:bg-pink-900/40 dark:text-pink-300 dark:ring-pink-800'
+                                    : 'bg-white text-gray-500 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700'
                                     }`}
                             >
                                 <Icon size={16} />
@@ -679,7 +687,7 @@ export default function EditProfile() {
                 </div>
 
                 {/* Active Section Content */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm min-h-[400px]">
+                <div className="bg-white p-6 rounded-2xl shadow-sm min-h-[400px] dark:bg-gray-800 dark:shadow-none transition-colors duration-300">
                     {renderSection()}
                 </div>
             </div>

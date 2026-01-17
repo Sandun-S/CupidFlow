@@ -126,10 +126,10 @@ export default function ProfileCard({ profile, onSwipe }: ProfileCardProps) {
 
             {/* Detail View Overlay */}
             {showInfo && (
-                <div className="absolute inset-0 bg-white z-30 overflow-y-auto animate-in slide-in-from-bottom duration-300">
-                    <div className="sticky top-0 bg-white/90 backdrop-blur p-4 flex justify-between items-center shadow-sm">
-                        <h2 className="text-xl font-bold text-gray-800">{profile.displayName}</h2>
-                        <button onClick={() => setShowInfo(false)} className="p-2 bg-gray-100 rounded-full">
+                <div className="absolute inset-0 bg-white z-30 overflow-y-auto animate-in slide-in-from-bottom duration-300 dark:bg-gray-900">
+                    <div className="sticky top-0 bg-white/90 backdrop-blur p-4 flex justify-between items-center shadow-sm dark:bg-gray-900/90 dark:border-b dark:border-gray-800">
+                        <h2 className="text-xl font-bold text-gray-800 dark:text-white">{profile.displayName}</h2>
+                        <button onClick={() => setShowInfo(false)} className="p-2 bg-gray-100 rounded-full dark:bg-gray-800 dark:text-gray-300">
                             <ArrowDown size={20} />
                         </button>
                     </div>
@@ -137,7 +137,7 @@ export default function ProfileCard({ profile, onSwipe }: ProfileCardProps) {
                     <div className="p-6 space-y-6 pb-20">
                         {/* Bio */}
                         <div>
-                            <p className="text-gray-600 leading-relaxed italic">"{profile.bio || "No bio yet"}"</p>
+                            <p className="text-gray-600 leading-relaxed italic dark:text-gray-300">"{profile.bio || "No bio yet"}"</p>
                         </div>
 
                         {/* Sections */}
@@ -167,16 +167,16 @@ export default function ProfileCard({ profile, onSwipe }: ProfileCardProps) {
                     </div>
 
                     {/* Sticky Bottom Actions */}
-                    <div className="sticky bottom-0 bg-white border-t p-4 flex justify-center gap-8">
+                    <div className="sticky bottom-0 bg-white border-t p-4 flex justify-center gap-8 dark:bg-gray-900 dark:border-gray-800">
                         <button
                             onClick={() => { setShowInfo(false); onSwipe('left'); }}
-                            className="w-14 h-14 border-2 border-red-500 rounded-full flex items-center justify-center text-red-500"
+                            className="w-14 h-14 border-2 border-red-500 rounded-full flex items-center justify-center text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
                         >
                             <X size={28} />
                         </button>
                         <button
                             onClick={() => { setShowInfo(false); onSwipe('right'); }}
-                            className="w-14 h-14 bg-pink-500 rounded-full flex items-center justify-center text-white shadow-lg"
+                            className="w-14 h-14 bg-pink-500 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-pink-600"
                         >
                             <Heart size={28} fill="white" strokeWidth={0} />
                         </button>
@@ -190,13 +190,13 @@ export default function ProfileCard({ profile, onSwipe }: ProfileCardProps) {
 function InfoRow({ icon: Icon, label, value }: any) {
     if (!value) return null;
     return (
-        <div className="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0">
-            <div className="p-2 bg-pink-50 rounded-lg text-pink-500">
+        <div className="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0 dark:border-gray-800">
+            <div className="p-2 bg-pink-50 rounded-lg text-pink-500 dark:bg-gray-800 dark:text-pink-400">
                 <Icon size={18} />
             </div>
             <div>
-                <p className="text-xs text-gray-400">{label}</p>
-                <p className="text-sm font-medium text-gray-800">{value}</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500">{label}</p>
+                <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{value}</p>
             </div>
         </div>
     );

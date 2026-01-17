@@ -88,29 +88,29 @@ export default function LikesYou() {
     if (loading) return <div className="p-8 text-center text-gray-500">Loading your admirers...</div>;
 
     return (
-        <div className="min-h-screen bg-pink-50 pb-20">
-            <div className="max-w-md mx-auto bg-white min-h-screen shadow-xl relative">
+        <div className="min-h-screen bg-pink-50 pb-20 dark:bg-gray-900 transition-colors duration-300">
+            <div className="max-w-md mx-auto bg-white min-h-screen shadow-xl relative dark:bg-gray-900 dark:shadow-none transition-colors duration-300">
                 {/* Header */}
-                <div className="bg-white p-4 shadow-sm sticky top-0 z-10 flex items-center gap-3">
-                    <button onClick={() => navigate(-1)} className="text-gray-600">
+                <div className="bg-white p-4 shadow-sm sticky top-0 z-10 flex items-center gap-3 dark:bg-gray-900 dark:border-b dark:border-gray-800 transition-colors duration-300">
+                    <button onClick={() => navigate(-1)} className="text-gray-600 dark:text-gray-300">
                         &larr; Back
                     </button>
-                    <h1 className="text-xl font-bold text-gray-800">Likes You</h1>
-                    <span className="bg-pink-100 text-pink-600 text-xs font-bold px-2 py-0.5 rounded-full">
+                    <h1 className="text-xl font-bold text-gray-800 dark:text-white">Likes You</h1>
+                    <span className="bg-pink-100 text-pink-600 text-xs font-bold px-2 py-0.5 rounded-full dark:bg-pink-900/30 dark:text-pink-300">
                         {likers.length}
                     </span>
                 </div>
 
                 <div className="p-4">
                     {likers.length === 0 ? (
-                        <div className="text-center mt-20 text-gray-500">
-                            <Heart className="w-16 h-16 mx-auto text-gray-300 mb-4" />
+                        <div className="text-center mt-20 text-gray-500 dark:text-gray-400">
+                            <Heart className="w-16 h-16 mx-auto text-gray-300 mb-4 dark:text-gray-700" />
                             <p>No new likes yet. Keep swiping to get noticed!</p>
                         </div>
                     ) : (
                         <div className="grid grid-cols-2 gap-4">
                             {likers.map((profile) => (
-                                <div key={profile.uid} className="relative aspect-[3/4] rounded-xl overflow-hidden shadow-md bg-white">
+                                <div key={profile.uid} className="relative aspect-[3/4] rounded-xl overflow-hidden shadow-md bg-white dark:bg-gray-800">
                                     {/* Image Layer */}
                                     <img
                                         src={profile.avatar}
@@ -122,8 +122,8 @@ export default function LikesYou() {
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-3">
                                         {!isPremium ? (
                                             <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20">
-                                                <div className="bg-white/90 p-3 rounded-full mb-2">
-                                                    <Lock className="w-6 h-6 text-pink-600" />
+                                                <div className="bg-white/90 p-3 rounded-full mb-2 dark:bg-gray-900/90">
+                                                    <Lock className="w-6 h-6 text-pink-600 dark:text-pink-500" />
                                                 </div>
                                             </div>
                                         ) : (
@@ -139,7 +139,7 @@ export default function LikesYou() {
                 </div>
 
                 {!isPremium && likers.length > 0 && (
-                    <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t z-20 max-w-md mx-auto">
+                    <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t z-20 max-w-md mx-auto dark:bg-gray-900 dark:border-gray-800">
                         <button
                             onClick={() => navigate('/app/upgrade')}
                             className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold py-3 rounded-xl shadow-lg animate-pulse"

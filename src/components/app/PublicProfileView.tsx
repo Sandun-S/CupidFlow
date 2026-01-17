@@ -69,11 +69,11 @@ export default function PublicProfileView() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-20">
+        <div className="min-h-screen bg-gray-50 pb-20 dark:bg-gray-900 transition-colors duration-300">
             {/* Header Nav */}
 
 
-            <div className="max-w-md mx-auto bg-white min-h-screen shadow-lg overflow-hidden relative">
+            <div className="max-w-md mx-auto bg-white min-h-screen shadow-lg overflow-hidden relative dark:bg-gray-900 dark:shadow-none transition-colors duration-300">
                 {/* Main Photo (Carousel) */}
                 <div
                     className="relative h-96 w-full cursor-pointer"
@@ -150,45 +150,45 @@ export default function PublicProfileView() {
                     {/* Bio */}
                     {profile.bio && (
                         <div>
-                            <h3 className="text-lg font-bold text-gray-900 mb-2">About Me</h3>
-                            <p className="text-gray-600 leading-relaxed">{profile.bio}</p>
+                            <h3 className="text-lg font-bold text-gray-900 mb-2 dark:text-white">About Me</h3>
+                            <p className="text-gray-600 leading-relaxed dark:text-gray-300">{profile.bio}</p>
                         </div>
                     )}
 
                     {/* Details Grid */}
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="flex items-center gap-3 text-gray-700 bg-gray-50 p-3 rounded-lg">
+                        <div className="flex items-center gap-3 text-gray-700 bg-gray-50 p-3 rounded-lg dark:bg-gray-800 dark:text-gray-200">
                             <User size={20} className="text-pink-500" />
                             <div>
-                                <p className="text-xs text-gray-500">Gender</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">Gender</p>
                                 <p className="font-medium capitalize">{profile.gender || "N/A"}</p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3 text-gray-700 bg-gray-50 p-3 rounded-lg">
+                        <div className="flex items-center gap-3 text-gray-700 bg-gray-50 p-3 rounded-lg dark:bg-gray-800 dark:text-gray-200">
                             <Briefcase size={20} className="text-pink-500" />
                             <div>
-                                <p className="text-xs text-gray-500">Profession</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">Profession</p>
                                 <p className="font-medium text-sm line-clamp-2">{profile.profession || "N/A"}</p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3 text-gray-700 bg-gray-50 p-3 rounded-lg">
+                        <div className="flex items-center gap-3 text-gray-700 bg-gray-50 p-3 rounded-lg dark:bg-gray-800 dark:text-gray-200">
                             <Ruler size={20} className="text-pink-500" />
                             <div>
-                                <p className="text-xs text-gray-500">Height</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">Height</p>
                                 <p className="font-medium">{profile.height || "N/A"}</p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3 text-gray-700 bg-gray-50 p-3 rounded-lg">
+                        <div className="flex items-center gap-3 text-gray-700 bg-gray-50 p-3 rounded-lg dark:bg-gray-800 dark:text-gray-200">
                             <Book size={20} className="text-pink-500" />
                             <div>
-                                <p className="text-xs text-gray-500">Education</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">Education</p>
                                 <p className="font-medium text-sm line-clamp-2">{profile.education || "N/A"}</p>
                             </div>
                         </div>
 
                         {/* NEW: University / Education (if available) */}
                         {profile.university && (
-                            <div className="flex items-center gap-3 text-gray-700 bg-gray-50 p-3 rounded-lg col-span-2">
+                            <div className="flex items-center gap-3 text-gray-700 bg-gray-50 p-3 rounded-lg col-span-2 dark:bg-gray-800 dark:text-gray-200">
                                 <BookOpen size={20} className="text-pink-500" />
                                 <div>
                                     <p className="font-bold text-sm">Studies at</p>
@@ -199,11 +199,11 @@ export default function PublicProfileView() {
 
                         {/* NEW: Family Details (if available) */}
                         {profile.family && (profile.family.fatherProfession || profile.family.motherProfession) && (
-                            <div className="flex items-center gap-3 text-gray-700 bg-gray-50 p-2 rounded-lg col-span-2">
+                            <div className="flex items-center gap-3 text-gray-700 bg-gray-50 p-2 rounded-lg col-span-2 dark:bg-gray-800 dark:text-gray-200">
                                 <Users size={20} className="text-pink-500" />
                                 <div>
                                     <p className="font-bold text-sm">Family Background</p>
-                                    <p className="text-xs text-gray-600">
+                                    <p className="text-xs text-gray-600 dark:text-gray-400">
                                         {[
                                             profile.family.fatherProfession ? `Father: ${profile.family.fatherProfession}` : '',
                                             profile.family.motherProfession ? `Mother: ${profile.family.motherProfession}` : ''
@@ -213,19 +213,19 @@ export default function PublicProfileView() {
                             </div>
                         )}
 
-                        <div className="flex items-center gap-3 text-gray-700 bg-gray-50 p-3 rounded-lg col-span-2">
+                        <div className="flex items-center gap-3 text-gray-700 bg-gray-50 p-3 rounded-lg col-span-2 dark:bg-gray-800 dark:text-gray-200">
                             <Wine size={20} className="text-pink-500" />
                             <div className="flex flex-wrap gap-2">
                                 <div>
-                                    <p className="text-xs text-gray-500">Drinking</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">Drinking</p>
                                     <p className="font-medium text-sm">{profile.habits?.drinking || 'No'}</p>
                                 </div>
-                                <div className="border-l pl-2">
-                                    <p className="text-xs text-gray-500">Smoking</p>
+                                <div className="border-l pl-2 dark:border-gray-700">
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">Smoking</p>
                                     <p className="font-medium text-sm">{profile.habits?.smoking || 'No'}</p>
                                 </div>
-                                <div className="border-l pl-2">
-                                    <p className="text-xs text-gray-500">Food</p>
+                                <div className="border-l pl-2 dark:border-gray-700">
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">Food</p>
                                     <p className="font-medium text-sm">{profile.habits?.food || 'Any'}</p>
                                 </div>
                             </div>
@@ -234,10 +234,10 @@ export default function PublicProfileView() {
                     {/* Interests */}
                     {profile.interests && profile.interests.length > 0 && (
                         <div>
-                            <h3 className="text-lg font-bold text-gray-900 mb-3">Interests</h3>
+                            <h3 className="text-lg font-bold text-gray-900 mb-3 dark:text-white">Interests</h3>
                             <div className="flex flex-wrap gap-2">
                                 {profile.interests.map((interest: string, idx: number) => (
-                                    <span key={idx} className="px-3 py-1 bg-pink-50 text-pink-600 rounded-full text-sm border border-pink-100 font-medium">
+                                    <span key={idx} className="px-3 py-1 bg-pink-50 text-pink-600 rounded-full text-sm border border-pink-100 font-medium dark:bg-pink-900/30 dark:border-pink-500 dark:text-pink-300">
                                         {interest}
                                     </span>
                                 ))}
@@ -248,10 +248,10 @@ export default function PublicProfileView() {
                     {/* Gallery */}
                     {profile.photos && profile.photos.length > 1 && (
                         <div>
-                            <h3 className="text-lg font-bold text-gray-900 mb-3">Gallery</h3>
+                            <h3 className="text-lg font-bold text-gray-900 mb-3 dark:text-white">Gallery</h3>
                             <div className="grid grid-cols-3 gap-2">
                                 {profile.photos.slice(1).map((photo: string, idx: number) => (
-                                    <div key={idx} className="aspect-square rounded-lg overflow-hidden bg-gray-100">
+                                    <div key={idx} className="aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
                                         <img src={photo} className="w-full h-full object-cover" alt="Gallery" />
                                     </div>
                                 ))}
@@ -261,11 +261,11 @@ export default function PublicProfileView() {
 
                     {/* Report Button Area */}
                     {isOwner ? (
-                        <div className="pt-8 border-t text-center text-gray-400 text-sm">
+                        <div className="pt-8 border-t text-center text-gray-400 text-sm dark:border-gray-800">
                             This is how other users will see your profile.
                         </div>
                     ) : (
-                        <div className="pt-8 border-t text-center">
+                        <div className="pt-8 border-t text-center dark:border-gray-800">
                             <button
                                 onClick={() => alert("Report User feature coming soon")}
                                 className="text-red-500 font-bold text-sm hover:underline"
