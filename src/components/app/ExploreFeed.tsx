@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { collection, getDocs, getDoc, query, limit, where, orderBy, doc, updateDoc, Timestamp } from 'firebase/firestore';
+import { collection, getDocs, getDoc, query, limit, where, doc, updateDoc, Timestamp } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { useAuthStore } from '../../store/authStore';
 import ProfileCard from './ProfileCard';
@@ -49,7 +49,7 @@ export default function ExploreFeed() {
             // Fetching a larger limit to allow client-side filtering
             const q = query(
                 collection(db, "profiles"),
-                orderBy("boostedUntil", "desc"),
+                // orderBy("boostedUntil", "desc"), // Disabled because it requires a composite index
                 limit(100)
             );
 
