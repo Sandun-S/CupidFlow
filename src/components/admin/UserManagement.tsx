@@ -85,7 +85,7 @@ export default function UserManagement() {
 
     return (
         <div className="space-y-6">
-            <h1 className="text-2xl font-bold text-gray-800">User Management</h1>
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-white">User Management</h1>
 
             {/* Search */}
             <div className="relative">
@@ -95,14 +95,14 @@ export default function UserManagement() {
                     placeholder="Search by name, email or phone..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-200 outline-none"
+                    className="w-full pl-10 p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-200 outline-none dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:focus:ring-pink-900"
                 />
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden dark:bg-gray-800 dark:border-gray-700">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm">
-                        <thead className="bg-gray-50 border-b border-gray-100 text-gray-500 uppercase">
+                        <thead className="bg-gray-50 border-b border-gray-100 text-gray-500 uppercase dark:bg-gray-900/50 dark:border-gray-700 dark:text-gray-400">
                             <tr>
                                 <th className="p-4 font-bold">User</th>
                                 <th className="p-4 font-bold">Contact</th>
@@ -111,21 +111,21 @@ export default function UserManagement() {
                                 <th className="p-4 font-bold text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-50">
+                        <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
                             {loading ? (
                                 <tr><td colSpan={5} className="p-8 text-center text-gray-400">Loading users...</td></tr>
                             ) : filteredUsers.length === 0 ? (
                                 <tr><td colSpan={5} className="p-8 text-center text-gray-400">No users found</td></tr>
                             ) : (
                                 filteredUsers.map(user => (
-                                    <tr key={user.id} className="hover:bg-gray-50 transition">
+                                    <tr key={user.id} className="hover:bg-gray-50 transition dark:hover:bg-gray-700/50">
                                         <td className="p-4">
-                                            <div className="font-bold text-gray-900">{user.displayName || "No Name (Onboarding)"}</div>
+                                            <div className="font-bold text-gray-900 dark:text-white">{user.displayName || "No Name (Onboarding)"}</div>
                                             <div className="text-xs text-gray-400">{user.gender} • {user.id.slice(0, 6)}</div>
                                             {user.nicStatus && <div className={`text-[10px] uppercase font-bold ${user.nicStatus === 'verified' ? 'text-green-500' : 'text-yellow-500'}`}>{user.nicStatus}</div>}
                                         </td>
                                         <td className="p-4">
-                                            <div className="text-gray-600">{user.email}</div>
+                                            <div className="text-gray-600 dark:text-gray-300">{user.email}</div>
                                             <div className="flex items-center gap-2">
                                                 <div className="text-xs text-gray-400">{user.phone || "No Phone"}</div>
                                                 {/* Email Verification Status */}
@@ -137,7 +137,7 @@ export default function UserManagement() {
                                                             setUsers(users.map(u => u.id === user.id ? { ...u, emailVerified: newVal } : u));
                                                         }
                                                     }}
-                                                    className={`text-[10px] px-1 rounded border ${user.emailVerified ? 'bg-green-100 text-green-700 border-green-200' : 'bg-gray-100 text-gray-500 border-gray-200'}`}
+                                                    className={`text-[10px] px-1 rounded border ${user.emailVerified ? 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800' : 'bg-gray-100 text-gray-500 border-gray-200 dark:bg-gray-700 dark:text-gray-400 dark:border-gray-600'}`}
                                                     title="Click to toggle email verification"
                                                 >
                                                     {user.emailVerified ? 'Email Verified' : 'Email Unverified'}
@@ -148,7 +148,7 @@ export default function UserManagement() {
                                             <select
                                                 value={user.packageId || 'free'}
                                                 onChange={(e) => handleSubscription(user.id, e.target.value)}
-                                                className="p-2 rounded-lg border border-gray-200 text-sm focus:border-pink-500 outline-none bg-white"
+                                                className="p-2 rounded-lg border border-gray-200 text-sm focus:border-pink-500 outline-none bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                             >
                                                 <option value="free">Free</option>
                                                 {packages.map(pkg => (
@@ -161,15 +161,15 @@ export default function UserManagement() {
                                         <td className="p-4">
                                             <div className="flex items-center gap-1">
                                                 {user.role === 'admin' ? <Shield size={14} className="text-pink-600" /> : <UserX size={14} className="text-gray-400" />}
-                                                <span className="capitalize">{user.role || 'User'}</span>
+                                                <span className="capitalize dark:text-gray-300">{user.role || 'User'}</span>
                                             </div>
                                         </td>
                                         <td className="p-4 text-right">
                                             <div className="flex justify-end gap-2">
                                                 <select
-                                                    className={`text-xs font-bold uppercase border rounded px-2 py-1 outline-none ${user.nicStatus === 'verified' ? 'text-green-600 border-green-200 bg-green-50' :
-                                                        user.nicStatus === 'rejected' ? 'text-red-600 border-red-200 bg-red-50' :
-                                                            'text-yellow-600 border-yellow-200 bg-yellow-50'
+                                                    className={`text-xs font-bold uppercase border rounded px-2 py-1 outline-none ${user.nicStatus === 'verified' ? 'text-green-600 border-green-200 bg-green-50 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800' :
+                                                        user.nicStatus === 'rejected' ? 'text-red-600 border-red-200 bg-red-50 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800' :
+                                                            'text-yellow-600 border-yellow-200 bg-yellow-50 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800'
                                                         }`}
                                                     value={user.nicStatus || 'unverified'}
                                                     onChange={async (e) => {
@@ -199,7 +199,7 @@ export default function UserManagement() {
 
                                                 <button
                                                     title="View Public Profile"
-                                                    className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100"
+                                                    className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
                                                     onClick={() => navigate('/app/profile/view', { state: { uid: user.id } })}
                                                 >
                                                     <Eye size={16} />
@@ -207,7 +207,7 @@ export default function UserManagement() {
                                                 <button
                                                     title={user.role === 'admin' ? "Remove Admin" : "Make Admin"}
                                                     onClick={() => handleUpdateRole(user.id, user.role === 'admin' ? 'user' : 'admin')}
-                                                    className={`p-2 rounded-lg ${user.role === 'admin' ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-600'}`}
+                                                    className={`p-2 rounded-lg ${user.role === 'admin' ? 'bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'}`}
                                                 >
                                                     <Shield size={16} />
                                                 </button>

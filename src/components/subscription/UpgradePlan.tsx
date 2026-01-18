@@ -54,7 +54,8 @@ export default function UpgradePlan() {
 
             // 2. Create Transaction Record
             await addDoc(collection(db, "transactions"), {
-                userId: user.uid,
+                uid: user.uid, // Unified field name
+                // userId: user.uid, // Deprecated, keeping consistent with Admin
                 userName: user.displayName || 'User',
                 packageId: selectedPackage.id,
                 packageName: selectedPackage.name,

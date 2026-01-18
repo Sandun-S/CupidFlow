@@ -196,7 +196,7 @@ function AppContent() {
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminRoute />}>
                 <Route element={<AdminLayout />}>
-                    <Route index element={<div className="text-center p-10">Welcome to Admin Dashboard. Select an item from the sidebar.</div>} />
+                    <Route index element={<div className="text-center p-10 dark:text-gray-200">Welcome to Admin Dashboard. Select an item from the sidebar.</div>} />
                     <Route path="verifications" element={<VerificationQueue />} />
                     <Route path="transactions" element={<TransactionManager />} />
                     <Route path="packages" element={<PackageManager />} />

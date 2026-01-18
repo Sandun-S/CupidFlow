@@ -125,31 +125,31 @@ export default function VerificationQueue() {
 
     return (
         <div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">Verification Queue</h2>
+            <h2 className="text-2xl font-bold text-gray-800 mb-6 dark:text-white">Verification Queue</h2>
 
             {requests.length === 0 ? (
-                <p className="text-gray-500">No pending verification requests.</p>
+                <p className="text-gray-500 dark:text-gray-400">No pending verification requests.</p>
             ) : (
                 <div className="space-y-4">
                     {requests.map(req => (
-                        <div key={req.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center transition hover:shadow-md">
+                        <div key={req.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center transition hover:shadow-md dark:bg-gray-800 dark:border-gray-700">
                             <div className="flex items-center gap-4">
-                                <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 font-bold">
+                                <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 font-bold dark:bg-pink-900/40 dark:text-pink-300">
                                     {req.displayName ? req.displayName[0] : 'U'}
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-gray-900">{req.displayName || "Unknown User"}</h3>
-                                    <p className="text-sm text-gray-500 font-mono">{req.nicNumber}</p>
+                                    <h3 className="font-bold text-gray-900 dark:text-white">{req.displayName || "Unknown User"}</h3>
+                                    <p className="text-sm text-gray-500 font-mono dark:text-gray-400">{req.nicNumber}</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-4">
-                                <div className="text-right text-xs text-gray-400">
+                                <div className="text-right text-xs text-gray-400 dark:text-gray-500">
                                     <p>{new Date(req.submittedAt?.seconds * 1000).toLocaleDateString()}</p>
                                     <p>{req.status}</p>
                                 </div>
                                 <button
                                     onClick={() => setSelectedReq(req)}
-                                    className="bg-pink-600 text-white px-4 py-2 text-sm font-bold rounded-lg hover:bg-pink-700 transition"
+                                    className="bg-pink-600 text-white px-4 py-2 text-sm font-bold rounded-lg hover:bg-pink-700 transition dark:bg-pink-700 dark:hover:bg-pink-600"
                                 >
                                     Review
                                 </button>
@@ -162,55 +162,55 @@ export default function VerificationQueue() {
             {/* Review Modal */}
             {selectedReq && (
                 <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white w-full max-w-7xl h-[90vh] rounded-2xl overflow-hidden flex flex-col shadow-2xl animate-in fade-in zoom-in duration-300">
+                    <div className="bg-white w-full max-w-7xl h-[90vh] rounded-2xl overflow-hidden flex flex-col shadow-2xl animate-in fade-in zoom-in duration-300 dark:bg-gray-900 dark:border dark:border-gray-700">
                         {/* Header */}
-                        <div className="p-6 border-b flex justify-between items-center bg-gray-50">
+                        <div className="p-6 border-b flex justify-between items-center bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
                             <div>
-                                <h2 className="text-2xl font-bold text-gray-800">Reviewing: {selectedReq.displayName}</h2>
-                                <div className="flex flex-wrap gap-4 mt-2 text-sm text-gray-600">
-                                    <span className="flex items-center gap-1 bg-white px-2 py-1 rounded border"><User size={14} /> {selectedReq.fullName}</span>
-                                    <span className="flex items-center gap-1 bg-white px-2 py-1 rounded border"><Phone size={14} /> {selectedReq.userPhone}</span>
-                                    <span className="flex items-center gap-1 bg-white px-2 py-1 rounded border">📍 {selectedReq.location}</span>
-                                    <span className="flex items-center gap-1 bg-yellow-50 text-yellow-700 px-2 py-1 rounded border border-yellow-200 font-mono font-bold">NIC: {selectedReq.nicNumber}</span>
+                                <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Reviewing: {selectedReq.displayName}</h2>
+                                <div className="flex flex-wrap gap-4 mt-2 text-sm text-gray-600 dark:text-gray-400">
+                                    <span className="flex items-center gap-1 bg-white px-2 py-1 rounded border dark:bg-gray-700 dark:border-gray-600"><User size={14} /> {selectedReq.fullName}</span>
+                                    <span className="flex items-center gap-1 bg-white px-2 py-1 rounded border dark:bg-gray-700 dark:border-gray-600"><Phone size={14} /> {selectedReq.userPhone}</span>
+                                    <span className="flex items-center gap-1 bg-white px-2 py-1 rounded border dark:bg-gray-700 dark:border-gray-600">📍 {selectedReq.location}</span>
+                                    <span className="flex items-center gap-1 bg-yellow-50 text-yellow-700 px-2 py-1 rounded border border-yellow-200 font-mono font-bold dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800">NIC: {selectedReq.nicNumber}</span>
                                 </div>
                             </div>
-                            <button onClick={() => setSelectedReq(null)} className="p-2 hover:bg-gray-200 rounded-full transition">
-                                <XCircle size={24} className="text-gray-500" />
+                            <button onClick={() => setSelectedReq(null)} className="p-2 hover:bg-gray-200 rounded-full transition dark:hover:bg-gray-700">
+                                <XCircle size={24} className="text-gray-500 dark:text-gray-400" />
                             </button>
                         </div>
 
                         {/* Content Grid */}
-                        <div className="flex-1 overflow-y-auto p-6 bg-gray-100 grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="flex-1 overflow-y-auto p-6 bg-gray-100 grid grid-cols-1 md:grid-cols-3 gap-6 dark:bg-gray-900">
                             {/* Selfie */}
                             <div className="flex flex-col gap-2">
-                                <div className="bg-white p-3 rounded-xl shadow-sm border text-center font-bold text-gray-700">Selfie</div>
-                                <div className="flex-1 bg-black rounded-xl overflow-hidden border-2 border-gray-200 relative group">
+                                <div className="bg-white p-3 rounded-xl shadow-sm border text-center font-bold text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300">Selfie</div>
+                                <div className="flex-1 bg-black rounded-xl overflow-hidden border-2 border-gray-200 relative group dark:border-gray-700">
                                     <img src={selectedReq.selfieUrl} className="w-full h-full object-contain" />
                                 </div>
                             </div>
 
                             {/* NIC Front */}
                             <div className="flex flex-col gap-2">
-                                <div className="bg-white p-3 rounded-xl shadow-sm border text-center font-bold text-gray-700">NIC Front</div>
-                                <div className="flex-1 bg-black rounded-xl overflow-hidden border-2 border-gray-200 relative group">
+                                <div className="bg-white p-3 rounded-xl shadow-sm border text-center font-bold text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300">NIC Front</div>
+                                <div className="flex-1 bg-black rounded-xl overflow-hidden border-2 border-gray-200 relative group dark:border-gray-700">
                                     <img src={selectedReq.nicFrontUrl} className="w-full h-full object-contain" />
                                 </div>
                             </div>
 
                             {/* NIC Back */}
                             <div className="flex flex-col gap-2">
-                                <div className="bg-white p-3 rounded-xl shadow-sm border text-center font-bold text-gray-700">NIC Back</div>
-                                <div className="flex-1 bg-black rounded-xl overflow-hidden border-2 border-gray-200 relative group">
+                                <div className="bg-white p-3 rounded-xl shadow-sm border text-center font-bold text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300">NIC Back</div>
+                                <div className="flex-1 bg-black rounded-xl overflow-hidden border-2 border-gray-200 relative group dark:border-gray-700">
                                     <img src={selectedReq.nicBackUrl} className="w-full h-full object-contain" />
                                 </div>
                             </div>
                         </div>
 
                         {/* Footer Actions */}
-                        <div className="p-6 border-t bg-white flex flex-col gap-4">
+                        <div className="p-6 border-t bg-white flex flex-col gap-4 dark:bg-gray-800 dark:border-gray-700">
                             <textarea
                                 id="admin-note"
-                                className="w-full border border-gray-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-pink-500 outline-none"
+                                className="w-full border border-gray-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-pink-500 outline-none dark:bg-gray-900 dark:border-gray-600 dark:text-white"
                                 placeholder="Admin Notes (Required for Rejection)..."
                                 rows={2}
                             />
@@ -221,7 +221,7 @@ export default function VerificationQueue() {
                                         if (!note) return alert("Please provide a rejection reason.");
                                         handleAction('reject', note);
                                     }}
-                                    className="px-6 py-3 border border-red-200 text-red-600 bg-red-50 rounded-xl font-bold hover:bg-red-100 transition flex items-center gap-2"
+                                    className="px-6 py-3 border border-red-200 text-red-600 bg-red-50 rounded-xl font-bold hover:bg-red-100 transition flex items-center gap-2 dark:bg-red-900/30 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/50"
                                 >
                                     <XCircle size={18} /> Reject
                                 </button>
@@ -230,7 +230,7 @@ export default function VerificationQueue() {
                                         const note = (document.getElementById('admin-note') as HTMLTextAreaElement).value;
                                         handleAction('approve', note || 'Verified by Admin');
                                     }}
-                                    className="px-6 py-3 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition flex items-center gap-2 shadow-lg shadow-green-200"
+                                    className="px-6 py-3 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition flex items-center gap-2 shadow-lg shadow-green-200 dark:bg-green-700 dark:hover:bg-green-600 dark:shadow-none"
                                 >
                                     <CheckCircle size={18} /> Approve & Verify
                                 </button>

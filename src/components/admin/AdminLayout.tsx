@@ -25,7 +25,7 @@ export default function AdminLayout() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
     return (
-        <div className="min-h-screen bg-gray-100 flex flex-col md:flex-row">
+        <div className="min-h-screen bg-gray-100 flex flex-col md:flex-row dark:bg-gray-900 transition-colors duration-300">
             {/* Mobile Header */}
             <div className="md:hidden bg-slate-900 text-white p-4 flex justify-between items-center">
                 <h1 className="text-xl font-bold text-pink-500">CupidFlow Admin</h1>
