@@ -28,31 +28,43 @@ export default function TransactionManager() {
             const q = query(collection(db, "transactions"), where("status", "==", "pending"));
             const snapshot = await getDocs(q);
 
-            const list: Transaction[] = [];
-            for (const d of snapshot.docs) {
+            // Fetch all user/profile data in parallel
+            const items = await Promise.all(snapshot.docs.map(async (d) => {
                 const data = d.data();
-                // Fetch user details for context
                 let userPhone = "N/A";
-                let userName = "Unknown";
+                let userName = "Unknown User";
 
                 try {
-                    const userDoc = await getDoc(doc(db, "users", data.uid));
-                    const profileDoc = await getDoc(doc(db, "profiles", data.uid));
+                    // Parallel fetch user and profile
+                    const [userSnap, profileSnap] = await Promise.all([
+                        getDoc(doc(db, "users", data.uid)),
+                        getDoc(doc(db, "profiles", data.uid))
+                    ]);
 
-                    if (userDoc.exists()) userPhone = userDoc.data().phone || "N/A";
-                    if (profileDoc.exists()) userName = profileDoc.data().displayName || "User";
+                    if (userSnap.exists()) {
+                        const uData = userSnap.data();
+                        userPhone = uData.phone || uData.email || "N/A";
+                    }
+
+                    if (profileSnap.exists()) {
+                        userName = profileSnap.data().displayName || "Unnamed Profile";
+                    } else {
+                        // Fallback if profile missing (maybe just registered)
+                        userName = `User (${data.uid.slice(0, 5)})`;
+                    }
                 } catch (e) {
-                    console.error("Error fetching user details", e);
+                    console.error("Error fetching details for txn", d.id, e);
                 }
 
-                list.push({
+                return {
                     id: d.id,
                     ...data,
                     userPhone,
                     userName
-                } as Transaction);
-            }
-            setTransactions(list);
+                } as Transaction;
+            }));
+
+            setTransactions(items);
         } catch (error) {
             console.error("Error fetching transactions:", error);
         } finally {

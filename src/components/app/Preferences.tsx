@@ -62,23 +62,23 @@ export default function Preferences() {
     const OptionButton = ({ label, active, onClick }: { label: string, active: boolean, onClick: () => void }) => (
         <button
             onClick={onClick}
-            className={`px-4 py-2 rounded-lg text-sm font-bold border transition-colors ${active ? 'bg-pink-50 border-pink-500 text-pink-700' : 'bg-white border-gray-200 text-gray-600'}`}
+            className={`px-4 py-2 rounded-lg text-sm font-bold border transition-colors ${active ? 'bg-pink-50 border-pink-500 text-pink-700 dark:bg-pink-900/30 dark:border-pink-500 dark:text-pink-400' : 'bg-white border-gray-200 text-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
         >
             {label}
         </button>
     );
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-20">
-            <nav className="bg-white shadow-sm p-4 sticky top-0 z-10 flex items-center justify-between">
-                <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-full">
-                    <ArrowLeft className="text-gray-600" />
+        <div className="min-h-screen bg-gray-50 pb-20 dark:bg-gray-900 transition-colors duration-300">
+            <nav className="bg-white shadow-sm p-4 sticky top-0 z-10 flex items-center justify-between dark:bg-gray-900 dark:border-b dark:border-gray-800 transition-colors duration-300">
+                <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-full dark:hover:bg-gray-800">
+                    <ArrowLeft className="text-gray-600 dark:text-gray-300" />
                 </button>
-                <h1 className="text-lg font-bold">Partner Preferences</h1>
+                <h1 className="text-lg font-bold text-gray-900 dark:text-white">Partner Preferences</h1>
                 <button
                     onClick={handleSave}
                     disabled={saving}
-                    className="text-pink-600 font-bold text-sm bg-pink-50 px-3 py-1.5 rounded-full hover:bg-pink-100 disabled:opacity-50 transition-colors"
+                    className="text-pink-600 font-bold text-sm bg-pink-50 px-3 py-1.5 rounded-full hover:bg-pink-100 disabled:opacity-50 transition-colors dark:bg-pink-900/30 dark:text-pink-400 dark:hover:bg-pink-900/50"
                 >
                     {saving ? 'Saving...' : 'Save'}
                 </button>
@@ -97,35 +97,35 @@ export default function Preferences() {
                 </div>
 
                 {/* Age Range */}
-                <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 dark:bg-gray-800 dark:border-gray-700 transition-colors duration-300">
                     <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 bg-gray-100 rounded-lg text-gray-600"><User size={20} /></div>
-                        <h3 className="font-bold text-gray-900">Age Preference</h3>
+                        <div className="p-2 bg-gray-100 rounded-lg text-gray-600 dark:bg-gray-700 dark:text-gray-300"><User size={20} /></div>
+                        <h3 className="font-bold text-gray-900 dark:text-white">Age Preference</h3>
                     </div>
 
                     <div className="flex items-center justify-between mb-4 px-2">
-                        <span className="text-2xl font-bold text-gray-800">{prefs.ageRange.min}</span>
-                        <span className="text-gray-300 font-medium">to</span>
-                        <span className="text-2xl font-bold text-gray-800">{prefs.ageRange.max}</span>
+                        <span className="text-2xl font-bold text-gray-800 dark:text-white">{prefs.ageRange.min}</span>
+                        <span className="text-gray-300 font-medium dark:text-gray-600">to</span>
+                        <span className="text-2xl font-bold text-gray-800 dark:text-white">{prefs.ageRange.max}</span>
                     </div>
 
                     <div className="flex gap-4">
                         <div className="flex-1">
-                            <label className="text-xs font-bold text-gray-400 uppercase mb-1 block">Min Age</label>
-                            <input type="range" min="18" max="60" value={prefs.ageRange.min} onChange={e => setPrefs({ ...prefs, ageRange: { ...prefs.ageRange, min: parseInt(e.target.value) } })} className="w-full accent-pink-600" />
+                            <label className="text-xs font-bold text-gray-400 uppercase mb-1 block dark:text-gray-500">Min Age</label>
+                            <input type="range" min="18" max="60" value={prefs.ageRange.min} onChange={e => setPrefs({ ...prefs, ageRange: { ...prefs.ageRange, min: parseInt(e.target.value) } })} className="w-full accent-pink-600 bg-gray-200 rounded-lg dark:bg-gray-700" />
                         </div>
                         <div className="flex-1">
-                            <label className="text-xs font-bold text-gray-400 uppercase mb-1 block">Max Age</label>
-                            <input type="range" min="18" max="70" value={prefs.ageRange.max} onChange={e => setPrefs({ ...prefs, ageRange: { ...prefs.ageRange, max: parseInt(e.target.value) } })} className="w-full accent-pink-600" />
+                            <label className="text-xs font-bold text-gray-400 uppercase mb-1 block dark:text-gray-500">Max Age</label>
+                            <input type="range" min="18" max="70" value={prefs.ageRange.max} onChange={e => setPrefs({ ...prefs, ageRange: { ...prefs.ageRange, max: parseInt(e.target.value) } })} className="w-full accent-pink-600 bg-gray-200 rounded-lg dark:bg-gray-700" />
                         </div>
                     </div>
                 </div>
 
                 {/* Gender */}
-                <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 dark:bg-gray-800 dark:border-gray-700 transition-colors duration-300">
                     <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 bg-gray-100 rounded-lg text-gray-600"><Users size={20} /></div>
-                        <h3 className="font-bold text-gray-900">Gender</h3>
+                        <div className="p-2 bg-gray-100 rounded-lg text-gray-600 dark:bg-gray-700 dark:text-gray-300"><Users size={20} /></div>
+                        <h3 className="font-bold text-gray-900 dark:text-white">Gender</h3>
                     </div>
                     <div className="flex gap-2">
                         {['any', 'man', 'woman'].map(opt => (
@@ -140,16 +140,16 @@ export default function Preferences() {
                 </div>
 
                 {/* Location */}
-                <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 dark:bg-gray-800 dark:border-gray-700 transition-colors duration-300">
                     <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 bg-gray-100 rounded-lg text-gray-600"><MapPin size={20} /></div>
-                        <h3 className="font-bold text-gray-900">Location (Select Multiple)</h3>
+                        <div className="p-2 bg-gray-100 rounded-lg text-gray-600 dark:bg-gray-700 dark:text-gray-300"><MapPin size={20} /></div>
+                        <h3 className="font-bold text-gray-900 dark:text-white">Location (Select Multiple)</h3>
                     </div>
 
                     <div className="flex flex-wrap gap-2">
                         <button
                             onClick={() => setPrefs({ ...prefs, district: 'any' })}
-                            className={`px-3 py-1.5 rounded-full text-sm font-bold border transition-colors ${prefs.district === 'any' ? 'bg-pink-600 text-white border-pink-600' : 'bg-white border-gray-200 text-gray-600'}`}
+                            className={`px-3 py-1.5 rounded-full text-sm font-bold border transition-colors ${prefs.district === 'any' ? 'bg-pink-600 text-white border-pink-600' : 'bg-white border-gray-200 text-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
                         >
                             Anywhere
                         </button>
@@ -168,8 +168,8 @@ export default function Preferences() {
                                     setPrefs({ ...prefs, district: current });
                                 }}
                                 className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-colors ${(Array.isArray(prefs.district) && prefs.district.includes(d)) || prefs.district === d
-                                    ? 'bg-pink-50 border-pink-500 text-pink-700'
-                                    : 'bg-white border-gray-200 text-gray-600'
+                                    ? 'bg-pink-50 border-pink-500 text-pink-700 dark:bg-pink-900/30 dark:border-pink-500 dark:text-pink-400'
+                                    : 'bg-white border-gray-200 text-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
                                     }`}
                             >
                                 {d}
@@ -179,15 +179,15 @@ export default function Preferences() {
                 </div>
 
                 {/* Advanced */}
-                <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 dark:bg-gray-800 dark:border-gray-700 transition-colors duration-300">
                     <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 bg-gray-100 rounded-lg text-gray-600"><BookHeart size={20} /></div>
-                        <h3 className="font-bold text-gray-900">Background</h3>
+                        <div className="p-2 bg-gray-100 rounded-lg text-gray-600 dark:bg-gray-700 dark:text-gray-300"><BookHeart size={20} /></div>
+                        <h3 className="font-bold text-gray-900 dark:text-white">Background</h3>
                     </div>
 
                     <div className="space-y-4">
                         <div>
-                            <label className="text-xs font-bold text-gray-400 uppercase mb-2 block">Religion</label>
+                            <label className="text-xs font-bold text-gray-400 uppercase mb-2 block dark:text-gray-500">Religion</label>
                             <div className="flex flex-wrap gap-2">
                                 {['any', 'Buddhist', 'Christian', 'Hindu', 'Islam'].map(opt => (
                                     <OptionButton
@@ -201,7 +201,7 @@ export default function Preferences() {
                         </div>
 
                         <div>
-                            <label className="text-xs font-bold text-gray-400 uppercase mb-2 block">Ethnicity</label>
+                            <label className="text-xs font-bold text-gray-400 uppercase mb-2 block dark:text-gray-500">Ethnicity</label>
                             <div className="flex flex-wrap gap-2">
                                 {['any', 'Sinhalese', 'Tamil', 'Muslim', 'Burgher'].map(opt => (
                                     <OptionButton

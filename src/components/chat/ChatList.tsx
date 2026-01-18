@@ -4,7 +4,6 @@ import { db } from '../../lib/firebase';
 import { useAuthStore } from '../../store/authStore';
 import { useNavigate } from 'react-router-dom';
 import { MessageCircle } from 'lucide-react';
-import BottomNav from '../app/BottomNav';
 
 interface ChatMatch {
     id: string; // matchId
@@ -83,8 +82,8 @@ export default function ChatList() {
     if (loading) return <div className="p-4 text-center">Loading chats...</div>;
 
     return (
-        <div className="min-h-screen bg-pink-50 pb-20 dark:bg-gray-900 transition-colors duration-300">
-            <div className="max-w-md mx-auto bg-white min-h-screen shadow-xl relative dark:bg-gray-900 dark:shadow-none transition-colors duration-300">
+        <div className="h-full bg-pink-50 dark:bg-gray-900 transition-colors duration-300 flex flex-col overflow-y-auto">
+            <div className="w-full bg-white relative dark:bg-gray-900 dark:shadow-none transition-colors duration-300 flex-1">
                 <div className="p-4 border-b bg-white sticky top-0 z-10 dark:bg-gray-900 dark:border-gray-800 transition-colors duration-300">
                     <h1 className="text-2xl font-bold text-pink-600 dark:text-pink-500">Messages</h1>
                 </div>
@@ -119,7 +118,7 @@ export default function ChatList() {
                             <div
                                 key={match.id}
                                 onClick={() => navigate(`/app/chat/${match.id}`)}
-                                className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4 active:scale-95 transition-transform cursor-pointer border border-gray-100 dark:bg-gray-800 dark:border-gray-700"
+                                className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4 active:scale-95 transition-transform cursor-pointer border border-gray-100 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700"
                             >
                                 <div className="w-14 h-14 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
                                     {match.otherUser.photoUrl ? (
@@ -138,7 +137,6 @@ export default function ChatList() {
                         ))}
                     </div>
                 )}
-                <BottomNav />
             </div>
         </div>
     );

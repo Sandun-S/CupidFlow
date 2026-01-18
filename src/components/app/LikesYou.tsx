@@ -4,7 +4,7 @@ import { db } from '../../lib/firebase';
 import { useAuthStore } from '../../store/authStore';
 import { Heart, Lock, Crown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import BottomNav from './BottomNav';
+// import BottomNav from './BottomNav';
 
 interface LikerProfile {
     uid: string;
@@ -92,9 +92,10 @@ export default function LikesYou() {
             <div className="max-w-md mx-auto bg-white min-h-screen shadow-xl relative dark:bg-gray-900 dark:shadow-none transition-colors duration-300">
                 {/* Header */}
                 <div className="bg-white p-4 shadow-sm sticky top-0 z-10 flex items-center gap-3 dark:bg-gray-900 dark:border-b dark:border-gray-800 transition-colors duration-300">
-                    <button onClick={() => navigate(-1)} className="text-gray-600 dark:text-gray-300">
-                        &larr; Back
-                    </button>
+                    {/* Back Button Removed as per request */}
+                    <div className="bg-pink-100 p-2 rounded-full dark:bg-pink-900/30">
+                        <Heart className="w-5 h-5 text-pink-600 dark:text-pink-400" fill="currentColor" />
+                    </div>
                     <h1 className="text-xl font-bold text-gray-800 dark:text-white">Likes You</h1>
                     <span className="bg-pink-100 text-pink-600 text-xs font-bold px-2 py-0.5 rounded-full dark:bg-pink-900/30 dark:text-pink-300">
                         {likers.length}
@@ -175,7 +176,7 @@ export default function LikesYou() {
                     </div>
                 )}
             </div>
-            <BottomNav />
+
         </div>
     );
 }

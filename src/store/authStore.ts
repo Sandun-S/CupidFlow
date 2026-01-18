@@ -5,7 +5,8 @@ export interface UserData {
     uid: string;
     email: string;
     displayName?: string;
-    photoUrl?: string;
+    photoUrl?: string; // Auth provider URL
+    photos?: string[]; // Firestore Profile photos
     isPremium: boolean;
     packageId: string; // 'free', 'silver', 'gold', 'platinum'
     boostedUntil?: any;

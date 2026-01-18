@@ -13,7 +13,7 @@ import EmailVerificationPending from './components/auth/EmailVerificationPending
 import AuthAction from './components/auth/AuthAction';
 import ProfileWizard from './components/onboarding/ProfileWizard';
 import ExploreFeed from './components/app/ExploreFeed';
-import ChatList from './components/chat/ChatList';
+import ChatLayout from './components/chat/ChatLayout';
 import ChatWindow from './components/chat/ChatWindow';
 import UpgradePlan from './components/subscription/UpgradePlan';
 import PackageManager from './components/admin/PackageManager';
@@ -33,6 +33,7 @@ import VerificationQueue from './components/admin/VerificationQueue';
 import TransactionManager from './components/admin/TransactionManager';
 
 // Layouts
+import MainLayout from './components/layout/MainLayout';
 import AdminLayout from './components/admin/AdminLayout';
 import AdminRoute from './components/admin/AdminRoute';
 
@@ -40,6 +41,16 @@ function AppContent() {
     const { setUser, setUserData, setLoading, loading } = useAuthStore();
     const navigate = useNavigate();
     const location = useLocation();
+
+    // Dark Mode Initialization
+    useEffect(() => {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    }, []);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -57,7 +68,6 @@ function AppContent() {
                     if (userSnap.exists()) {
                         const data = userSnap.data();
 
-                        // Sync Email Verification Status
                         if (currentUser.emailVerified && !data.emailVerified) {
                             await updateDoc(doc(db, "users", currentUser.uid), {
                                 emailVerified: true
@@ -65,7 +75,9 @@ function AppContent() {
                             data.emailVerified = true;
                         }
 
-                        setUserData(data);
+                        // Merge Profile Data if exists
+                        const profileData = profileSnap.exists() ? profileSnap.data() : {};
+                        setUserData({ ...data, ...profileData });
 
                         const profileExists = profileSnap.exists();
                         const status = data.nicStatus || 'pending';
@@ -158,15 +170,28 @@ function AppContent() {
 
             {/* App Routes */}
             <Route path="/onboarding/*" element={<div className="min-h-screen bg-pink-50 pt-10"><ProfileWizard /></div>} />
-            <Route path="/app/explore" element={<ExploreFeed />} />
-            <Route path="/app/chat" element={<ChatList />} />
-            <Route path="/app/likes" element={<LikesYou />} />
-            <Route path="/app/chat/:matchId" element={<ChatWindow />} />
-            <Route path="/app/upgrade" element={<UpgradePlan />} />
-            <Route path="/app/profile/edit" element={<EditProfile />} />
-            <Route path="/app/preferences" element={<Preferences />} />
-            <Route path="/app/settings" element={<Settings />} />
-            <Route path="/app/profile/view" element={<PublicProfileView />} />
+
+            {/* Protected App Routes with Layout */}
+            <Route path="/app/*" element={
+                <MainLayout>
+                    <Routes>
+                        <Route path="explore" element={<ExploreFeed />} />
+                        <Route path="likes" element={<LikesYou />} />
+
+                        {/* Chat Split View Layout */}
+                        <Route path="chat" element={<ChatLayout />}>
+                            {/* Inner route for specific chat */}
+                            <Route path=":matchId" element={<ChatWindow />} />
+                        </Route>
+
+                        <Route path="upgrade" element={<UpgradePlan />} />
+                        <Route path="profile/edit" element={<EditProfile />} />
+                        <Route path="preferences" element={<Preferences />} />
+                        <Route path="settings" element={<Settings />} />
+                        <Route path="profile/view" element={<PublicProfileView />} />
+                    </Routes>
+                </MainLayout>
+            } />
 
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminRoute />}>

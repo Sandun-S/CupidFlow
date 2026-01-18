@@ -501,20 +501,20 @@ export default function EditProfile() {
                 );
             case 'interests':
                 return (
-                    <div className="animate-in fade-in slide-in-from-right-4 duration-300 h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                    <div className="animate-in fade-in slide-in-from-right-4 duration-300 h-[400px] overflow-y-auto px-2 custom-scrollbar">
                         <label className="label mb-3">Select Interests (Max 10)</label>
 
                         {Object.entries(INTERESTS_CATEGORIES).map(([category, items]) => (
                             <div key={category} className="mb-6">
-                                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 border-b pb-1">{category}</h4>
+                                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 border-b pb-1 dark:border-gray-700">{category}</h4>
                                 <div className="flex flex-wrap gap-2">
                                     {items.map((interest) => (
                                         <button
                                             key={interest}
                                             onClick={() => toggleInterest(interest)}
                                             className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${formData.interests.includes(interest)
-                                                ? 'bg-pink-600 text-white shadow-md ring-2 ring-pink-100'
-                                                : 'bg-white border border-gray-200 text-gray-600 hover:border-pink-300'
+                                                ? 'bg-pink-600 text-white shadow-md ring-2 ring-pink-100 dark:ring-pink-900'
+                                                : 'bg-white border border-gray-200 text-gray-600 hover:border-pink-300 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 dark:hover:border-pink-500'
                                                 }`}
                                         >
                                             {interest}
@@ -523,7 +523,7 @@ export default function EditProfile() {
                                 </div>
                             </div>
                         ))}
-                        <p className="sticky bottom-0 bg-white/90 p-2 text-center text-xs text-gray-400 backdrop-blur-sm border-t">
+                        <p className="sticky bottom-0 bg-white/90 p-2 text-center text-xs text-gray-400 backdrop-blur-sm border-t dark:bg-gray-800/90 dark:border-gray-700">
                             Selected: {formData.interests.length}/10
                         </p>
                     </div>
@@ -622,7 +622,7 @@ export default function EditProfile() {
 
             {/* Nav */}
             <div className="bg-white sticky top-0 z-20 shadow-sm dark:bg-gray-900 dark:border-b dark:border-gray-800 transition-colors duration-300">
-                <nav className="max-w-md mx-auto p-4 flex items-center justify-between">
+                <nav className="max-w-4xl mx-auto p-4 flex items-center justify-between">
                     <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-full dark:hover:bg-gray-800">
                         <ArrowLeft className="text-gray-600 dark:text-gray-300" />
                     </button>
@@ -637,58 +637,64 @@ export default function EditProfile() {
                 </nav>
             </div>
 
-            <div className="max-w-md mx-auto p-4">
-                {/* Photos Section */}
-                <div className="mb-8">
-                    <div className="flex justify-between items-center mb-3 px-1">
-                        <h3 className="font-bold text-gray-900 dark:text-gray-200">My Photos</h3>
-                    </div>
-                    <div className="grid grid-cols-3 gap-3">
-                        {[0, 1, 2, 3, 4, 5].map((idx) => (
-                            <div key={idx} className="relative aspect-[3/4] bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm flex flex-col items-center justify-center hover:border-pink-300 transition-colors group dark:bg-gray-800 dark:border-gray-700">
-                                <NICUploader
-                                    label={`#${idx + 1}`}
-                                    type="public"
-                                    onUpload={(url) => handlePhotoUpdate(url, idx)}
-                                    initialUrl={formData.photos[idx] || ''}
-                                    minimal={true}
-                                />
-                                {!formData.photos[idx] && (
-                                    <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-gray-400 group-hover:text-pink-400 transition-colors dark:text-gray-600">
-                                        <Camera size={20} className="mb-1" />
-                                        <span className="text-[10px] font-bold uppercase">Add</span>
-                                    </div>
-                                )}
-                            </div>
-                        ))}
+            <div className="max-w-4xl mx-auto p-4 grid grid-cols-1 md:grid-cols-12 gap-6">
+
+                {/* Left Column: Photos (md:col-span-4) */}
+                <div className="md:col-span-12 lg:col-span-4 space-y-4">
+                    <div className="bg-white p-4 rounded-2xl shadow-sm dark:bg-gray-800 dark:shadow-none border border-gray-100 dark:border-gray-700">
+                        <div className="flex justify-between items-center mb-3">
+                            <h3 className="font-bold text-gray-900 dark:text-gray-200">My Photos</h3>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2">
+                            {[0, 1, 2, 3, 4, 5].map((idx) => (
+                                <div key={idx} className="relative aspect-[3/4] bg-gray-50 rounded-xl overflow-hidden border border-gray-200 shadow-sm flex flex-col items-center justify-center hover:border-pink-300 transition-colors group dark:bg-gray-700 dark:border-gray-600">
+                                    <NICUploader
+                                        label={`#${idx + 1}`}
+                                        type="public"
+                                        onUpload={(url) => handlePhotoUpdate(url, idx)}
+                                        initialUrl={formData.photos[idx] || ''}
+                                        minimal={true}
+                                    />
+                                    {!formData.photos[idx] && (
+                                        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-gray-400 group-hover:text-pink-400 transition-colors dark:text-gray-500">
+                                            <Camera size={20} className="mb-1" />
+                                            <span className="text-[10px] font-bold uppercase">Add</span>
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
 
-                {/* Section Tabs */}
-                <div ref={tabsRef} className="flex overflow-x-auto gap-2 pb-4 mb-2 no-scrollbar scroll-smooth">
-                    {SECTIONS.map((section) => {
-                        const Icon = section.icon;
-                        const isActive = activeSection === section.id;
-                        return (
-                            <button
-                                key={section.id}
-                                data-tab={section.id}
-                                onClick={() => setActiveSection(section.id)}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all flex-shrink-0 ${isActive
-                                    ? 'bg-pink-100 text-pink-600 shadow-sm ring-1 ring-pink-200 dark:bg-pink-900/40 dark:text-pink-300 dark:ring-pink-800'
-                                    : 'bg-white text-gray-500 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700'
-                                    }`}
-                            >
-                                <Icon size={16} />
-                                {section.label}
-                            </button>
-                        );
-                    })}
-                </div>
+                {/* Right Column: Form (md:col-span-8) */}
+                <div className="md:col-span-12 lg:col-span-8">
+                    {/* Section Tabs - Fixed Overflow and Padding */}
+                    <div ref={tabsRef} className="flex overflow-x-auto gap-2 pb-2 mb-4 no-scrollbar scroll-smooth px-1">
+                        {SECTIONS.map((section) => {
+                            const Icon = section.icon;
+                            const isActive = activeSection === section.id;
+                            return (
+                                <button
+                                    key={section.id}
+                                    data-tab={section.id}
+                                    onClick={() => setActiveSection(section.id)}
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all flex-shrink-0 border ${isActive
+                                        ? 'bg-pink-100 text-pink-600 border-pink-200 shadow-sm dark:bg-pink-900/40 dark:text-pink-300 dark:border-pink-800'
+                                        : 'bg-white text-gray-500 border-gray-100 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700 dark:hover:bg-gray-700'
+                                        }`}
+                                >
+                                    <Icon size={16} />
+                                    {section.label}
+                                </button>
+                            );
+                        })}
+                    </div>
 
-                {/* Active Section Content */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm min-h-[400px] dark:bg-gray-800 dark:shadow-none transition-colors duration-300">
-                    {renderSection()}
+                    {/* Active Section Content */}
+                    <div className="bg-white p-6 rounded-2xl shadow-sm min-h-[400px] border border-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:shadow-none transition-colors duration-300">
+                        {renderSection()}
+                    </div>
                 </div>
             </div>
         </div>
